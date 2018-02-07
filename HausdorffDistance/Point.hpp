@@ -6,13 +6,13 @@
 //  Copyright © 2018年 李喆. All rights reserved.
 //
 
+
 #ifndef Point_hpp
 #define Point_hpp
 
 #include <stdio.h>
 #include <math.h>
 #include <limits>
-#endif /* Point_hpp */
 
 class Point{
 public:
@@ -26,7 +26,13 @@ public:
     bool isCenter;
     uint64_t zorder;
     
-    double distanceTo(Point point);
+    double distanceTo(const Point &point);
+    double getX() const {return x;};
+    void setX(double x){this->x = x;};
+    double getY() const {return y;};
+    void setY(double y){this->y = y;};
+    double getZ() const {return z;};
+    void setZ(double z){this->z = z;};
 };
 
 Point::Point(double x, double y, double z, int index, int dimension, bool isAvailable, bool isCenter, uint64_t zorder){
@@ -40,10 +46,18 @@ Point::Point(double x, double y, double z, int index, int dimension, bool isAvai
     this->zorder = zorder;
 }
 
-double Point::distanceTo(Point point){
-    double distanceX = fabs(this->x - point.x);
-    double distanceY = fabs(this->y - point.y);
-    double distanceZ = fabs(this->z - point.z);
-    double distance = sqrt(distanceX*distanceX + distanceY*distanceY + distanceZ*distanceZ);
+double Point::distanceTo(const Point &point){
+    double distance = 0;
+    if(dimension == 2 && point.dimension == 2){
+        double distanceX = fabs(this->x - point.x);
+        double distanceY = fabs(this->y - point.y);
+        distance = sqrt(distanceX*distanceX + distanceY*distanceY);
+    } else if (dimension == 3 && point.dimension == 3){
+        double distanceX = fabs(this->x - point.x);
+        double distanceY = fabs(this->y - point.y);
+        double distanceZ = fabs(this->z - point.z);
+        distance = sqrt(distanceX*distanceX + distanceY*distanceY + distanceZ*distanceZ);
+    }
     return distance;
 }
+#endif /* Point_hpp */

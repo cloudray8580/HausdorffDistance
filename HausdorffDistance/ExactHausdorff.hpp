@@ -10,15 +10,14 @@
 #define ExactHausdorff_hpp
 
 #include <stdio.h>
-#include "PointCloud.hpp"
+#include "Dataset.hpp"
 #include <limits>
-#endif /* ExactHausdorff_hpp */
 
 class ExactHausdorff{
 public:
     static double definition(PointCloud pc1, PointCloud pc2);
-    static double PAMI2015(PointCloud pc1, PointCloud pc2); // without excluding intersection
-    static double PR2017(PointCloud pc1, PointCloud pc2);
+    static double PAMI2015(PointCloud &pc1, PointCloud &pc2, bool pruning=false, double kthValue=std::numeric_limits<double>::infinity()); // without excluding intersection
+    static double PR2017(PointCloud &pc1, PointCloud &pc2);
 };
 
 double ExactHausdorff::definition(PointCloud pc1, PointCloud pc2){
@@ -44,50 +43,64 @@ double ExactHausdorff::definition(PointCloud pc1, PointCloud pc2){
     return max; // the Hausdorff distance
 }
 
-double ExactHausdorff::PAMI2015(PointCloud pc1, PointCloud pc2){
+double ExactHausdorff::PAMI2015(PointCloud &pc1, PointCloud &pc2, bool pruning, double kthValue){
     double max = 0;
     double min = std::numeric_limits<double>::infinity(); // infinity
     double distance = 0;
-    pc1.randomize();
-    pc2.randomize();
-    vector<Point> pointcloud1 = pc1.getPoints_1();
-    vector<Point> pointcloud2 = pc2.getPoints_1();
-    long size1 = pointcloud1.size();
-    long size2 = pointcloud2.size();
+    
+    // seperate to count time
+//    pc1.randomize();
+//    pc2.randomize();
+//    vector<Point> pointcloud1 = pc1.getPoints_1();
+//    vector<Point> pointcloud2 = pc2.getPoints_1();
+    vector<Point> *pointcloud1 = &pc1.pointcloud;
+    vector<Point> *pointcloud2 = &pc2.pointcloud;
+    
+    long size1 = pointcloud1->size();
+    long size2 = pointcloud2->size();
     for (int i = 0; i < size1; i++){
         min = std::numeric_limits<double>::infinity();
         for(int j = 0; j < size2; j++){
-            distance = pointcloud1[i].distanceTo(pointcloud2[j]);
+            distance = (*pointcloud1)[i].distanceTo((*pointcloud2)[j]);
             if(distance < min){
                 min = distance;
             }
-            if(distance < max){
+            if(distance <= max){
                 break;
             }
         }
         if(min > max){
             max = min;
+            if(pruning && max >= kthValue){
+                max = -1; // usig -1 to denote early break
+                return max;
+            }
         }
+        
     }
     return max; // the Hausdorff distance
 }
 
-double ExactHausdorff::PR2017(PointCloud pc1, PointCloud pc2){
+double ExactHausdorff::PR2017(PointCloud &pc1, PointCloud &pc2){
     double max = 0;
     double min = std::numeric_limits<double>::infinity(); // infinity
     double distance = 0;
-    pc1.zorder();
-    pc2.zorder();
-    vector<Point> pointcloud1 = pc1.getPoints_1();
-    vector<Point> pointcloud2 = pc2.getPoints_1();
-    long size1 = pointcloud1.size();
-    long size2 = pointcloud2.size();
+    // seperate to count time
+//    pc1.zorder();
+//    pc2.zorder();
+//    vector<Point> pointcloud1 = pc1.getPoints_1();
+//    vector<Point> pointcloud2 = pc2.getPoints_1();
+    vector<Point> *pointcloud1 = &pc1.pointcloud;
+    vector<Point> *pointcloud2 = &pc2.pointcloud;
+    
+    long size1 = pointcloud1->size();
+    long size2 = pointcloud2->size();
     int breakindex = 0;
     for (int i = 0; i < size1; i++){
         min = std::numeric_limits<double>::infinity();
         for(int j = 0; breakindex+j < size2 || breakindex-j > 0 ; j++){
             if (breakindex+j < size2){
-                distance = pointcloud1[i].distanceTo(pointcloud2[breakindex+j]);
+                distance = (*pointcloud1)[i].distanceTo((*pointcloud2)[breakindex+j]);
                 if(distance < min){
                     min = distance;
                 }
@@ -97,7 +110,7 @@ double ExactHausdorff::PR2017(PointCloud pc1, PointCloud pc2){
                 }
             }
             if (breakindex-j > 0){
-                distance = pointcloud1[i].distanceTo(pointcloud2[breakindex-j]);
+                distance = (*pointcloud1)[i].distanceTo((*pointcloud2)[breakindex-j]);
                 if(distance < min){
                     min = distance;
                 }
@@ -113,3 +126,4 @@ double ExactHausdorff::PR2017(PointCloud pc1, PointCloud pc2){
     }
     return max; // the Hausdorff distance
 }
+#endif /* ExactHausdorff_hpp */

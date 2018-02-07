@@ -23,6 +23,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		AD15AE192008911600A3B986 /* Dataset.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Dataset.hpp; sourceTree = "<group>"; };
 		ADE669791FFCBDD1003CEA23 /* HausdorffDistance */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = HausdorffDistance; sourceTree = BUILT_PRODUCTS_DIR; };
 		ADE6697C1FFCBDD2003CEA23 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		ADE669841FFCBE5F003CEA23 /* Point.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Point.hpp; sourceTree = "<group>"; };
@@ -30,6 +31,7 @@
 		ADE6698C1FFCC925003CEA23 /* ExactHausdorff.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ExactHausdorff.hpp; sourceTree = "<group>"; };
 		ADE6698F1FFCC941003CEA23 /* KNNSearch.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KNNSearch.hpp; sourceTree = "<group>"; };
 		ADE669921FFD1710003CEA23 /* Comparison.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Comparison.hpp; sourceTree = "<group>"; };
+		ADE669952004CD92003CEA23 /* boost */ = {isa = PBXFileReference; lastKnownFileType = folder; name = boost; path = ../../../../usr/local/Cellar/boost/1.66.0/include/boost; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -48,6 +50,7 @@
 			children = (
 				ADE6697B1FFCBDD1003CEA23 /* HausdorffDistance */,
 				ADE6697A1FFCBDD1003CEA23 /* Products */,
+				ADE669942004CD91003CEA23 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -65,11 +68,20 @@
 				ADE6697C1FFCBDD2003CEA23 /* main.cpp */,
 				ADE669841FFCBE5F003CEA23 /* Point.hpp */,
 				ADE669891FFCC8C5003CEA23 /* PointCloud.hpp */,
+				AD15AE192008911600A3B986 /* Dataset.hpp */,
 				ADE6698C1FFCC925003CEA23 /* ExactHausdorff.hpp */,
 				ADE6698F1FFCC941003CEA23 /* KNNSearch.hpp */,
 				ADE669921FFD1710003CEA23 /* Comparison.hpp */,
 			);
 			path = HausdorffDistance;
+			sourceTree = "<group>";
+		};
+		ADE669942004CD91003CEA23 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				ADE669952004CD92003CEA23 /* boost */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -244,6 +256,10 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 9W57MLZWWT;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/Cellar/boost/1.66.0/include/,
+					"/Users/lizhe/Downloads/RTree-master/",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -253,6 +269,10 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 9W57MLZWWT;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/Cellar/boost/1.66.0/include/,
+					"/Users/lizhe/Downloads/RTree-master/",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

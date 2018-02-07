@@ -14,14 +14,16 @@
 #include <vector>
 #include "Point.hpp"
 #include <limits>
-#endif /* PointCloud_hpp */
+
+#include <boost/algorithm/string.hpp>
 using namespace std;
 
 class PointCloud{
 public:
-    PointCloud(vector<Point> pointcloud);
-    PointCloud(vector<vector<double>> pointcloud);
-    PointCloud(string filename);
+    PointCloud(){pointcloud.clear();};
+    PointCloud(const vector<Point> &pointcloud);
+    PointCloud(const vector<vector<double>> &pointcloud);
+    PointCloud(string filename, int dimension=3); // should support .pts and .off
     
     vector<Point> pointcloud;
     vector<Point> z_pointcloud;
@@ -41,18 +43,21 @@ public:
     vector<vector<double>> getPoints_2();
 };
 
-PointCloud::PointCloud(vector<Point> pointcloud){
+PointCloud::PointCloud(const vector<Point> &pointcloud){
     this->pointcloud = pointcloud;
+    this->dimension = 3;
 }
 
-PointCloud::PointCloud(vector<vector<double>> pointcloud){
+PointCloud::PointCloud(const vector<vector<double>> &pointcloud){
     this->pointcloud.clear();
     for (int i = 0; i < pointcloud.size(); i++){
         this->pointcloud.push_back(Point(pointcloud[i][0],pointcloud[i][1],pointcloud[i][2],i));
     }
+    this->dimension = 3;
 }
 
-PointCloud::PointCloud(string filename){
+PointCloud::PointCloud(string filename, int dimension){
+    
     vector<Point> pointcloud;
     
     ifstream infile;
@@ -68,30 +73,78 @@ PointCloud::PointCloud(string filename){
     
     int count = 0;
     this->pointcloud.clear();
-    while(getline(infile,str))   //按行读取,遇到换行符结束
-    {
-        //cout<<str<<endl;
-        
-        vector<double> temp;
-        
-        pos2 = str.find(space);
-        pos1 = 0;
-        while(std::string::npos != pos2)
+    
+    vector<string> fields;
+    split(fields, filename, boost::is_any_of("."));
+    if(fields[fields.size()-1] == "pts"){
+        while(getline(infile,str))   //按行读取,遇到换行符结束
         {
-            temp.push_back(atof((str.substr(pos1, pos2-pos1)).c_str()));
+            //cout<<str<<endl;
             
-            pos1 = pos2 + space.size();
-            pos2 = str.find(space, pos1);
+            vector<double> temp;
+            
+            pos2 = str.find(space);
+            pos1 = 0;
+            while(std::string::npos != pos2)
+            {
+                temp.push_back(atof((str.substr(pos1, pos2-pos1)).c_str()));
+                
+                pos1 = pos2 + space.size();
+                pos2 = str.find(space, pos1);
+            }
+            if(pos1 != str.length())
+                temp.push_back(atof((str.substr(pos1)).c_str()));
+            
+            if(dimension == 3){
+                Point point(temp[0],temp[1],temp[2], count);
+                point.dimension = 3;
+                pointcloud.push_back(point);
+            } else if(dimension == 2){
+                Point point(temp[0],temp[1]);
+                point.dimension = 2;
+                pointcloud.push_back(point);
+            }
+            count++;
         }
-        if(pos1 != str.length())
-            temp.push_back(atof((str.substr(pos1)).c_str()));
+    } else if(fields[fields.size()-1] == "off"){
+        getline(infile,str);
+        getline(infile,str);
+        int numberOfPoints;
+        vector<string> info;
+        split(info, str, boost::is_any_of(" "));
+        numberOfPoints = std::stoi(info[0]);
+        for(int i = 0; i < numberOfPoints; i++){
+            getline(infile, str);
+            vector<double> temp;
+            
+            pos2 = str.find(space);
+            pos1 = 0;
+            while(std::string::npos != pos2)
+            {
+                temp.push_back(atof((str.substr(pos1, pos2-pos1)).c_str()));
+                
+                pos1 = pos2 + space.size();
+                pos2 = str.find(space, pos1);
+            }
+            if(pos1 != str.length())
+                temp.push_back(atof((str.substr(pos1)).c_str()));
+            
+            Point point(temp[0],temp[1],temp[2], count);
+            pointcloud.push_back(point);
+            count++;
+        }
         
-        Point point(temp[0],temp[1],temp[2], count);
-        pointcloud.push_back(point);
-        count++;
+    } else {
+        cout << "unsupport file format " << fields[fields.size()-1] << endl;
     }
+    
     infile.close();
     this->pointcloud = pointcloud;
+    if(dimension == 3){
+        this->dimension = 3;
+    } else if(dimension == 2){
+        this->dimension = 2;
+    }
 }
 
 void PointCloud::randomize(){
@@ -120,7 +173,10 @@ void PointCloud::prezorder(int magnitude){
     long size = this->z_pointcloud.size();
     double minx = std::numeric_limits<double>::infinity();
     double miny = std::numeric_limits<double>::infinity();
-    double minz = std::numeric_limits<double>::infinity();
+    double minz;
+    if(dimension == 3){
+        minz = std::numeric_limits<double>::infinity();
+    }
     for(int i = 0; i < size; i++){
         if(z_pointcloud[i].x < minx){
             minx = z_pointcloud[i].x;
@@ -128,7 +184,7 @@ void PointCloud::prezorder(int magnitude){
         if(z_pointcloud[i].y < miny){
             miny = z_pointcloud[i].y;
         }
-        if(z_pointcloud[i].z < minz){
+        if(dimension == 3 & z_pointcloud[i].z < minz){
             minz = z_pointcloud[i].z;
         }
     }
@@ -136,27 +192,31 @@ void PointCloud::prezorder(int magnitude){
     // turn to positive
     minx = fabs(minx);
     miny = fabs(miny);
-    minz = fabs(minz);
+    if(dimension == 3)
+        minz = fabs(minz);
     
     // add shift value to each point
     for(int i = 0; i < size; i++){
         z_pointcloud[i].x += minx;
         z_pointcloud[i].y += miny;
-        z_pointcloud[i].z += minz;
+        if(dimension == 3)
+            z_pointcloud[i].z += minz;
         
         // multiply by 10^magnitude and only keep the integer part
         z_pointcloud[i].x *= pow(10, magnitude);
         z_pointcloud[i].y *= pow(10, magnitude);
-        z_pointcloud[i].z *= pow(10, magnitude);
+        if(dimension == 3)
+            z_pointcloud[i].z *= pow(10, magnitude);
         
         z_pointcloud[i].x = floor(z_pointcloud[i].x);
         z_pointcloud[i].y = floor(z_pointcloud[i].y);
-        z_pointcloud[i].z = floor(z_pointcloud[i].z);
+        if(dimension == 3)
+            z_pointcloud[i].z = floor(z_pointcloud[i].z);
     }
 }
 
 // ascending order
-bool cmp_zorder(Point p1, Point p2){
+bool cmp_zorder(Point &p1, Point &p2){
     return p1.zorder < p2.zorder;
 }
 
@@ -167,23 +227,39 @@ void PointCloud::zorder(){
     // need to do prezorder() for dataset containing negative or float value
     
     // compute zorder
-    long size = this->z_pointcloud.size();
-    unsigned int _x;
-    unsigned int _y;
-    unsigned int _z;
-    uint64_t zorderValue = 0;
-    for(int i = 0; i < size; i++){
-        zorderValue = 0;
-        for(uint64_t j = 0; j < (sizeof(uint64_t)*CHAR_BIT)/3; j++){
-            _x = z_pointcloud[i].x;
-            _y = z_pointcloud[i].y;
-            _z = z_pointcloud[i].z;
-            // about priority :  */+-  higher than  << >>  higher than | &
-            zorderValue |= ((_x & ((uint64_t)1 << j)) << 2*j) | ((_y & ((uint64_t)1 << j)) << (2*j+1)) | ((_z & ((uint64_t)1 << j)) << (2*j+2));
+    if(dimension == 3){
+        long size = this->z_pointcloud.size();
+        unsigned int _x;
+        unsigned int _y;
+        unsigned int _z;
+        uint64_t zorderValue = 0;
+        for(int i = 0; i < size; i++){
+            zorderValue = 0;
+            for(uint64_t j = 0; j < (sizeof(uint64_t)*CHAR_BIT)/3; j++){
+                _x = z_pointcloud[i].x;
+                _y = z_pointcloud[i].y;
+                _z = z_pointcloud[i].z;
+                // about priority :  */+-  higher than  << >>  higher than | &
+                zorderValue |= ((_x & ((uint64_t)1 << j)) << 2*j) | ((_y & ((uint64_t)1 << j)) << (2*j+1)) | ((_z & ((uint64_t)1 << j)) << (2*j+2));
+            }
+            pointcloud[i].zorder = zorderValue;
         }
-        pointcloud[i].zorder = zorderValue;
+    } else if(dimension == 2){
+        long size = this->z_pointcloud.size();
+        unsigned int _x;
+        unsigned int _y;
+        uint64_t zorderValue = 0;
+        for(int i = 0; i < size; i++){
+            zorderValue = 0;
+            for(uint64_t j = 0; j < (sizeof(uint64_t)*CHAR_BIT)/2; j++){
+                _x = z_pointcloud[i].x;
+                _y = z_pointcloud[i].y;
+                // about priority :  */+-  higher than  << >>  higher than | &
+                zorderValue |= ((_x & ((uint64_t)1 << j)) << 2*j) | ((_y & ((uint64_t)1 << j)) << (2*j+1));
+            }
+            pointcloud[i].zorder = zorderValue;
+        }
     }
-    
     // sort the pointcloud according to zorder
     sort(this->pointcloud.begin(), this->pointcloud.end(), cmp_zorder);
 }
@@ -210,3 +286,4 @@ vector<vector<double>> PointCloud::getPoints_2(){
     }
     return _pointcloud;
 }
+#endif /* PointCloud_hpp */
