@@ -14,50 +14,59 @@
 #include <sys/types.h>
 #include <dirent.h>
 
-#include <boost/geometry.hpp>
-#include <boost/geometry/geometries/register/point.hpp>
-#include <boost/geometry/index/rtree.hpp>
-#include <boost/geometry/geometries/point.hpp>
-#include <boost/geometry/geometries/box.hpp>
-#include <queue> // used for priority_queue
-namespace bg = boost::geometry;
-namespace bgi = boost::geometry::index;
-namespace bgid = bgi::detail;
-typedef bgi::rtree<Point, bgi::linear<100>> rtree;
-BOOST_GEOMETRY_REGISTER_POINT_2D_GET_SET(Point, double, bg::cs::spherical_equatorial<bg::degree>, getX, getY, setX, setY)
-
-struct tempResult{
-    PointCloud pointcloud;
-    rtree RTree;
-    double distance;
-    int level;
-    tempResult(PointCloud &pc){
-        pointcloud = pc;
-    }
-};
-
 class KNNSearch{
 public:
     KNNSearch(){this->dataset.clear();};
     KNNSearch(string directory);
     
     vector<PointCloud> dataset;
+    void randomizeDataset();
     
     void loadDataset(string directory);
+    void generateBoundsForDataset(string filepath, vector<PointCloud> &dataset);
+    void generateRTreeForDataset(string filepath1, string filepath2, vector<PointCloud> &dataset);
+    void generateMBRsForDataset(string filepath1, string filepath2, vector<PointCloud> &dataset, int number);
+    void associateMBRs(string filepath1, string filepath2);
     
     vector<pair<double,PointCloud>> KNN_PAMI2015(PointCloud &ref, int k);
     vector<pair<double,PointCloud>> KNN_PR2017(PointCloud &ref, int k);
-    vector<tempResult> KNN_GIS2011(PointCloud &ref, int k);
+    vector<tempResult> KNN_GIS2011(PointCloud &ref, int k, int number = 10);
     
     void KNN_PAMI2015_Pruning(PointCloud &ref, int k); // use a priority queue to keep K
     void KNN_PR2017_Pruning(PointCloud &ref, int k); // use a priority queue to keep K
     
+    void KNN_COMBINED(PointCloud &ref, int k, int number = 10);
+    
+    void KNN_MINE(PointCloud &ref, int k, double a, double b, int c, int querythreshold);
+    void KNN_MINE2(PointCloud &ref, int k, int partialQuerySize);
+    void KNN_MINE3(PointCloud &ref, int k, double percentage, int LB, int UB, int queryMBRNumber);
+    void KNN_MINE4(PointCloud &ref, int k, double percentage, int LB, int UB, int queryMBRNumber); // using kcenter ordering
+    void KNN_MINE5(PointCloud &ref, int k, double percentage, int LB, int UB, int queryMBRNumber, double KNNValue); // using kcenter ordering, using threshold in PartialHD
+    
     void Test_Time_KNN_PAMI2015_Pruning(PointCloud &ref, int k);
     void Test_Time_KNN_PAMI2015_Pruning2(PointCloud &ref, int k);
+    
+    void AnalyseLBs(PointCloud &ref);
 };
 
 KNNSearch::KNNSearch(string directory){
     loadDataset(directory);
+}
+
+void KNNSearch::randomizeDataset(){
+    
+    long size = this->dataset.size();
+    int randomIndex = 0;
+    srand((unsigned)time(NULL));
+    PointCloud temp;
+    for (int i = 0; i < size; i++){
+        // create random variable in [0, size)
+        randomIndex = rand()%size;
+        // random exchange
+        temp = dataset[i];
+        dataset[i] = dataset[randomIndex];
+        dataset[randomIndex] = temp;
+    }
 }
 
 // http://www.martinbroadhurst.com/list-the-files-in-a-directory-in-c.html
@@ -157,18 +166,19 @@ struct cmp_double{
 
 void KNNSearch::KNN_PAMI2015_Pruning(PointCloud &ref, int k){
     
-    clock_t start, stop;
-    start = clock();
     priority_queue<double, vector<double>, cmp_double> prqueue;
     
     ref.randomize();
     int count = 1;
     for(int i = 0; i < dataset.size(); i++){
         dataset[i].randomize();
-        if (count % 100000 == 0)
-            cout << count << endl;
-        count++;
+//        if (count % 100000 == 0)
+//            cout << count << endl;
+//        count++;
     }
+    
+    clock_t start, stop;
+    start = clock();
     
     double distance;
     count = 1;
@@ -205,6 +215,10 @@ void KNNSearch::KNN_PAMI2015_Pruning(PointCloud &ref, int k){
             }
         }
         
+//        if(fabs(max - 1.6393) < 0.0001){
+//            cout << "here" << endl;
+//        }
+        
         if(breakTag){
             continue;
         }
@@ -213,21 +227,21 @@ void KNNSearch::KNN_PAMI2015_Pruning(PointCloud &ref, int k){
             prqueue.push(max);
             if(prqueue.size() == k){
                 readyTag = true;
-                kthValue = prqueue.top();
+                kthValue = prqueue.top(); // 这不是第K 个 吧 ？？？？？？？？？
             }
+        } else{
+            // the new max must less than kthValue, or it will be prune
+            prqueue.pop();
+            prqueue.push(max);
+            kthValue = prqueue.top();
         }
         
-        // the new max must less than kthValue, or it will be prune
-        prqueue.pop();
-        prqueue.push(max);
-        kthValue = prqueue.top();
-        
-        if (count % 100000 == 0)
-            cout << count << endl;
+//        if (count % 100000 == 0)
+//            cout << count << endl;
         count++;
     }
     stop = clock();
-    cout << "PAMI2015 time usage: " << stop-start << endl;
+    cout << "PAMI2015_pruning time usage: " << stop-start << endl;
     for(int i = 0; i < k; i++){
         cout<< prqueue.top() << endl;
         prqueue.pop();
@@ -480,57 +494,1180 @@ void KNNSearch::KNN_PR2017_Pruning(PointCloud &ref, int k){
     }
 }
 
-//============= the below is about the GIS2011 method ===================
+struct LBNode{
+    double bsclb;
+    double enhlb;
+    double partialHD;
+    double exactHD;
+};
 
+bool cmp_LBNode_bsclb(LBNode &n1, LBNode &n2){
+    return n1.bsclb < n2.bsclb;
+}
 
-template <typename Value, typename Options, typename Translator, typename Box, typename Allocators>
-class test_visitor
-: public bgid::rtree::visitor<Value, typename Options::parameters_type, Box, Allocators, typename Options::node_tag, true>::type
-{
-    typedef typename bgid::rtree::internal_node<Value, typename Options::parameters_type, Box, Allocators, typename Options::node_tag>::type internal_node;
-    typedef typename bgid::rtree::leaf<Value, typename Options::parameters_type, Box, Allocators, typename Options::node_tag>::type leaf;
+bool cmp_LBNode_enhlb(LBNode &n1, LBNode &n2){
+    return n1.enhlb < n2.enhlb;
+}
+
+bool cmp_LBNode_partialHD(LBNode &n1, LBNode &n2){
+    return n1.partialHD < n2.partialHD;
+}
+
+bool cmp_LBNode_exactHD(LBNode &n1, LBNode &n2){
+    return n1.exactHD < n2.exactHD;
+}
+
+void KNNSearch::AnalyseLBs(PointCloud &ref){
+    rtree refRTree(ref.pointcloud.begin(), ref.pointcloud.end());
+    int number = 10;
     
-public:
-    vector<Box> MBRs;
-    void operator()(internal_node const& n)
-    {
-        typedef typename bgid::rtree::elements_type<internal_node>::type elements_type;
-        elements_type const& elements = bgid::rtree::elements(n);
+    // calculate ref's bound
+    RTV::box_type refbound = refRTree.bounds();
+    Point p1(refbound.m_min_corner.m_values[0], refbound.m_min_corner.m_values[1]);
+    p1.dimension = 2;
+    Point p2(refbound.m_max_corner.m_values[0], refbound.m_max_corner.m_values[1]);
+    p2.dimension = 2;
+    ref.bound = pair<Point, Point>(p1, p2);
+    
+    // calculate ref's MBRs
+    vector<RTV::box_type> refVec = getMBRs2(refRTree, number); // extract the first level
+    vector<pair<Point, Point>> refMBRs;
+    for(int i = 0; i < refVec.size(); i++){
+        Point p1(refVec[i].m_min_corner.m_values[0], refVec[i].m_min_corner.m_values[1]);
+        p1.dimension = 2;
+        Point p2(refVec[i].m_max_corner.m_values[0], refVec[i].m_max_corner.m_values[1]);
+        p2.dimension = 2;
+        refMBRs.push_back(pair<Point, Point>(p1, p2));
+    }
+    // if there are no first level MBRs
+    if(refMBRs.size() == 0){
+        refMBRs.push_back(pair<Point, Point>(ref.bound));
+    }
+    ref.FirstLevelMBRs = refMBRs;
+    
+    // do randomize for both query and data
+//    ref.randomize();
+//    for(int i = 0; i < dataset.size(); i++){
+//        dataset[i].randomize();
+//    }
+    
+    // do KCenter ordering
+    ref.sortByKcenter2();
+    
+    vector<double> bsclb;
+    vector<double> enhlb;
+    vector<double> partialHD;
+    vector<double> exactHD;
+    vector<LBNode> nodes;
+    
+    double distance1 = 0;
+    double distance2 = 0;
+    double distance3 = 0;
+    double distance4 = 0;
+    int progress = ref.pointcloud.size() * 0.05;
+    for(int i = 0; i < dataset.size(); i++){
+        LBNode node;
+        distance1 = HausdorffDistanceForBound(ref.bound, dataset[i].bound);
+        distance2 = HausdorffDistanceForMBRs(ref.FirstLevelMBRs, dataset[i].FirstLevelMBRs);
+        distance3 = ExactHausdorff::Partial_PAMI2015(ref, dataset[i], progress);
+        distance4 = ExactHausdorff::PAMI2015(ref, dataset[i]);
+        
+        bsclb.push_back(distance1);
+        enhlb.push_back(distance2);
+        partialHD.push_back(distance3);
+        exactHD.push_back(distance4);
+        
+        node.bsclb = distance1;
+        node.enhlb = distance2;
+        node.partialHD = distance3;
+        node.exactHD = distance4;
+        nodes.push_back(node);
+        cout << "calculating..." << i << endl;
+    }
+    
+    sort(bsclb.begin(), bsclb.end());
+    sort(enhlb.begin(), enhlb.end());
+    sort(partialHD.begin(), partialHD.end());
+    sort(exactHD.begin(), exactHD.end());
+    
+    ofstream outfile1, outfile2, outfile3, outfile4;
+    outfile1.open("/Users/lizhe/Desktop/reports/KNN8/kcenter-sort-bsclb");
+    outfile2.open("/Users/lizhe/Desktop/reports/KNN8/kcenter-sort-enhlb");
+    outfile3.open("/Users/lizhe/Desktop/reports/KNN8/kcenter-sort-partialHD");
+    outfile4.open("/Users/lizhe/Desktop/reports/KNN8/kcenter-sort-exactHD");
+    
+    for(int i = 0; i < dataset.size(); i++){
+        outfile1 << i << " " << bsclb[i] << endl;
+        outfile2 << i << " " << enhlb[i] << endl;
+        outfile3 << i << " " << partialHD[i] << endl;
+        outfile4 << i << " " << exactHD[i] << endl;
+    }
+    outfile1.close();
+    outfile2.close();
+    outfile3.close();
+    outfile4.close();
+    
+    ofstream outfile_node1, outfile_node2, outfile_node3, outfile_node4;
+    outfile_node1.open("/Users/lizhe/Desktop/reports/KNN8/kcenter-sort-bsclb-node");
+    sort(nodes.begin(), nodes.end(), cmp_LBNode_bsclb);
+    for(int i = 0; i < dataset.size(); i++){
+        outfile_node1 << i << " " << nodes[i].bsclb << " " << nodes[i].enhlb << " " << nodes[i].partialHD << " " << nodes[i].exactHD << endl;
+    }
+    outfile_node1.close();
 
-        for ( typename elements_type::const_iterator it = elements.begin();
-             it != elements.end() ; ++it)
-        {
-            handle_box_or_value(it->first);
+    outfile_node2.open("/Users/lizhe/Desktop/reports/KNN8/kcenter-sort-enhlb-node");
+    sort(nodes.begin(), nodes.end(), cmp_LBNode_enhlb);
+    for(int i = 0; i < dataset.size(); i++){
+        outfile_node2 << i << " " << nodes[i].bsclb << " " << nodes[i].enhlb << " " << nodes[i].partialHD << " " << nodes[i].exactHD << endl;
+    }
+    outfile_node2.close();
 
-            bgid::rtree::apply_visitor(*this, *(it->second));
+    outfile_node3.open("/Users/lizhe/Desktop/reports/KNN8/kcenter-sort-partialHD-node");
+    sort(nodes.begin(), nodes.end(), cmp_LBNode_partialHD);
+    for(int i = 0; i < dataset.size(); i++){
+        outfile_node3 << i << " " << nodes[i].bsclb << " " << nodes[i].enhlb << " " << nodes[i].partialHD << " " << nodes[i].exactHD << endl;
+    }
+    outfile_node3.close();
+
+    outfile_node4.open("/Users/lizhe/Desktop/reports/KNN8/kcenter-sort-exactHD-node");
+    sort(nodes.begin(), nodes.end(), cmp_LBNode_exactHD);
+    for(int i = 0; i < dataset.size(); i++){
+        outfile_node4 << i << " " << nodes[i].bsclb << " " << nodes[i].enhlb << " " << nodes[i].partialHD << " " << nodes[i].exactHD << endl;
+    }
+    outfile_node4.close();
+}
+
+// ====================== a combined method ==========================
+void KNNSearch::KNN_COMBINED(PointCloud &ref, int k, int number){
+    
+    rtree refRTree(ref.pointcloud.begin(), ref.pointcloud.end());
+    
+    // calculate ref's bound
+    RTV::box_type refbound = refRTree.bounds();
+    Point p1(refbound.m_min_corner.m_values[0], refbound.m_min_corner.m_values[1]);
+    p1.dimension = 2;
+    Point p2(refbound.m_max_corner.m_values[0], refbound.m_max_corner.m_values[1]);
+    p2.dimension = 2;
+    ref.bound = pair<Point, Point>(p1, p2);
+    
+    // calculate ref's MBRs
+    vector<RTV::box_type> refVec = getMBRs2(refRTree, number); // extract the first level
+    vector<pair<Point, Point>> refMBRs;
+    for(int i = 0; i < refVec.size(); i++){
+        Point p1(refVec[i].m_min_corner.m_values[0], refVec[i].m_min_corner.m_values[1]);
+        p1.dimension = 2;
+        Point p2(refVec[i].m_max_corner.m_values[0], refVec[i].m_max_corner.m_values[1]);
+        p2.dimension = 2;
+        refMBRs.push_back(pair<Point, Point>(p1, p2));
+    }
+    // if there are no first level MBRs
+    if(refMBRs.size() == 0){
+        refMBRs.push_back(pair<Point, Point>(ref.bound));
+    }
+    ref.FirstLevelMBRs = refMBRs;
+    
+    // do randomize for both query and data
+    ref.randomize();
+    for(int i = 0; i < dataset.size(); i++){
+        dataset[i].randomize();
+    }
+    
+    priority_queue<double> krecord; // descending
+    
+    clock_t start, stop;
+    start = clock();
+    
+    // random select k point cloud
+    double distance = 0;
+    for(int i = 0; i < k; i++){
+        distance = ExactHausdorff::PAMI2015(ref, dataset[i]);
+        krecord.push(distance);
+    }
+    
+    double kthValue = krecord.top();
+    
+    // calculate MBRs and prune, using MBRs to prune first
+    for(int i = k; i < dataset.size(); i++){
+        
+        distance = HausdorffDistanceForMBRs(ref.FirstLevelMBRs, dataset[i].FirstLevelMBRs); // no need to worry whether there is MBRs or not
+        
+        if(distance > kthValue){
+            continue;
+        } else {
+            distance = ExactHausdorff::PAMI2015(ref, dataset[i], true, kthValue);
+            if(distance < kthValue) {
+                krecord.pop();
+                krecord.push(distance);
+                kthValue = krecord.top();
+            }
         }
     }
     
-    // that is for print the leaf value, e.g., points, instead of MBRs
-//    void operator()(leaf const& n)
-//    {
-//        typedef typename bgid::rtree::elements_type<leaf>::type elements_type;
-//        elements_type const& elements = bgid::rtree::elements(n);
-//
-//        for ( typename elements_type::const_iterator it = elements.begin();
-//             it != elements.end() ; ++it)
-//        {
-//            handle_box_or_value(*it);
-//        }
-//    }
+    stop = clock();
     
-    template <typename BoxOrValue>
-    void handle_box_or_value(BoxOrValue const& b)
-    {
-        MBRs.push_back(b);
-        std::cout << bg::dsv(b) << std::endl;
+    cout << "combined method time usage: " << stop-start << endl;
+    for(int i = 0; i < k; i++){
+        cout << krecord.top() << endl;
+        krecord.pop();
+    }
+}
+
+// ==================== my method ==========================
+
+struct prqnode{
+    int pcindex; // the data point cloud index in dataset
+    int progress; // the query point cloud's current point
+    int level; // 0 for partial, 1 for exact;  In MINE2: 0 for basicLB, 1 for ENHLB, 2 for PartialLB, 3 for Exact
+    double distance; // the current Hausdorff Distance
+    prqnode(int pci, int pro, int lev, double dis){
+        pcindex = pci;
+        progress = pro;
+        level = lev;
+        distance = dis;
     }
 };
 
-typedef bg::model::point<float, 2, bg::cs::cartesian> point;
-typedef bg::model::box<Point> box;
-//typedef bgi::rtree<Point, bgi::linear<3>> rtree;
-typedef bgid::rtree::utilities::view<rtree> RTV;
+struct cmp_prqnode{
+    bool operator()(prqnode &n1, prqnode &n2){
+        return n1.distance > n2.distance; // ascending order
+    }
+};
+
+// consider data's size!!!!
+// a : times of K
+// b : percentage of Query
+// c : threshold for data point cloud
+void KNNSearch::KNN_MINE(PointCloud &ref, int k, double a, double b, int c, int querythreshold){
+    // 1. randomize query point cloud and dataset as preprocessing
+    // 2. calculate a*K exact HD (random selected from data), using the Kth one for pruning (suitable for large dataset and small K, a is a parameter)
+    // 3.1 for the rest, calculate partial HD as LB (b * number of points in Query), if LB > Kth value, prune, else, store it in priority queue
+    // 3.2 for the above step, if data point cloud is small, calculate the exact HD directly
+    // 4. after all are calculated, keep priority queue and pruning to get the KNN result
+    
+    vector<prqnode> result;
+    priority_queue<prqnode, vector<prqnode>, cmp_prqnode> prqueue; // ascending
+    priority_queue<double> krecord; // descending
+    
+    ref.randomize();
+    randomizeDataset();
+    
+    long querySize = ref.pointcloud.size();
+    long datasetSize = dataset.size();
+    long partialQuerySize = b*querySize;
+    partialQuerySize = partialQuerySize < querythreshold? partialQuerySize : querythreshold;
+    int ak = a*k; // a times k
+    
+    clock_t start, stop;
+    start = clock();
+    
+    // calculate a*k exact HD
+    for(int i = 0; i < ak; i++){
+        double distance = ExactHausdorff::PAMI2015(ref, dataset[i]);
+        prqnode node(i, querySize, 1, distance);
+        prqueue.push(node);
+        
+        if(krecord.size() < k){
+            krecord.push(distance);
+        } else { // =k
+            double kth = krecord.top();
+            if(distance < kth){
+                krecord.pop();
+                krecord.push(distance);
+            } else {
+                // do noting
+            }
+        }
+    }
+
+    double kthValue = krecord.top();
+    double max = 0;
+    double min = std::numeric_limits<double>::infinity(); // infinity
+    double distance = 0;
+    
+    // calculate partial HD for the rest
+    for(int i = ak; i < datasetSize; i++){
+        max = 0;
+        distance = 0;
+        if(dataset[i].pointcloud.size() > c){ // calculate partial HD
+            for (int i1 = 0; i1 < partialQuerySize; i1++){
+                min = std::numeric_limits<double>::infinity();
+                for(int j = 0; j < dataset[i].pointcloud.size(); j++){
+                    distance = ref.pointcloud[i1].distanceTo(dataset[i].pointcloud[j]);
+                    if(distance < min){
+                        min = distance;
+                    }
+                    if(distance <= max){
+                        break;
+                    }
+                }
+                if(min > max){
+                    max = min;
+                    if(max >= kthValue){
+                        break; // give up this point cloud
+                    }
+                }
+                
+            }
+            prqnode node(i, partialQuerySize, 0, max); // the partial Hausdorff distance
+            prqueue.push(node);
+        } else { // calculate full HD
+            for (int i1 = 0; i1 < querySize; i1++){
+                min = std::numeric_limits<double>::infinity();
+                for(int j = 0; j < dataset[i].pointcloud.size(); j++){
+                    distance = ref.pointcloud[i1].distanceTo(dataset[i].pointcloud[j]);
+                    if(distance < min){
+                        min = distance;
+                    }
+                    if(distance <= max){
+                        break;
+                    }
+                }
+                if(min > max){
+                    max = min;
+                    if(max >= kthValue){
+                        break; // give up this point cloud
+                    }
+                }
+                
+            }
+            prqnode node(i, querySize, 1, max); // the partial Hausdorff distance
+            prqueue.push(node);
+            if(node.distance < kthValue){
+                krecord.pop();
+                krecord.push(distance);
+                kthValue = krecord.top();
+            }
+        }
+    }
+    
+    int tempk = k;
+    while(tempk){
+        prqnode node = prqueue.top();
+        prqueue.pop();
+        if(node.level == 1){
+            tempk--;
+            if(node.distance < kthValue){
+                krecord.pop();
+                krecord.push(distance);
+                kthValue = krecord.top();
+            }
+            result.push_back(node);
+        } else {
+            // keep calculating the reamining part
+            int i = node.pcindex;
+            max = node.distance;
+            distance = node.distance;
+            for (int i1 = partialQuerySize; i1 < querySize; i1++){
+                min = std::numeric_limits<double>::infinity();
+                for(int j = 0; j < dataset[i].pointcloud.size(); j++){
+                    distance = ref.pointcloud[i1].distanceTo(dataset[i].pointcloud[j]);
+                    if(distance < min){
+                        min = distance;
+                    }
+                    if(distance <= max){
+                        break;
+                    }
+                }
+                if(min > max){
+                    max = min;
+                    if(max >= kthValue){
+                        break; // give up this point cloud
+                    }
+                }
+            }
+            node.progress = querySize;
+            node.level = 1;
+            node.distance = max;
+            prqueue.push(node);
+        }
+    }
+    
+    stop = clock();
+    
+    cout << "my method time usage: " << stop - start << endl;
+    for(int i = 0; i < k; i++){
+        cout << "i: " << result[i].distance << " " << result[i].pcindex << endl;
+    }
+    
+}
+
+void KNNSearch::KNN_MINE2(PointCloud &ref, int k, int partialQuerySize){
+    
+    vector<prqnode> result;
+    priority_queue<prqnode, vector<prqnode>, cmp_prqnode> prqueue;
+    
+    rtree refRTree(ref.pointcloud.begin(), ref.pointcloud.end());
+    
+    long refsize = ref.pointcloud.size();
+    partialQuerySize = partialQuerySize < refsize ? partialQuerySize : refsize;
+    
+    // calculate ref's bound
+    RTV::box_type refbound = refRTree.bounds();
+    Point p1(refbound.m_min_corner.m_values[0], refbound.m_min_corner.m_values[1]);
+    p1.dimension = 2;
+    Point p2(refbound.m_max_corner.m_values[0], refbound.m_max_corner.m_values[1]);
+    p2.dimension = 2;
+    ref.bound = pair<Point, Point>(p1, p2);
+    
+    // calculate ref's MBRs
+    vector<RTV::box_type> refVec = getMBRs(refRTree); // extract the first level
+    vector<pair<Point, Point>> refMBRs;
+    for(int i = 0; i < refVec.size(); i++){
+        Point p1(refVec[i].m_min_corner.m_values[0], refVec[i].m_min_corner.m_values[1]);
+        p1.dimension = 2;
+        Point p2(refVec[i].m_max_corner.m_values[0], refVec[i].m_max_corner.m_values[1]);
+        p2.dimension = 2;
+        refMBRs.push_back(pair<Point, Point>(p1, p2));
+    }
+    if(refMBRs.size() == 0){
+        refMBRs.push_back(pair<Point, Point>(ref.bound));
+    }
+    ref.FirstLevelMBRs = refMBRs;
+    
+    // randomize
+    ref.randomize();
+    for(int i = 0; i < dataset.size(); i++){
+        dataset[i].randomize();
+    }
+    
+    clock_t start,stop;
+    start = clock();
+    
+    double distance = 0;
+    for(int i = 0; i < dataset.size(); i++){
+        distance = HausdorffDistanceForBound(ref.bound, dataset[i].bound);
+        prqnode node(i, 0, 0, distance);
+        prqueue.push(node);
+    }
+    
+    int _k = k;
+    
+    int count1 = 0, count2 = 0, count3 = 0, nbcount = 0, nombrcount = 0;
+    double max = 0, min = 0;
+    
+    while(k){
+        prqnode node = prqueue.top();
+        prqueue.pop();
+        if(node.level == 0){
+            // consider if there is not multi level
+            if(dataset[node.pcindex].FirstLevelMBRs.size() == 1 && ref.FirstLevelMBRs.size() == 1){
+                // should we calculate partial HD or exact HD instead here?
+                max = 0;
+                for (int i = 0; i < partialQuerySize; i++){
+                    min = std::numeric_limits<double>::infinity();
+                    for(int j = 0; j < dataset[node.pcindex].pointcloud.size(); j++){
+                        distance = ref.pointcloud[i].distanceTo(dataset[node.pcindex].pointcloud[j]);
+                        if(distance < min){
+                            min = distance;
+                        }
+                        if(distance <= max){
+                            break;
+                        }
+                    }
+                    if(min > max){
+                        max = min;
+                        //                    if(max >= kthValue){
+                        //                        break; // give up this point cloud
+                        //                    }
+                    }
+                }
+                node.progress = partialQuerySize;
+                node.level = 2;
+                count2++;
+                nombrcount++;
+                node.distance = max;
+            } else {
+                // calculate ENHLB
+                node.distance = HausdorffDistanceForMBRs(ref.FirstLevelMBRs, dataset[node.pcindex].FirstLevelMBRs); // this refVec is not enhanced !!!!!!!!!!
+                count1++;
+            }
+            node.level = 1;
+            prqueue.push(node);
+        } else if(node.level == 1){
+            // calculate partial HD as LB
+            max = 0;
+            for (int i = 0; i < partialQuerySize; i++){
+                min = std::numeric_limits<double>::infinity();
+                for(int j = 0; j < dataset[node.pcindex].pointcloud.size(); j++){
+                    distance = ref.pointcloud[i].distanceTo(dataset[node.pcindex].pointcloud[j]);
+                    if(distance < min){
+                        min = distance;
+                    }
+                    if(distance <= max){
+                        break;
+                    }
+                }
+                if(min > max){
+                    max = min;
+//                    if(max >= kthValue){
+//                        break; // give up this point cloud
+//                    }
+                }
+            }
+            node.progress = partialQuerySize;
+            node.level = 2;
+            if(max > node.distance){
+                nbcount++; // nearly all of them is bigger
+            } else {
+                // ???? will this be even bigger?
+            }
+            node.distance = max;
+            prqueue.push(node);
+            count2++;
+        } else if(node.level == 2){
+            // calculate the reamining HD
+            max = node.distance;
+            for (int i = partialQuerySize; i < refsize; i++){
+                min = std::numeric_limits<double>::infinity();
+                for(int j = 0; j < dataset[node.pcindex].pointcloud.size(); j++){
+                    distance = ref.pointcloud[i].distanceTo(dataset[node.pcindex].pointcloud[j]);
+                    if(distance < min){
+                        min = distance;
+                    }
+                    if(distance <= max){
+                        break;
+                    }
+                }
+                if(min > max){
+                    max = min;
+//                    if(max >= kthValue){
+//                        break; // give up this point cloud
+//                    }
+                }
+            }
+            node.progress = refsize;
+            node.level = 3;
+            node.distance = max;
+            prqueue.push(node);
+            count3++;
+        } else if(node.level == 3){
+            result.push_back(node);
+            k--;
+        }
+    }
+    stop = clock();
+    cout << "MINE_2 time usage: " <<  stop - start << endl;
+    cout << "filtering count: count1=" << count1 << "  count2=" << count2 << "  count3=" << count3 << "  nbcount=" << nbcount << "  nombrcount=" << nombrcount << endl;
+    for(int i = 0; i < _k; i++){
+        cout << result[i].distance << endl;
+    }
+}
+
+// ignore BscLB, calculate partial HD according to percentage.
+// 不能直接算ENHLB 因为有些没有啊！
+void KNNSearch::KNN_MINE3(PointCloud &ref, int k, double percentage, int LB, int UB, int queryMBRNumber){
+    
+    vector<prqnode> result;
+    priority_queue<prqnode, vector<prqnode>, cmp_prqnode> prqueue;
+    long refsize = ref.pointcloud.size();
+    int partialQuerySize = refsize*percentage;
+    if(partialQuerySize > UB){
+        partialQuerySize = UB;
+    }
+    if(partialQuerySize < LB){
+        partialQuerySize = LB;
+    }
+    if(partialQuerySize > ref.pointcloud.size()){
+        partialQuerySize = ref.pointcloud.size();
+    }
+
+    rtree refRTree(ref.pointcloud.begin(), ref.pointcloud.end());
+    // calculate ref's bound
+    RTV::box_type refbound = refRTree.bounds();
+    Point p1(refbound.m_min_corner.m_values[0], refbound.m_min_corner.m_values[1]);
+    p1.dimension = 2;
+    Point p2(refbound.m_max_corner.m_values[0], refbound.m_max_corner.m_values[1]);
+    p2.dimension = 2;
+    ref.bound = pair<Point, Point>(p1, p2);
+    
+    // calculate ref's MBRs
+    vector<RTV::box_type> refVec = getMBRs2(refRTree, queryMBRNumber); // extract the first level
+    vector<pair<Point, Point>> refMBRs;
+    for(int i = 0; i < refVec.size(); i++){
+        Point p1(refVec[i].m_min_corner.m_values[0], refVec[i].m_min_corner.m_values[1]);
+        p1.dimension = 2;
+        Point p2(refVec[i].m_max_corner.m_values[0], refVec[i].m_max_corner.m_values[1]);
+        p2.dimension = 2;
+        refMBRs.push_back(pair<Point, Point>(p1, p2));
+    }
+    // if there are no first level MBRs
+    if(refMBRs.size() == 0){
+        refMBRs.push_back(pair<Point, Point>(ref.bound));
+    }
+    ref.FirstLevelMBRs = refMBRs;
+    
+    // do randomize for both query and data
+    ref.randomize();
+    for(int i = 0; i < dataset.size(); i++){
+        dataset[i].randomize();
+    }
+    
+    clock_t start,stop;
+    start = clock();
+    
+//    clock_t start1, stop1; // you can remove this later
+    
+//    start1 = clock(); // you can remove this later
+    double distance = 0;
+    for(int i = 0; i < dataset.size(); i++){
+        distance = HausdorffDistanceForMBRs(ref.FirstLevelMBRs, dataset[i].FirstLevelMBRs);
+        prqnode node(i, 0, 0, distance);
+        prqueue.push(node);
+    }
+//    stop1 = clock(); // you can remove this later
+    
+    int _k = k;
+    
+    int count1 = 0, count2 = 0;
+    double max = 0, min = 0;
+    
+//    clock_t start2, stop2, start3, stop3, totalPHD = 0, totalHD = 0;
+    
+//    ofstream outfile1, outfile2; // you can remove this later
+//    outfile1.open("/Users/lizhe/Desktop/reports/KNN8/Testing3-prqueue-pop"); // you can remove this later
+//    outfile2.open("/Users/lizhe/Desktop/reports/KNN8/Testing3-prqueue-kth"); // you can remove this later
+//    priority_queue<double> krecord; // descending, you can remove this later
+//    int whilecount = 0; // you can remove this later
+//    double tempdistance = 0; // you can remove this later
+    
+    while(k){
+//        whilecount++; // you can remove this later
+        prqnode node = prqueue.top();
+        prqueue.pop();
+//        tempdistance = node.distance; // you can remove this later
+        if(node.level == 0){
+//            start2 = clock(); // you can remove this later
+//             calculate partial HD as LB
+            max = 0;
+            for (int i = 0; i < partialQuerySize; i++){
+                min = std::numeric_limits<double>::infinity();
+                for(int j = 0; j < dataset[node.pcindex].pointcloud.size(); j++){
+                    distance = ref.pointcloud[i].distanceTo(dataset[node.pcindex].pointcloud[j]);
+                    if(distance < min){
+                        min = distance;
+                    }
+                    if(distance <= max){
+                        break;
+                    }
+                }
+                if(min > max){
+                    max = min;
+                }
+            }
+            node.progress = partialQuerySize;
+            node.level = 1;
+            node.distance = max;
+            prqueue.push(node);
+            count1++;
+//            stop2 = clock(); // you can remove this later
+//            totalPHD += stop2-start2; // you can remove this later
+        } else if(node.level == 1){
+//            start3 = clock(); // you can remove this later
+            // calculate the reamining HD
+            max = node.distance;
+            for (int i = partialQuerySize; i < refsize; i++){
+                min = std::numeric_limits<double>::infinity();
+                for(int j = 0; j < dataset[node.pcindex].pointcloud.size(); j++){
+                    distance = ref.pointcloud[i].distanceTo(dataset[node.pcindex].pointcloud[j]);
+                    if(distance < min){
+                        min = distance;
+                    }
+                    if(distance <= max){
+                        break;
+                    }
+                }
+                if(min > max){
+                    max = min;
+                }
+            }
+            node.progress = refsize;
+            node.level = 2;
+            node.distance = max;
+            prqueue.push(node);
+            count2++;
+//            stop3 = clock(); // you can remove this later
+//            totalHD += stop3 - start3; // you can remove this later
+           
+            // you can remove this later
+//            if(krecord.size() <_k){
+//                krecord.push(max);
+//            } else if(max < krecord.top()){
+//                krecord.pop();
+//                krecord.push(max);
+//            }
+        } else if(node.level == 2){
+            result.push_back(node);
+            k--;
+        }
+        // you can remove this later
+//        if(krecord.size() < _k){
+//            outfile1 << whilecount << " " << tempdistance << endl;
+//        } else{
+//            outfile1 << whilecount << " " << tempdistance << endl;
+//            outfile2 << whilecount << " " << krecord.top() << endl;
+//        }
+    }
+    stop = clock();
+    cout << "MINE_3 time usage: " <<  stop - start << endl;
+    cout << "filtering count: count1=" << count1 << "  count2=" << count2 << endl;
+//    cout << "ENHLB time: " << stop1-start1 << "  partial HD time: " << totalPHD << "  exact HD time" << totalHD << endl; // you can remove this later
+    for(int i = 0; i < _k; i++){
+        cout << result[i].distance << endl;
+    }
+}
+
+
+void KNNSearch::KNN_MINE4(PointCloud &ref, int k, double percentage, int LB, int UB, int queryMBRNumber){
+    
+    vector<prqnode> result;
+    priority_queue<prqnode, vector<prqnode>, cmp_prqnode> prqueue;
+    long refsize = ref.pointcloud.size();
+    int partialQuerySize = refsize*percentage;
+    if(partialQuerySize > UB){
+        partialQuerySize = UB;
+    }
+    if(partialQuerySize < LB){
+        partialQuerySize = LB;
+    }
+    if(partialQuerySize > ref.pointcloud.size()){
+        partialQuerySize = ref.pointcloud.size();
+    }
+    
+    rtree refRTree(ref.pointcloud.begin(), ref.pointcloud.end());
+    // calculate ref's bound
+    RTV::box_type refbound = refRTree.bounds();
+    Point p1(refbound.m_min_corner.m_values[0], refbound.m_min_corner.m_values[1]);
+    p1.dimension = 2;
+    Point p2(refbound.m_max_corner.m_values[0], refbound.m_max_corner.m_values[1]);
+    p2.dimension = 2;
+    ref.bound = pair<Point, Point>(p1, p2);
+    
+    // calculate ref's MBRs
+    vector<RTV::box_type> refVec = getMBRs2(refRTree, queryMBRNumber); // extract the first level
+    vector<pair<Point, Point>> refMBRs;
+    for(int i = 0; i < refVec.size(); i++){
+        Point p1(refVec[i].m_min_corner.m_values[0], refVec[i].m_min_corner.m_values[1]);
+        p1.dimension = 2;
+        Point p2(refVec[i].m_max_corner.m_values[0], refVec[i].m_max_corner.m_values[1]);
+        p2.dimension = 2;
+        refMBRs.push_back(pair<Point, Point>(p1, p2));
+    }
+    // if there are no first level MBRs
+    if(refMBRs.size() == 0){
+        refMBRs.push_back(pair<Point, Point>(ref.bound));
+    }
+    ref.FirstLevelMBRs = refMBRs;
+    
+    // do kcenter ordering !!!!!!!!!!!
+    ref.sortByKcenter();
+    // assume the dataset is already kcenter minzed !!  But actually we don not need it be ordered right?
+//    for(int i = 0; i < dataset.size(); i++){
+//        dataset[i].sortByKcenter();
+//    }
+    
+    clock_t start,stop;
+    start = clock();
+    
+//    clock_t start1, stop1; // you can remove this later
+    
+//    start1 = clock(); // you can remove this later
+    double distance = 0;
+    for(int i = 0; i < dataset.size(); i++){
+        distance = HausdorffDistanceForMBRs(ref.FirstLevelMBRs, dataset[i].FirstLevelMBRs);
+        prqnode node(i, 0, 0, distance);
+        prqueue.push(node);
+    }
+//    stop1 = clock(); // you can remove this later
+    
+    int _k = k;
+    
+    int count1 = 0, count2 = 0;
+    double max = 0, min = 0;
+    
+//    clock_t start2, stop2, start3, stop3, totalPHD = 0, totalHD = 0; // you can remove this later
+    
+//    ofstream outfile1, outfile2; // you can remove this later
+//    outfile1.open("/Users/lizhe/Desktop/reports/KNN8/Testing3-prqueue-pop"); // you can remove this later
+//    outfile2.open("/Users/lizhe/Desktop/reports/KNN8/Testing3-prqueue-kth"); // you can remove this later
+//    priority_queue<double> krecord; // descending, you can remove this later
+//    int whilecount = 0; // you can remove this later
+//    double tempdistance = 0; // you can remove this later
+    
+    while(k){
+//        whilecount++; // you can remove this later
+        prqnode node = prqueue.top();
+        prqueue.pop();
+//        tempdistance = node.distance; // you can remove this later
+        if(node.level == 0){
+//            start2 = clock(); // you can remove this later
+            //             calculate partial HD as LB
+            max = 0;
+            for (int i = 0; i < partialQuerySize; i++){
+                min = std::numeric_limits<double>::infinity();
+                for(int j = 0; j < dataset[node.pcindex].pointcloud.size(); j++){
+                    distance = ref.pointcloud[i].distanceTo(dataset[node.pcindex].pointcloud[j]);
+                    if(distance < min){
+                        min = distance;
+                    }
+                    if(distance <= max){
+                        break;
+                    }
+                }
+                if(min > max){
+                    max = min;
+                }
+            }
+            node.progress = partialQuerySize;
+            node.level = 1;
+            node.distance = max;
+            prqueue.push(node);
+            count1++;
+//            stop2 = clock(); // you can remove this later
+//            totalPHD += stop2-start2; // you can remove this later
+        } else if(node.level == 1){
+//            start3 = clock(); // you can remove this later
+            // calculate the reamining HD
+            max = node.distance;
+            for (int i = partialQuerySize; i < refsize; i++){
+                min = std::numeric_limits<double>::infinity();
+                for(int j = 0; j < dataset[node.pcindex].pointcloud.size(); j++){
+                    distance = ref.pointcloud[i].distanceTo(dataset[node.pcindex].pointcloud[j]);
+                    if(distance < min){
+                        min = distance;
+                    }
+                    if(distance <= max){
+                        break;
+                    }
+                }
+                if(min > max){
+                    max = min;
+                }
+            }
+            node.progress = refsize;
+            node.level = 2;
+            node.distance = max;
+            prqueue.push(node);
+            count2++;
+//            stop3 = clock(); // you can remove this later
+//            totalHD += stop3 - start3; // you can remove this later
+            
+            // you can remove this later
+//            if(krecord.size() <_k){
+//                krecord.push(max);
+//            } else if(max < krecord.top()){
+//                krecord.pop();
+//                krecord.push(max);
+//            }
+        } else if(node.level == 2){
+            result.push_back(node);
+            k--;
+        }
+        // you can remove this later
+//        if(krecord.size() < _k){
+//            outfile1 << whilecount << " " << tempdistance << endl;
+//        } else{
+//            outfile1 << whilecount << " " << tempdistance << endl;
+//            outfile2 << whilecount << " " << krecord.top() << endl;
+//        }
+    }
+    stop = clock();
+    cout << "MINE_4 time usage: " <<  stop - start << endl;
+    cout << "filtering count: count1=" << count1 << "  count2=" << count2 << endl;
+//    cout << "ENHLB time: " << stop1-start1 << "  partial HD time: " << totalPHD << "  exact HD time" << totalHD << endl; // you can remove this later
+    for(int i = 0; i < _k; i++){
+        cout << result[i].distance << endl;
+    }
+}
+
+// using kcenter ordering, using threshold in PartialHD
+void KNNSearch::KNN_MINE5(PointCloud &ref, int k, double percentage, int LB, int UB, int queryMBRNumber, double KNNValue){
+    
+    vector<prqnode> result;
+    priority_queue<prqnode, vector<prqnode>, cmp_prqnode> prqueue;
+    long refsize = ref.pointcloud.size();
+    int partialQuerySize = refsize*percentage;
+    if(partialQuerySize > UB){
+        partialQuerySize = UB;
+    }
+    if(partialQuerySize < LB){
+        partialQuerySize = LB;
+    }
+    if(partialQuerySize > ref.pointcloud.size()){
+        partialQuerySize = ref.pointcloud.size();
+    }
+    
+    ref.generateBoundAndMBRs(queryMBRNumber);
+    ref.sortByKcenter();
+    
+    clock_t start,stop;
+    start = clock();
+    
+    //    clock_t start1, stop1; // you can remove this later
+    //    start1 = clock(); // you can remove this later
+    double distance = 0;
+    for(int i = 0; i < dataset.size(); i++){
+        distance = HausdorffDistanceForMBRs(ref.FirstLevelMBRs, dataset[i].FirstLevelMBRs);
+        prqnode node(i, 0, 0, distance);
+        prqueue.push(node);
+    }
+    //    stop1 = clock(); // you can remove this later
+    
+    int _k = k;
+    
+    int count1 = 0, count2 = 0, countbreak1 = 0, countbreak2 = 0;
+    double max = 0, min = 0;
+    
+    //    clock_t start2, stop2, start3, stop3, totalPHD = 0, totalHD = 0; // you can remove this later
+    
+    //    ofstream outfile1, outfile2; // you can remove this later
+    //    outfile1.open("/Users/lizhe/Desktop/reports/KNN8/Testing3-prqueue-pop"); // you can remove this later
+    //    outfile2.open("/Users/lizhe/Desktop/reports/KNN8/Testing3-prqueue-kth"); // you can remove this later
+    //    priority_queue<double> krecord; // descending, you can remove this later
+    //    int whilecount = 0; // you can remove this later
+    //    double tempdistance = 0; // you can remove this later
+    
+    while(k){
+        //        whilecount++; // you can remove this later
+        prqnode node = prqueue.top();
+        prqueue.pop();
+        //        tempdistance = node.distance; // you can remove this later
+        if(node.level == 0){
+            //            start2 = clock(); // you can remove this later
+            //             calculate partial HD as LB
+            max = 0;
+            max = ExactHausdorff::Partial_PAMI205_Pruning(ref, dataset[node.pcindex], 0, partialQuerySize, 0, KNNValue);
+            //            for (int i = 0; i < partialQuerySize; i++){
+            //                min = std::numeric_limits<double>::infinity();
+            //                for(int j = 0; j < dataset[node.pcindex].pointcloud.size(); j++){
+            //                    distance = ref.pointcloud[i].distanceTo(dataset[node.pcindex].pointcloud[j]);
+            //                    if(distance < min){
+            //                        min = distance;
+            //                    }
+            //                    if(distance <= max){
+            //                        break;
+            //                    }
+            //                }
+            //                if(min > max){
+            //                    max = min;
+            //                }
+            //            }
+            count1++;
+            if(max != -1){
+                node.progress = partialQuerySize;
+                node.level = 1;
+                node.distance = max;
+                prqueue.push(node);
+            } else{
+                countbreak1++;
+                continue;
+            }
+            //            stop2 = clock(); // you can remove this later
+            //            totalPHD += stop2-start2; // you can remove this later
+        } else if(node.level == 1){
+            //            start3 = clock(); // you can remove this later
+            // calculate the reamining HD
+            max = node.distance;
+            max = ExactHausdorff::Partial_PAMI205_Pruning(ref, dataset[node.pcindex], partialQuerySize, refsize, max, KNNValue);
+            //            for (int i = partialQuerySize; i < refsize; i++){
+            //                min = std::numeric_limits<double>::infinity();
+            //                for(int j = 0; j < dataset[node.pcindex].pointcloud.size(); j++){
+            //                    distance = ref.pointcloud[i].distanceTo(dataset[node.pcindex].pointcloud[j]);
+            //                    if(distance < min){
+            //                        min = distance;
+            //                    }
+            //                    if(distance <= max){
+            //                        break;
+            //                    }
+            //                }
+            //                if(min > max){
+            //                    max = min;
+            //                }
+            //            }
+            count2++;
+            if(max != -1){
+                node.progress = refsize;
+                node.level = 2;
+                node.distance = max;
+                prqueue.push(node);
+            } else{
+                countbreak2++;
+                continue;
+            }
+            
+            //            stop3 = clock(); // you can remove this later
+            //            totalHD += stop3 - start3; // you can remove this later
+            
+            // you can remove this later
+            //            if(krecord.size() <_k){
+            //                krecord.push(max);
+            //            } else if(max < krecord.top()){
+            //                krecord.pop();
+            //                krecord.push(max);
+            //            }
+        } else if(node.level == 2){
+            result.push_back(node);
+            k--;
+        }
+        // you can remove this later
+        //        if(krecord.size() < _k){
+        //            outfile1 << whilecount << " " << tempdistance << endl;
+        //        } else{
+        //            outfile1 << whilecount << " " << tempdistance << endl;
+        //            outfile2 << whilecount << " " << krecord.top() << endl;
+        //        }
+    }
+    stop = clock();
+    cout << "MINE_5 time usage: " <<  stop - start << endl;
+    cout << "filtering count: count1=" << count1 << "  count2=" << count2 << "  countbreak1=" << countbreak1 << "  countbreak2=" << countbreak2 << endl;
+    //    cout << "ENHLB time: " << stop1-start1 << "  partial HD time: " << totalPHD << "  exact HD time" << totalHD << endl; // you can remove this later
+    for(int i = 0; i < _k; i++){
+        cout << result[i].distance << endl;
+    }
+}
+
+//==========================================================================
+
+void testMBRs(PointCloud &ref){
+    rtree refRTree(ref.pointcloud.begin(), ref.pointcloud.end());
+    vector<RTV::box_type> bounds = getMBRs2(refRTree, 7);
+    RTV::box_type box = refRTree.bounds();
+    cout << box.m_min_corner.m_values[0] << " " << box.m_min_corner.m_values[1] << " " << box.m_max_corner.m_values[0] << " " << box.m_max_corner.m_values[1] << endl;
+    cout << "MBRs from visitor: " << endl;
+    for(int i = 0; i < bounds.size(); i++){
+        cout << bounds[i].m_min_corner.m_values[0] << " " << bounds[i].m_min_corner.m_values[1] << " " << bounds[i].m_max_corner.m_values[0] << " " << bounds[i].m_max_corner.m_values[1] << endl;
+    }
+}
+
+//==========================================================================
+
+void KNNSearch::generateBoundsForDataset(string filepath, vector<PointCloud> &dataset){
+    ofstream outfile;
+    outfile.open(filepath);
+    long size1 = dataset.size();
+    vector<RTV::box_type> vec;
+    for(long i = 0; i < size1; i++){
+        rtree dataRtree = rtree(dataset[i].pointcloud.begin(), dataset[i].pointcloud.end());
+        RTV::box_type box = dataRtree.bounds();
+        outfile << box.m_min_corner.m_values[0] << " " << box.m_min_corner.m_values[1] << " " << box.m_max_corner.m_values[0] << " " << box.m_max_corner.m_values[1] << endl;
+        if(i % 1000 == 0){
+            cout << i << endl;
+        }
+    }
+}
+
+void KNNSearch::generateMBRsForDataset(string filepath1, string filepath2, vector<PointCloud> &dataset, int number){
+    ofstream outfile1, outfile2;
+    outfile1.open(filepath1);
+    outfile2.open(filepath2);
+    
+    long size1 = dataset.size();
+    vector<RTV::box_type> vec;
+    for(long i = 0; i < size1; i++){
+        rtree dataRtree = rtree(dataset[i].pointcloud.begin(), dataset[i].pointcloud.end());
+        vec.clear();
+        vec = getMBRs2(dataRtree, number);
+        
+        for(int j = 0; j < vec.size(); j++){
+            outfile1 << vec[j].m_min_corner.m_values[0] << " " << vec[j].m_min_corner.m_values[1] << " " << vec[j].m_max_corner.m_values[0] << " " << vec[j].m_max_corner.m_values[1] << endl;
+        }
+        outfile1 << "====" << endl;
+        
+        RTV::box_type box = dataRtree.bounds();
+        outfile2 << box.m_min_corner.m_values[0] << " " << box.m_min_corner.m_values[1] << " " << box.m_max_corner.m_values[0] << " " << box.m_max_corner.m_values[1] << endl;
+        
+        if(i % 1000 == 0){
+            cout << i << endl;
+        }
+    }
+}
+
+// 1 for MBR 2 for bound
+void KNNSearch::generateRTreeForDataset(string filepath1, string filepath2, vector<PointCloud> &dataset){
+    ofstream outfile1, outfile2;
+    outfile1.open(filepath1);
+    outfile2.open(filepath2);
+    
+    long size1 = dataset.size();
+    vector<RTV::box_type> vec;
+    for(long i = 0; i < size1; i++){
+        rtree dataRtree = rtree(dataset[i].pointcloud.begin(), dataset[i].pointcloud.end());
+        vec.clear();
+        vec = getMBRs(dataRtree);
+        
+        for(int j = 0; j < vec.size(); j++){ // 如果没有10个的怎么记录？？？会变成两个====连着
+            outfile1 << vec[j].m_min_corner.m_values[0] << " " << vec[j].m_min_corner.m_values[1] << " " << vec[j].m_max_corner.m_values[0] << " " << vec[j].m_max_corner.m_values[1] << endl;
+        }
+        outfile1 << "====" << endl;
+        
+        RTV::box_type box = dataRtree.bounds();
+        outfile2 << box.m_min_corner.m_values[0] << " " << box.m_min_corner.m_values[1] << " " << box.m_max_corner.m_values[0] << " " << box.m_max_corner.m_values[1] << endl;
+        
+        if(i % 1000 == 0){
+            cout << i << endl;
+        }
+    }
+}
+
+// 1 for MBR 2 for bound
+void KNNSearch::associateMBRs(string filepath1, string filepath2){
+    
+    string line;
+    int count = 0;
+    double minx;
+    double miny;
+    double maxx;
+    double maxy;
+    
+    // first associate bounds
+    ifstream infile2;
+    infile2.open(filepath2);
+    count = 0;
+    vector<string> coordinates;
+    while(getline(infile2, line)){
+        split(coordinates, line, boost::is_any_of(" "));
+        minx = stod(coordinates[0]);
+        miny = stod(coordinates[1]);
+        maxx = stod(coordinates[2]);
+        maxy = stod(coordinates[3]);
+        Point point1 = Point(minx, miny);
+        Point point2 = Point(maxx, maxy);
+        point1.dimension = 2;
+        point2.dimension = 2;
+        dataset[count].bound = pair<Point, Point>(point1, point2);
+        count++;
+    }
+    
+    // then associate MBRs
+    count = 0;
+    ifstream infile1;
+    infile1.open(filepath1);
+    vector<pair<Point, Point>> vec;
+    while(getline(infile1, line)){
+        if(line == "===="){
+            if(vec.size() == 0){
+                vec.push_back(pair<Point, Point>(dataset[count].bound));
+            }
+            dataset[count].FirstLevelMBRs = vec;
+            vec.clear();
+            count++;
+            //            cout << "associating..." << count << endl;
+        } else {
+            split(coordinates, line, boost::is_any_of(" "));
+            minx = stod(coordinates[0]);
+            miny = stod(coordinates[1]);
+            maxx = stod(coordinates[2]);
+            maxy = stod(coordinates[3]);
+            Point point1 = Point(minx, miny);
+            Point point2 = Point(maxx, maxy);
+            point1.dimension = 2;
+            point2.dimension = 2;
+            vec.push_back(pair<Point, Point>(point1, point2));
+        }
+    }
+}
+
+//========================== GIS2011 =================================
+
 
 struct cmp_tempResult{
     bool operator()(tempResult t1, tempResult t2){
@@ -538,195 +1675,141 @@ struct cmp_tempResult{
     }
 };
 
-double HausdorffDistanceForMBRs(vector<RTV::box_type> &refMBRs, vector<RTV::box_type> &MBRs);
-double distanceFromEdgeToMBR(double &edgeminx, double &edgeminy, double &edgemaxx, double &edgemaxy, double &mbrminx, double &mbrminy, double &mbrmaxx, double &mbrmaxy);
-vector<RTV::box_type> getMBRs(rtree &RTree);
-
-
-vector<tempResult> KNNSearch::KNN_GIS2011(PointCloud &ref, int k){
+vector<tempResult> KNNSearch::KNN_GIS2011(PointCloud &ref, int k, int number){
     
-    clock_t start,stop;
-    start = clock();
     vector<tempResult> result;
     priority_queue<tempResult, vector<tempResult>, cmp_tempResult> prqueue;
     
     rtree refRTree(ref.pointcloud.begin(), ref.pointcloud.end());
-    vector<RTV::box_type> refVec, vec;
-    refVec.push_back(refRTree.bounds());
-    double tempHausdorffDistance = 0;
-    for(int i = 0; i < dataset.size(); i++){
-        tempResult tr(dataset[i]);
-        tr.RTree = rtree(dataset[i].pointcloud.begin(), dataset[i].pointcloud.end());
-        vec.clear();
-        vec.push_back(tr.RTree.bounds());
-        tr.distance = HausdorffDistanceForMBRs(refVec, vec);
-        tr.level = 0;
-        prqueue.push(tr);
-        if(i % 1000 == 0){
-            cout << "building RTree " << i << endl;
-        }
+    
+    // calculate ref's bound
+    RTV::box_type refbound = refRTree.bounds();
+    Point p1(refbound.m_min_corner.m_values[0], refbound.m_min_corner.m_values[1]);
+    p1.dimension = 2;
+    Point p2(refbound.m_max_corner.m_values[0], refbound.m_max_corner.m_values[1]);
+    p2.dimension = 2;
+    ref.bound = pair<Point, Point>(p1, p2);
+    
+    // calculate ref's MBRs
+    vector<RTV::box_type> refVec = getMBRs2(refRTree, number); // extract the first level
+    vector<pair<Point, Point>> refMBRs;
+    for(int i = 0; i < refVec.size(); i++){
+        Point p1(refVec[i].m_min_corner.m_values[0], refVec[i].m_min_corner.m_values[1]);
+        p1.dimension = 2;
+        Point p2(refVec[i].m_max_corner.m_values[0], refVec[i].m_max_corner.m_values[1]);
+        p2.dimension = 2;
+        refMBRs.push_back(pair<Point, Point>(p1, p2));
     }
+    // if there is no first level MBRs
+    if(refMBRs.size() == 0){
+        refMBRs.push_back(pair<Point, Point>(ref.bound));
+    }
+    ref.FirstLevelMBRs = refMBRs;
+    
+    // do randomize for both query and data
+    ref.randomize();
+    for(int i = 0; i < dataset.size(); i++){
+        dataset[i].randomize();
+    }
+    
+    clock_t start,stop;
+    start = clock();
+    
+//    clock_t start1, stop1; // can be removed later
+//    start1 = clock(); // can be removed later
+    
+    for(int i = 0; i < dataset.size(); i++){
+        tempResult tr(i);
+        tr.distance = HausdorffDistanceForBound(ref.bound, dataset[i].bound);
+        prqueue.push(tr);
+    }
+//    stop1 = clock(); // can be removed later
+    
+    int _k = k;
+    
+    int count1 = 0, count2 = 0;
+    
+    // only for counting: !!!!!!!!!!!!!!!!!!!!!!!!! you can remove this later
+//    vector<double> exactcount; // you can remove this later
+//    bool flag1 = true, flag2 = true, flag3 = true;
+    
+//    clock_t start2, stop2, start3, stop3, totalENHLB = 0, totalHD = 0; // you can remove this later
+    
+    long refMBRsize = ref.FirstLevelMBRs.size();
     
     while(k){
         tempResult tr = prqueue.top();
         prqueue.pop();
         if(tr.level == 0){ // consider if there is not multi level
-            vec.clear();
-            vec = getMBRs(tr.RTree);
-            if(vec.size() == 0){
+//            start2 = clock(); // you can remove this later
+            if(dataset[tr.pcindex].FirstLevelMBRs.size() == 1 && refMBRsize == 1){
                 // do nothing
             } else {
-                tr.distance = HausdorffDistanceForMBRs(refVec, vec);
+                tr.distance = HausdorffDistanceForMBRs(ref.FirstLevelMBRs, dataset[tr.pcindex].FirstLevelMBRs); // this refVec is not enhanced !!!!!!!!!!
             }
             tr.level = 1;
             prqueue.push(tr);
+            count1++;
+//            stop2 = clock(); // you can remove this later
+//            totalENHLB += stop2-start2; // you can remove this later
         } else if(tr.level == 1){
-            tr.distance = ExactHausdorff::PAMI2015(ref, tr.pointcloud);
+//            start3 = clock(); // you can remove this later
+            tr.distance = ExactHausdorff::PAMI2015(ref, dataset[tr.pcindex]);
             tr.level = 2;
             prqueue.push(tr);
+            count2++;
+//            if(flag1 and tr.distance > 10 and tr.distance < 15){
+//                cout << "large DH1: " << tr.distance << endl;
+//                dataset[tr.pcindex].storeToFile("/Users/lizhe/Desktop/reports/KNN7/largeDH1");
+//                flag1 = false;
+//            } else if(flag2 and tr.distance > 15 and tr.distance < 20){
+//                cout << "large DH2: " << tr.distance << endl;
+//                dataset[tr.pcindex].storeToFile("/Users/lizhe/Desktop/reports/KNN7/largeDH2");
+//                flag2 = false;
+//            } else if(flag3 and tr.distance > 20){
+//                cout << "large DH3: " << tr.distance << endl;
+//                dataset[tr.pcindex].storeToFile("/Users/lizhe/Desktop/reports/KNN7/largeDH3");
+//                flag3 = false;
+//            }
+//            exactcount.push_back(tr.distance); // only for counting !!!!!!!!!!!  remove this after finish!!
+//            stop3 = clock(); // you can remove this later
+//            totalHD += stop3-start3; // you can remove this later
         } else if(tr.level == 2){
             result.push_back(tr);
             k--;
         }
     }
     stop = clock();
-//    for(int i = 0; i < 10; i++){
-//        cout << result[i].distance << endl;
+    for(int i = 0; i < _k; i++){
+        cout << result[i].distance << endl;
+    }
+    cout << "GIS2011 time usage: " <<  stop - start << endl;
+    cout << "filtering count: count1=" << count1 << "  count2=" << count2 << endl;
+//    cout << "BscLB time: " << stop1-start1 << "  ENHLB time: " << totalENHLB << "  exact HD time" << totalHD << endl; // you can remove this later
+    
+//    cout << "exact values " << endl;
+//    ofstream outfile;
+//    outfile.open("/Users/lizhe/Desktop/reports/KNN7/exact1");
+//    for(int i = 0; i < exactcount.size(); i++){
+//        outfile << i << " " << exactcount[i] << endl;
+//        cout << exactcount[i] << endl;
 //    }
-    cout << stop - start << endl;
-    return result;
-}
-
-/*
-void KNNSearch::KNN_GIS2011(PointCloud &ref, int k){
-    vector<Point> points = ref.pointcloud;
-    rtree refRTree(points.begin(), points.end());
-//    bgi::rtree<Point, bgi::linear<10>>::bounds_type bounds = RTree.bounds();
-    
-    RTV refRtv(refRTree);
-    
-    test_visitor<
-    typename RTV::value_type,
-    typename RTV::options_type,
-    typename RTV::translator_type,
-    typename RTV::box_type,
-    typename RTV::allocators_type
-    > refVisitor, visitor;
-    
-    refRtv.apply_visitor(refVisitor);
-    
-    // test if there are only root node. or the below value is none
-    vector<RTV::box_type> refMBRs = refVisitor.MBRs;
-    vector<RTV::box_type> MBRs;
-    if(refMBRs.size() == 0){
-        
-    } else {
-//        rtree RTree(dataset[1].pointcloud.begin(),dataset[i].pointcloud.end());
-//        RTV rtv(RTree);
-//        rtv.apply_visitor(visitor);
-//        MBRs.clear();
-//        MBRs = visitor.MBRs;
+//    outfile.close();
 //
-    }
-
-
-    // cout bounds in well known text
-//    cout << bg::wkt<bgi::rtree<Point, bgi::linear<10>>::bounds_type>(bounds) << endl;
-    
-    // get all points in rtree
-//    cout << bg::wkt<point>(point(0,0)) << endl;
-//    for(auto it:RTree){
-//        cout << it.x << endl;
+//    // sort by ascending order
+//    sort(exactcount.begin(), exactcount.end());
+//
+//    outfile.open("/Users/lizhe/Desktop/reports/KNN7/exact2");
+//    for(int i = 0; i < exactcount.size(); i++){
+//        outfile << i << " " << exactcount[i] << endl;
+//        cout << exactcount[i] << endl;
 //    }
+//    outfile.close();
+//
+//    cout << "count2 : " << count2 << endl;
+//    cout << "exact value size: " << exactcount.size() << endl;
     
-    // process query
-//    box querybox(Point(0,0),Point(0.1,2));
-//    vector<Point> resultset;
-//    RTree.query(bgi::intersects(querybox), std::back_inserter(resultset));
-//    for(auto it:resultset){
-//        cout << it.x << endl;
-//    }
-    
-    // get all points count
-//    cout << RTree.size() << endl;
-    
-}
- */
-
-vector<RTV::box_type> getMBRs(rtree &RTree){
-    
-    RTV Rtv(RTree);
-    
-    test_visitor<
-    typename RTV::value_type,
-    typename RTV::options_type,
-    typename RTV::translator_type,
-    typename RTV::box_type,
-    typename RTV::allocators_type
-    > visitor;
-    
-    Rtv.apply_visitor(visitor);
-    return visitor.MBRs;
-}
-
-
-// return the Hausdorff distance from the reference pointcloud's MBRs to the other pointcloud's MBRs
-double HausdorffDistanceForMBRs(vector<RTV::box_type> &refMBRs, vector<RTV::box_type> &MBRs){
-
-    double distance1 = std::numeric_limits<double>::infinity(); // left edge to box, use minx, maxx = minx
-    double distance2 = std::numeric_limits<double>::infinity(); // upper edge to box, use maxy, miny = maxy
-    double distance3 = std::numeric_limits<double>::infinity(); // right edge to box, use maxx, minx = minx
-    double distance4 = std::numeric_limits<double>::infinity(); // down edge to box, use miny, maxy = miny
-    double HausdorffDistance = 0;
-
-    for(int i = 0; i < refMBRs.size(); i++){
-        for(int j = 0; j < MBRs.size(); j++){
-            distance1 = min(distance1, distanceFromEdgeToMBR(refMBRs[i].m_min_corner.m_values[0], refMBRs[i].m_min_corner.m_values[1], refMBRs[i].m_min_corner.m_values[0], refMBRs[i].m_max_corner.m_values[1], MBRs[j].m_min_corner.m_values[0], MBRs[j].m_min_corner.m_values[1], MBRs[j].m_max_corner.m_values[0], MBRs[j].m_max_corner.m_values[1]));
-            distance2 = min(distance1, distanceFromEdgeToMBR(refMBRs[i].m_min_corner.m_values[0], refMBRs[i].m_max_corner.m_values[1], refMBRs[i].m_min_corner.m_values[0], refMBRs[i].m_max_corner.m_values[1], MBRs[j].m_min_corner.m_values[0], MBRs[j].m_min_corner.m_values[1], MBRs[j].m_max_corner.m_values[0], MBRs[j].m_max_corner.m_values[1]));
-            distance3 = min(distance1, distanceFromEdgeToMBR(refMBRs[i].m_max_corner.m_values[0], refMBRs[i].m_min_corner.m_values[1], refMBRs[i].m_min_corner.m_values[0], refMBRs[i].m_max_corner.m_values[1], MBRs[j].m_min_corner.m_values[0], MBRs[j].m_min_corner.m_values[1], MBRs[j].m_max_corner.m_values[0], MBRs[j].m_max_corner.m_values[1]));
-            distance4 = min(distance1, distanceFromEdgeToMBR(refMBRs[i].m_min_corner.m_values[0], refMBRs[i].m_min_corner.m_values[1], refMBRs[i].m_min_corner.m_values[0], refMBRs[i].m_min_corner.m_values[1], MBRs[j].m_min_corner.m_values[0], MBRs[j].m_min_corner.m_values[1], MBRs[j].m_max_corner.m_values[0], MBRs[j].m_max_corner.m_values[1]));
-        }
-        HausdorffDistance = distance1;
-        if(distance2 >= HausdorffDistance){
-            HausdorffDistance = distance1;
-        }
-        if(distance3 >= HausdorffDistance){
-            HausdorffDistance = distance3;
-        }
-        if(distance4 >= HausdorffDistance){
-            HausdorffDistance = distance4;
-        }
-    }
-    return HausdorffDistance;
-}
-
-// calculate the distance from an edge to a single MBR
-double distanceFromEdgeToMBR(double &edgeminx, double &edgeminy, double &edgemaxx, double &edgemaxy, double &mbrminx, double &mbrminy, double &mbrmaxx, double &mbrmaxy){
-    
-    double distance = 0;
-    bool horizontal_valid = false;
-    bool vertical_valid = false;
-    
-    if(edgeminx > mbrmaxx || edgemaxx < mbrminx){ // non overlap in horizontal
-        horizontal_valid = true;
-    }
-    if(edgeminy > mbrmaxy || edgemaxy < mbrminy){ // non overlap in vertical
-        vertical_valid = true;
-    }
-    
-    if (!horizontal_valid && !vertical_valid){
-        distance = 0;
-    } else if(horizontal_valid && !vertical_valid){
-        distance = min(fabs(edgeminx - mbrmaxx), fabs(edgemaxx - mbrminx));
-    } else if(!horizontal_valid && vertical_valid){
-        distance = min(fabs(edgeminy - mbrmaxy), fabs(edgemaxy - mbrminy));
-    } else if(horizontal_valid && vertical_valid){
-        double tempdisx = min(fabs(edgeminx-mbrmaxx), fabs(edgemaxx-mbrminx));
-        double tempdisy = min(fabs(edgeminy-mbrmaxy), fabs(edgemaxy-mbrminy));
-        distance = sqrt(tempdisx*tempdisx + tempdisy*tempdisy);
-    } // else if inner mbr, the distance is 0
-    
-    return distance;
+    return result;
 }
 
 #endif /* KNNSearch_hpp */

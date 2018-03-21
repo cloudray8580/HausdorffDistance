@@ -22,8 +22,8 @@ public:
     double z;
     int index;
     int dimension;
-    bool isAvailable;
-    bool isCenter;
+    bool isAvailable = true;
+    bool isCenter = false;
     uint64_t zorder;
     
     double distanceTo(const Point &point);

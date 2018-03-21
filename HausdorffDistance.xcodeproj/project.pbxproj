@@ -24,6 +24,10 @@
 
 /* Begin PBXFileReference section */
 		AD15AE192008911600A3B986 /* Dataset.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Dataset.hpp; sourceTree = "<group>"; };
+		ADD65622204AE85E00329AC7 /* ProposedKNN.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ProposedKNN.hpp; sourceTree = "<group>"; };
+		ADD6562520511F8E00329AC7 /* AnalyseTask.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AnalyseTask.hpp; sourceTree = "<group>"; };
+		ADD6562820511FB500329AC7 /* Util.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Util.hpp; sourceTree = "<group>"; };
+		ADD6562B205120E500329AC7 /* BoostRTreeSetting.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BoostRTreeSetting.hpp; sourceTree = "<group>"; };
 		ADE669791FFCBDD1003CEA23 /* HausdorffDistance */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = HausdorffDistance; sourceTree = BUILT_PRODUCTS_DIR; };
 		ADE6697C1FFCBDD2003CEA23 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		ADE669841FFCBE5F003CEA23 /* Point.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Point.hpp; sourceTree = "<group>"; };
@@ -71,7 +75,11 @@
 				AD15AE192008911600A3B986 /* Dataset.hpp */,
 				ADE6698C1FFCC925003CEA23 /* ExactHausdorff.hpp */,
 				ADE6698F1FFCC941003CEA23 /* KNNSearch.hpp */,
+				ADD65622204AE85E00329AC7 /* ProposedKNN.hpp */,
 				ADE669921FFD1710003CEA23 /* Comparison.hpp */,
+				ADD6562520511F8E00329AC7 /* AnalyseTask.hpp */,
+				ADD6562820511FB500329AC7 /* Util.hpp */,
+				ADD6562B205120E500329AC7 /* BoostRTreeSetting.hpp */,
 			);
 			path = HausdorffDistance;
 			sourceTree = "<group>";

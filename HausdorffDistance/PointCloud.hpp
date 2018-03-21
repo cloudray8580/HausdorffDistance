@@ -16,21 +16,31 @@
 #include <limits>
 
 #include <boost/algorithm/string.hpp>
+#include "BoostRTreeSetting.hpp"
 using namespace std;
 
 class PointCloud{
 public:
-    PointCloud(){pointcloud.clear();};
+    PointCloud(){pointcloud.clear(); this->dimension = 3;};
     PointCloud(const vector<Point> &pointcloud);
     PointCloud(const vector<vector<double>> &pointcloud);
     PointCloud(string filename, int dimension=3); // should support .pts and .off
+    PointCloud(int size, double minx, double maxx, double miny, double maxy); // random generate points
+    PointCloud(PointCloud &pc, int size);
+    
+    vector<Point> getPoints_1();
+    vector<vector<double>> getPoints_2();
     
     vector<Point> pointcloud;
     vector<Point> z_pointcloud;
+    pair<Point, Point> bound;
+    vector<pair<Point,Point>> FirstLevelMBRs; // actually more than first, if none, there will be bound in it
     
+    bool isAvailable = true;
     int dimension;
     
     void randomize();
+    
     // negative -> positive and double -> integer
     // magnitude: *10^magnitude for each coordinate value
     void prezorder(int magnitude=3); // operate on z_pointcloud 2^10 ~= 10^3, 10 bits
@@ -38,9 +48,11 @@ public:
     void zorder(); // after prezorder, each coordinate value should less than 2^21, as each coordinate only consider the first 21 bits
     
     void printAll();
+    void storeToFile(string filename);
     
-    vector<Point> getPoints_1();
-    vector<vector<double>> getPoints_2();
+    void generateBoundAndMBRs(int expectedNumber);
+    void sortByKcenter();
+    void sortByKcenter2();
 };
 
 PointCloud::PointCloud(const vector<Point> &pointcloud){
@@ -147,6 +159,30 @@ PointCloud::PointCloud(string filename, int dimension){
     }
 }
 
+PointCloud::PointCloud(int size, double minx, double maxx, double miny, double maxy){
+    
+    double xrange = maxx-minx;
+    double yrange = maxy-miny;
+    
+    srand((unsigned)time(NULL));
+    double _x, _y;
+    for(int i = 0; i < size; i++){
+        _x = ((double) rand() / (RAND_MAX)) * xrange + minx;
+        _y = ((double) rand() / (RAND_MAX)) * yrange + miny;
+        Point p(_x, _y);
+        pointcloud.push_back(p);
+    }
+}
+
+PointCloud::PointCloud(PointCloud &pc, int size){
+    if(size > pc.pointcloud.size()){
+        size = pc.pointcloud.size();
+    }
+    for(int i = 0; i < size; i++){
+        pointcloud.push_back(pc.pointcloud[i]);
+    }
+}
+
 void PointCloud::randomize(){
     
     long size = this->pointcloud.size();
@@ -156,7 +192,7 @@ void PointCloud::randomize(){
     for (int i = 0; i < size; i++){
         // create random variable in [0, size)
         randomIndex = rand()%size;
-        // tandom exchange
+        // random exchange
         temp = pointcloud[i];
         pointcloud[i] = pointcloud[randomIndex];
         pointcloud[randomIndex] = temp;
@@ -286,4 +322,274 @@ vector<vector<double>> PointCloud::getPoints_2(){
     }
     return _pointcloud;
 }
+
+void PointCloud::storeToFile(string filename){
+    ofstream outfile;
+    outfile.open(filename);
+    if(dimension == 2){
+        for(int i = 0; i < pointcloud.size(); i++){
+            outfile << pointcloud[i].x << " " << pointcloud[i].y << endl;
+        }
+    } else if(dimension == 3){
+        for(int i = 0; i < pointcloud.size(); i++){
+            outfile << pointcloud[i].x << " " << pointcloud[i].y << " " << pointcloud[i].z << endl;
+        }
+    }
+}
+
+void PointCloud::generateBoundAndMBRs(int expectedNumber){
+    
+    rtree refRTree(pointcloud.begin(), pointcloud.end());
+    
+    // calculate bound
+    RTV::box_type refbound = refRTree.bounds();
+    Point p1(refbound.m_min_corner.m_values[0], refbound.m_min_corner.m_values[1]);
+    p1.dimension = 2;
+    Point p2(refbound.m_max_corner.m_values[0], refbound.m_max_corner.m_values[1]);
+    p2.dimension = 2;
+    this->bound = pair<Point, Point>(p1, p2);
+    
+    // calculate MBRs
+    vector<RTV::box_type> refVec = getMBRs2(refRTree, expectedNumber); // extract the first level
+    vector<pair<Point, Point>> refMBRs;
+    for(int i = 0; i < refVec.size(); i++){
+        Point p1(refVec[i].m_min_corner.m_values[0], refVec[i].m_min_corner.m_values[1]);
+        p1.dimension = 2;
+        Point p2(refVec[i].m_max_corner.m_values[0], refVec[i].m_max_corner.m_values[1]);
+        p2.dimension = 2;
+        refMBRs.push_back(pair<Point, Point>(p1, p2));
+    }
+    // if there are no first level MBRs
+    if(refMBRs.size() == 0){
+        refMBRs.push_back(pair<Point, Point>(this->bound));
+    }
+    this->FirstLevelMBRs = refMBRs;
+}
+
+void PointCloud::sortByKcenter(){
+    
+    if(pointcloud.size() <= 3)
+        return;
+    
+    long num = this->pointcloud.size();
+    num *= 0.05;
+    if(num > 100){
+        num = 100;
+    }
+    if(num < 10){
+        num = 10;
+    }
+    if(num > pointcloud.size()){
+        num = pointcloud.size();
+    }
+    
+    vector<Point> kcenters;
+    
+    double **distanceMatrix = new double *[pointcloud.size()];
+//    vector<vector<double>> distanceMatrix;
+//    vector<double> subDistanceMatrix;
+    int diameterIndex1 = 0, diameterIndex2 = 1;
+    double distance;
+    double diameter = 0;
+    
+    // first, calculate the vector to store the distance of each pair of points
+    for (int i1 = 0; i1 < pointcloud.size(); i1++){
+        pointcloud[i1].index = i1;
+//        subDistanceMatrix.clear();
+        distanceMatrix[i1] = new double[pointcloud.size()];
+        for (int i2 = 0; i2 < pointcloud.size(); i2++){
+            if(i1 == i2){
+                distance = 0;
+            } else {
+                distance = pointcloud[i1].distanceTo(pointcloud[i2]);
+            }
+//            subDistanceMatrix.push_back(distance);
+            distanceMatrix[i1][i2] = distance; // this will induce SIG KILL, memory 57 GB
+            if (distance > diameter){
+                diameter = distance;
+                diameterIndex1 = i1;
+                diameterIndex2 = i2;
+            }
+        }
+//        distanceMatrix.push_back(subDistanceMatrix);
+    }
+    
+    // add the diameter point as the initial 2 centers.
+    // this code will have a bug if the one of the diameter is at the end but you do not delete it first.
+    if(diameterIndex1 == pointcloud.size()-1){
+        pointcloud[diameterIndex1].isCenter = true;
+        kcenters.push_back(pointcloud[diameterIndex1]);
+        pointcloud[diameterIndex1] = pointcloud.back();
+        pointcloud.pop_back();
+        
+        pointcloud[diameterIndex2].isCenter = true;
+        kcenters.push_back(pointcloud[diameterIndex2]);
+        pointcloud[diameterIndex2] = pointcloud.back();
+        pointcloud.pop_back();
+    } else {
+        pointcloud[diameterIndex2].isCenter = true;
+        kcenters.push_back(pointcloud[diameterIndex2]);
+        pointcloud[diameterIndex2] = pointcloud.back();
+        pointcloud.pop_back();
+        
+        pointcloud[diameterIndex1].isCenter = true;
+        kcenters.push_back(pointcloud[diameterIndex1]);
+        pointcloud[diameterIndex1] = pointcloud.back();
+        pointcloud.pop_back();
+    }
+    
+//    num = pointcloud.size();
+    num -= 2;
+    double maxMinDistance = 0;
+    double mindistance = 0;
+    double targetIndex = 0;
+    // for each remaining point, find the max(min distance to current kcenters)
+    while(num){
+        maxMinDistance = 0;
+        targetIndex = 0;
+        for(int i = 0; i < pointcloud.size(); i++){
+            mindistance = distanceMatrix[pointcloud[i].index][kcenters[0].index];
+            for(int j = 0; j < kcenters.size(); j++){
+                distance = distanceMatrix[pointcloud[i].index][kcenters[j].index];
+                if(distance < mindistance){
+                    mindistance = distance;
+                }
+            }
+            if(mindistance > maxMinDistance){
+                maxMinDistance = mindistance;
+                targetIndex = i;
+            }
+        }
+        kcenters.push_back(pointcloud[targetIndex]);
+        pointcloud[targetIndex] = pointcloud.back();
+        pointcloud.pop_back();
+        num--;
+        if(num % 10 == 0)
+            cout << "num: " << num << endl;
+    }
+   
+    std::copy(pointcloud.begin(), pointcloud.end(), std::back_inserter(kcenters));
+    this->pointcloud = kcenters;
+    
+    // deallocate memory
+    for(int i = 0; i < pointcloud.size(); i++){
+        delete [] distanceMatrix[i];
+    }
+    delete [] distanceMatrix;
+//    cout << "lala";
+}
+
+// do not use distanceMatrix as it will be too large!
+void PointCloud::sortByKcenter2(){
+    if(pointcloud.size() <= 3)
+        return;
+    
+    long num = this->pointcloud.size();
+    num *= 0.05;
+    if(num > 100){
+        num = 100;
+    }
+    if(num < 10){
+        num = 10;
+    }
+    if(num > pointcloud.size()){
+        num = pointcloud.size();
+    }
+    
+    vector<Point> kcenters;
+    
+    int diameterIndex1 = 0, diameterIndex2 = 1;
+    double distance;
+    double diameter = 0;
+    
+    // if the pointcloud is too large, calculating its diameter will be too costly
+    // we random choose a point as randomIndex1
+    if (pointcloud.size() > 10000){
+        srand((unsigned)time(NULL));
+        diameterIndex1 = rand()%pointcloud.size();
+        for(int i = 0; i < pointcloud.size(); i++){
+            distance = pointcloud[diameterIndex1].distanceTo(pointcloud[i]);
+            if (distance > diameter){
+                diameter = distance;
+                diameterIndex2 = i;
+            }
+        }
+    } else {
+        // calculate its diameter points
+        for (int i1 = 0; i1 < pointcloud.size(); i1++){
+            for (int i2 = i1; i2 < pointcloud.size(); i2++){
+                if(i1 == i2){
+                    distance = 0;
+                } else {
+                    distance = pointcloud[i1].distanceTo(pointcloud[i2]);
+                }
+                if (distance > diameter){
+                    diameter = distance;
+                    diameterIndex1 = i1;
+                    diameterIndex2 = i2;
+                }
+            }
+        }
+    }
+    
+    
+    // add the diameter point as the initial 2 centers.
+    // this code will have a bug if the one of the diameter is at the end but you do not delete it first.
+    if(diameterIndex1 == pointcloud.size()-1){
+        pointcloud[diameterIndex1].isCenter = true;
+        kcenters.push_back(pointcloud[diameterIndex1]);
+        pointcloud[diameterIndex1] = pointcloud.back();
+        pointcloud.pop_back();
+        
+        pointcloud[diameterIndex2].isCenter = true;
+        kcenters.push_back(pointcloud[diameterIndex2]);
+        pointcloud[diameterIndex2] = pointcloud.back();
+        pointcloud.pop_back();
+    } else {
+        pointcloud[diameterIndex2].isCenter = true;
+        kcenters.push_back(pointcloud[diameterIndex2]);
+        pointcloud[diameterIndex2] = pointcloud.back();
+        pointcloud.pop_back();
+        
+        pointcloud[diameterIndex1].isCenter = true;
+        kcenters.push_back(pointcloud[diameterIndex1]);
+        pointcloud[diameterIndex1] = pointcloud.back();
+        pointcloud.pop_back();
+    }
+    
+    num -= 2;
+    double maxMinDistance = 0;
+    double mindistance = 0;
+    double targetIndex = 0;
+    // for each remaining point, find the max(min distance to current kcenters)
+    while(num){
+        maxMinDistance = 0;
+        targetIndex = 0;
+        for(int i = 0; i < pointcloud.size(); i++){
+            mindistance = pointcloud[i].distanceTo(kcenters[0]);
+            for(int j = 0; j < kcenters.size(); j++){
+                distance = pointcloud[i].distanceTo(kcenters[j]);
+                if(distance < mindistance){
+                    mindistance = distance;
+                }
+            }
+            if(mindistance > maxMinDistance){
+                maxMinDistance = mindistance;
+                targetIndex = i;
+            }
+        }
+        kcenters.push_back(pointcloud[targetIndex]);
+        pointcloud[targetIndex] = pointcloud.back();
+        pointcloud.pop_back();
+        num--;
+        if(num % 10 == 0)
+            cout << "num: " << num << endl;
+    }
+    
+    std::copy(pointcloud.begin(), pointcloud.end(), std::back_inserter(kcenters));
+    this->pointcloud = kcenters;
+    
+    cout << "lala";
+}
+
 #endif /* PointCloud_hpp */

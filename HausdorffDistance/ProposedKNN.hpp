@@ -10,5 +10,6 @@
 #define ProposedKNN_hpp
 
 #include <stdio.h>
+#include "KNNSearch.hpp"
 
 #endif /* ProposedKNN_hpp */

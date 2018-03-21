@@ -21,6 +21,7 @@ public:
     static vector<PointCloud> GeneratePointCloudFromTwitterFile(string filepath);
     static bool StorePointCloudIntoFile(string filepath, vector<PointCloud> &dataset);
     static vector<PointCloud> RestorePointCloudFromFile(string filepath);
+    static void ProcessWithKCenter(string filepath, vector<PointCloud> &dataset);
 };
 
 // need to handle 2-dimension point
@@ -303,4 +304,17 @@ vector<PointCloud> Dataset::RestorePointCloudFromFile(string filepath){
     return dataset;
 }
 
+void Dataset::ProcessWithKCenter(string filepath, vector<PointCloud> &dataset){
+    ofstream outfile;
+    outfile.open(filepath);
+    
+    for(int i = 0; i < dataset.size(); i++){
+        cout << "calculating..." << i << endl;
+        dataset[i].sortByKcenter2();
+        for(int j = 0; j < dataset[i].pointcloud.size(); j++){
+            outfile << dataset[i].pointcloud[j].x << " " << dataset[i].pointcloud[j].y << endl;
+        }
+        outfile << "====" << endl;
+    }
+}
 #endif /* Dataset_hpp */

@@ -8,7 +8,8 @@
 
 #ifndef AnalyseTask_hpp
 #define AnalyseTask_hpp
-
+#include "KNNSearch.hpp"
 #include <stdio.h>
+
 
 #endif /* AnalyseTask_hpp */
