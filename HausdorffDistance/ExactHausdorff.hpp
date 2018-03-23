@@ -20,8 +20,10 @@ public:
     static double PR2017(PointCloud &pc1, PointCloud &pc2);
     
     static double PAMI2015_recordMax(PointCloud &pc1, PointCloud &pc2, string filepath, bool pruning=false, double kthValue=std::numeric_limits<double>::infinity());
+    
     static double Partial_PAMI2015(PointCloud &pc1, PointCloud &pc2, int progress);
-    static double Partial_PAMI205_Pruning(PointCloud &pc1, PointCloud &pc2, int start, int end, double currentMax, double currentKNN);
+    static double Partial_PAMI2015(PointCloud &pc1, PointCloud &pc2, int start, int end, double currentMax);
+    static double Partial_PAMI2015_Pruning(PointCloud &pc1, PointCloud &pc2, int start, int end, double currentMax, double currentKNN);
 };
 
 double ExactHausdorff::definition(PointCloud pc1, PointCloud pc2){
@@ -186,7 +188,37 @@ double ExactHausdorff::Partial_PAMI2015(PointCloud &pc1, PointCloud &pc2, int pr
             if(distance < min){
                 min = distance;
             }
-            if(distance <= max){
+            if(distance < max){
+                break;
+            }
+        }
+        if(min > max){
+            max = min;
+        }
+    }
+    return max;
+}
+
+double ExactHausdorff::Partial_PAMI2015(PointCloud &pc1, PointCloud &pc2, int start, int end, double currentMax){
+    
+    double max = currentMax;
+    double min = std::numeric_limits<double>::infinity();
+    double distance = 0;
+    
+    if(end > pc1.pointcloud.size())
+        end = pc1.pointcloud.size();
+    
+    if(start >= end)
+        return currentMax;
+    
+    for (int i = start; i < end; i++){
+        min = std::numeric_limits<double>::infinity();
+        for(int j = 0; j < pc2.pointcloud.size(); j++){
+            distance = pc1.pointcloud[i].distanceTo(pc2.pointcloud[j]);
+            if(distance < min){
+                min = distance;
+            }
+            if(distance <= max){ // if =, if migth break in the first outer loop
                 break;
             }
         }
@@ -198,10 +230,15 @@ double ExactHausdorff::Partial_PAMI2015(PointCloud &pc1, PointCloud &pc2, int pr
 }
 
 // if break by threshold, the max value is -1
-inline double ExactHausdorff::Partial_PAMI205_Pruning(PointCloud &pc1, PointCloud &pc2, int start, int end, double currentMax, double currentKNN){
+inline double ExactHausdorff::Partial_PAMI2015_Pruning(PointCloud &pc1, PointCloud &pc2, int start, int end, double currentMax, double currentKNN){
+    
     double max = currentMax;
     double min = std::numeric_limits<double>::infinity();
     double distance = 0;
+    
+    if(end > pc1.pointcloud.size())
+        end = pc1.pointcloud.size();
+    
     if(start >= end)
         return currentMax;
 
@@ -212,7 +249,7 @@ inline double ExactHausdorff::Partial_PAMI205_Pruning(PointCloud &pc1, PointClou
             if(distance < min){
                 min = distance;
             }
-            if(distance <= max){
+            if(distance < max){
                 break;
             }
         }

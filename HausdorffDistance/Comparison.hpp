@@ -522,64 +522,59 @@ void testGIS2011(){
     PointCloud pc4("/Users/lizhe/Downloads/ICDE15data/TweetExtract4.pts");
     PointCloud pc5("/Users/lizhe/Downloads/ICDE15data/TweetExtract5.pts");
     
+//    clock_t start, stop;
+//    start = clock();
+//    pc5.sortByKcenter();
+//    stop = clock();
+//    cout << "kcenter 1 time: " << stop-start << endl;
+//
+//    start = clock();
+//    pc5.sortByKcenter();
+//    stop = clock();
+//    cout << "kcenter 1 time: " << stop-start << endl;
+//
+//    start = clock();
+//    pc5.sortByKcenter();
+//    stop = clock();
+//    cout << "kcenter 1 time: " << stop-start << endl;
+//    
+//    start = clock();
+//    pc5.sortByKcenter();
+//    stop = clock();
+//    cout << "kcenter 1 time: " << stop-start << endl;
+//
+//    start = clock();
+//    pc5.sortByKcenter();
+//    stop = clock();
+//    cout << "kcenter 1 time: " << stop-start << endl;
+    
+    
     KNNSearch knn = KNNSearch();
 //    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/Tweets-KCenter.pts");
     vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/Tweets.pts");
     knn.dataset = dataset;
     knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/Tweets-MBRs-10", "/Users/lizhe/Downloads/ICDE15data/Tweets-Bound");
-//    knn.KNN_GIS2011(pc1, 10);
-//    knn.KNN_GIS2011(pc2, 10);
-//    knn.KNN_GIS2011(pc3, 10);
-//    knn.KNN_GIS2011(pc4, 10);
-//    knn.KNN_GIS2011(pc5, 10);
-//
-//    cout << "=========== segmentation =========" << endl;
-//
-//    knn.KNN_PAMI2015_Pruning(pc1,10);
-//    knn.KNN_PAMI2015_Pruning(pc2,10);
-//    knn.KNN_PAMI2015_Pruning(pc3,10);
-//    knn.KNN_PAMI2015_Pruning(pc4,10);
-//    knn.KNN_PAMI2015_Pruning(pc5,10);
-//
-//    cout << "=========== segmentation =========" << endl;
-//
-//    knn.KNN_COMBINED(pc1,10);
-//    knn.KNN_COMBINED(pc2,10);
-//    knn.KNN_COMBINED(pc3,10);
-//    knn.KNN_COMBINED(pc4,10);
-//    knn.KNN_COMBINED(pc5,10);
-//
-//    cout << "=========== segmentation =========" << endl;
-//
-    knn.KNN_MINE5(pc1, 10, 0.05, 20, 100, 10, 0.000316229);
-    knn.KNN_MINE5(pc2, 10, 0.05, 20, 100, 10, 0.032309);
-    knn.KNN_MINE5(pc3, 10, 0.05, 20, 100, 10, 0.273380);
-    knn.KNN_MINE5(pc4, 10, 0.05, 20, 100, 10, 0.187096);
-    knn.KNN_MINE5(pc5, 10, 0.05, 20, 100, 10, 0.929885); // increase the threshold a little to avoid missing the true KNN
-    
-//    cout << "=========== segmentation =========" << endl;
-//
-//    knn.KNN_MINE4(pc1, 10, 0.05, 20, 100, 10);
-//    knn.KNN_MINE4(pc2, 10, 0.05, 20, 100, 10);
-//    knn.KNN_MINE4(pc3, 10, 0.05, 20, 100, 10);
-//    knn.KNN_MINE4(pc4, 10, 0.05, 20, 100, 10);
-//    knn.KNN_MINE4(pc5, 10, 0.05, 20, 100, 10);
-//
-//    cout << "=========== segmentation =========" << endl;
-//
-//    knn.KNN_MINE3(pc1, 10, 0.05, 20, 1000, 10);
-//    knn.KNN_MINE3(pc2, 10, 0.05, 20, 1000, 10);
-//    knn.KNN_MINE3(pc3, 10, 0.05, 20, 1000, 10);
-//    knn.KNN_MINE3(pc4, 10, 0.05, 20, 1000, 10);
-//    knn.KNN_MINE3(pc5, 10, 0.05, 20, 1000, 10);
-//
-//    cout << "=========== segmentation =========" << endl;
-//
-//    knn.KNN_MINE2(pc1, 10, 20);
-//    knn.KNN_MINE2(pc2, 10, 20);
-//    knn.KNN_MINE2(pc3, 10, 20);
-//    knn.KNN_MINE2(pc4, 10, 20);
-//    knn.KNN_MINE2(pc5, 10, 20);
+    knn.KNN_GIS2011(pc1, 10);
+    knn.KNN_GIS2011(pc2, 10);
+    knn.KNN_GIS2011(pc3, 10);
+    knn.KNN_GIS2011(pc4, 10);
+    knn.KNN_GIS2011(pc5, 10);
+
+    cout << "=========== segmentation =========" << endl;
+
+    knn.KNN_PAMI2015_Pruning(pc1,10);
+    knn.KNN_PAMI2015_Pruning(pc2,10);
+    knn.KNN_PAMI2015_Pruning(pc3,10);
+    knn.KNN_PAMI2015_Pruning(pc4,10);
+    knn.KNN_PAMI2015_Pruning(pc5,10);
+
+    cout << "=========== segmentation =========" << endl;
+
+    knn.KNN_COMBINED(pc1,10);
+    knn.KNN_COMBINED(pc2,10);
+    knn.KNN_COMBINED(pc3,10);
+    knn.KNN_COMBINED(pc4,10);
+    knn.KNN_COMBINED(pc5,10);
     
 //    cout << "=========== segmentation =========" << endl;
 //    // the result is not right !
@@ -589,7 +584,46 @@ void testGIS2011(){
 //    knn.KNN_MINE(pc4, 10, 1, 0.01, 0, 20);
 //    knn.KNN_MINE(pc5, 10, 1, 0.01, 0, 20);
     
-//    knn.KNN_PAMI2015(pc5, 20);
+    cout << "=========== segmentation =========" << endl;
+
+    knn.KNN_MINE2(pc1, 10, 20);
+    knn.KNN_MINE2(pc2, 10, 20);
+    knn.KNN_MINE2(pc3, 10, 20);
+    knn.KNN_MINE2(pc4, 10, 20);
+    knn.KNN_MINE2(pc5, 10, 20);
+
+    cout << "=========== segmentation =========" << endl;
+
+    knn.KNN_MINE3(pc1, 10, 0.05, 20, 1000, 10);
+    knn.KNN_MINE3(pc2, 10, 0.05, 20, 1000, 10);
+    knn.KNN_MINE3(pc3, 10, 0.05, 20, 1000, 10);
+    knn.KNN_MINE3(pc4, 10, 0.05, 20, 1000, 10);
+    knn.KNN_MINE3(pc5, 10, 0.05, 20, 1000, 10);
+
+    cout << "=========== segmentation =========" << endl;
+
+    knn.KNN_MINE4(pc1, 10, 0.05, 20, 100, 10);
+    knn.KNN_MINE4(pc2, 10, 0.05, 20, 100, 10);
+    knn.KNN_MINE4(pc3, 10, 0.05, 20, 100, 10);
+    knn.KNN_MINE4(pc4, 10, 0.05, 20, 100, 10);
+    knn.KNN_MINE4(pc5, 10, 0.05, 20, 100, 10);
+    
+    cout << "=========== segmentation =========" << endl;
+
+    knn.KNN_MINE5(pc1, 10, 0.05, 20, 100, 10, 0.000316229);
+    knn.KNN_MINE5(pc2, 10, 0.05, 20, 100, 10, 0.032309);
+    knn.KNN_MINE5(pc3, 10, 0.05, 20, 100, 10, 0.273380);
+    knn.KNN_MINE5(pc4, 10, 0.05, 20, 100, 10, 0.187096);
+    knn.KNN_MINE5(pc5, 10, 0.05, 20, 100, 10, 0.929885); // increase the threshold a little to avoid missing the true KNN
+    
+    cout << "=========== segmentation =========" << endl;
+    
+    knn.KNN_MINE6(pc1, 10, 5, 10);
+    knn.KNN_MINE6(pc2, 10, 5, 10);
+    knn.KNN_MINE6(pc3, 10, 5, 10);
+    knn.KNN_MINE6(pc4, 10, 5, 10);
+    knn.KNN_MINE6(pc5, 10, 5, 10);
+    
 }
 
 

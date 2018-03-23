@@ -42,6 +42,8 @@ public:
     void KNN_MINE3(PointCloud &ref, int k, double percentage, int LB, int UB, int queryMBRNumber);
     void KNN_MINE4(PointCloud &ref, int k, double percentage, int LB, int UB, int queryMBRNumber); // using kcenter ordering
     void KNN_MINE5(PointCloud &ref, int k, double percentage, int LB, int UB, int queryMBRNumber, double KNNValue); // using kcenter ordering, using threshold in PartialHD
+    void KNN_MINE6(PointCloud &ref, int k, int step, int queryMBRNumber); // using kcenter ordering, and gradually improve progress
+    
     
     void Test_Time_KNN_PAMI2015_Pruning(PointCloud &ref, int k);
     void Test_Time_KNN_PAMI2015_Pruning2(PointCloud &ref, int k);
@@ -552,7 +554,7 @@ void KNNSearch::AnalyseLBs(PointCloud &ref){
 //    }
     
     // do KCenter ordering
-    ref.sortByKcenter2();
+    ref.sortByKcenter();
     
     vector<double> bsclb;
     vector<double> enhlb;
@@ -1435,7 +1437,7 @@ void KNNSearch::KNN_MINE5(PointCloud &ref, int k, double percentage, int LB, int
             //            start2 = clock(); // you can remove this later
             //             calculate partial HD as LB
             max = 0;
-            max = ExactHausdorff::Partial_PAMI205_Pruning(ref, dataset[node.pcindex], 0, partialQuerySize, 0, KNNValue);
+            max = ExactHausdorff::Partial_PAMI2015_Pruning(ref, dataset[node.pcindex], 0, partialQuerySize, 0, KNNValue);
             //            for (int i = 0; i < partialQuerySize; i++){
             //                min = std::numeric_limits<double>::infinity();
             //                for(int j = 0; j < dataset[node.pcindex].pointcloud.size(); j++){
@@ -1467,7 +1469,7 @@ void KNNSearch::KNN_MINE5(PointCloud &ref, int k, double percentage, int LB, int
             //            start3 = clock(); // you can remove this later
             // calculate the reamining HD
             max = node.distance;
-            max = ExactHausdorff::Partial_PAMI205_Pruning(ref, dataset[node.pcindex], partialQuerySize, refsize, max, KNNValue);
+            max = ExactHausdorff::Partial_PAMI2015_Pruning(ref, dataset[node.pcindex], partialQuerySize, refsize, max, KNNValue);
             //            for (int i = partialQuerySize; i < refsize; i++){
             //                min = std::numeric_limits<double>::infinity();
             //                for(int j = 0; j < dataset[node.pcindex].pointcloud.size(); j++){
@@ -1519,6 +1521,67 @@ void KNNSearch::KNN_MINE5(PointCloud &ref, int k, double percentage, int LB, int
     stop = clock();
     cout << "MINE_5 time usage: " <<  stop - start << endl;
     cout << "filtering count: count1=" << count1 << "  count2=" << count2 << "  countbreak1=" << countbreak1 << "  countbreak2=" << countbreak2 << endl;
+    //    cout << "ENHLB time: " << stop1-start1 << "  partial HD time: " << totalPHD << "  exact HD time" << totalHD << endl; // you can remove this later
+    for(int i = 0; i < _k; i++){
+        cout << result[i].distance << endl;
+    }
+}
+
+// using kcenter ordering, and gradually improve progress
+// step should less than query's size!
+void KNNSearch::KNN_MINE6(PointCloud &ref, int k, int step, int queryMBRNumber){
+    vector<prqnode> result;
+    priority_queue<prqnode, vector<prqnode>, cmp_prqnode> prqueue;
+    long refsize = ref.pointcloud.size();
+    
+    ref.generateBoundAndMBRs(queryMBRNumber);
+    ref.sortByKcenter(); // this might be the reason
+    
+    clock_t start,stop;
+    start = clock();
+
+    double distance = 0;
+    for(int i = 0; i < dataset.size(); i++){
+        distance = HausdorffDistanceForMBRs(ref.FirstLevelMBRs, dataset[i].FirstLevelMBRs);
+        prqnode node(i, 0, 0, distance);
+        prqueue.push(node);
+    }
+    
+    int _k = k;
+    
+    int count1 = 0;
+    double max = 0, min = 0;
+    
+    while(k){
+        prqnode node = prqueue.top();
+        prqueue.pop();
+        if(node.level == 0){
+            max = 0;
+            max = ExactHausdorff::Partial_PAMI2015(ref, dataset[node.pcindex], 0, step, 0);
+            node.progress = step;
+            node.level = 1;
+            if(step >= refsize)
+                node.level = 2;
+            node.distance = max;
+            prqueue.push(node);
+            count1++;
+        } else if(node.level == 1){
+            max = ExactHausdorff::Partial_PAMI2015(ref, dataset[node.pcindex], node.progress, node.progress+step, node.distance);
+            node.progress += step;
+            node.level = 1;
+            if(node.progress+step >= refsize)
+                node.level = 2;
+            node.distance = max;
+            prqueue.push(node);
+            count1++;
+        } else if(node.level == 2){
+            result.push_back(node);
+            k--;
+        }
+    }
+    stop = clock();
+    cout << "MINE_6 time usage: " <<  stop - start << endl;
+    cout << "filtering count: count1=" << count1 << endl;
     //    cout << "ENHLB time: " << stop1-start1 << "  partial HD time: " << totalPHD << "  exact HD time" << totalHD << endl; // you can remove this later
     for(int i = 0; i < _k; i++){
         cout << result[i].distance << endl;

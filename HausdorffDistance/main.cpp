@@ -28,8 +28,17 @@ int main(int argc, const char * argv[]) {
 //    Dataset::ProcessWithKCenter("/Users/lizhe/Downloads/ICDE15data/Tweets-KCenter.pts", dataset);
 //    testGIS2011();
     
+    
+//    PointCloud pc5("/Users/lizhe/Downloads/ICDE15data/TweetExtract5.pts");
+//    pc5.sortByKcenter();
 //    PointCloud ref = PointCloud("/Users/lizhe/Desktop/pointclouddataset/other/rtreetest1.pts");
-//    ref.sortByKcenter2();
+//    ref.sortByKcenter();
+//    ref.sortByKcenter();
+//    ref.sortByKcenter();
+//    for(int i = 0; i < ref.pointcloud.size(); i++){
+//        cout << i << ":  " << ref.pointcloud[i].x << "  " << ref.pointcloud[i].y << endl;
+//    }
+//    cout << "lala";
 //
 //    vector<int> test;
 //    test.push_back(0);

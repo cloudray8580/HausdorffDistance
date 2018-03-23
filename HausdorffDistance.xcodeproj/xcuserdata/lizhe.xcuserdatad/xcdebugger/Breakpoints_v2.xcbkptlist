@@ -10,7 +10,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/PointCloud.hpp"
-            timestampString = "543252625.596372"
+            timestampString = "543429112.217567"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "279"
@@ -26,11 +26,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/KNNSearch.hpp"
-            timestampString = "543252625.596557"
+            timestampString = "543429112.218051"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "92"
-            endingLineNumber = "92"
+            startingLineNumber = "94"
+            endingLineNumber = "94"
             landmarkName = "KNNSearch::loadDataset(string directory)"
             landmarkType = "7">
          </BreakpointContent>
@@ -42,7 +42,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/PointCloud.hpp"
-            timestampString = "543252625.596724"
+            timestampString = "543429112.218513"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "91"
@@ -58,7 +58,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/PointCloud.hpp"
-            timestampString = "543252625.596813"
+            timestampString = "543429112.21883"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "121"
@@ -74,7 +74,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/PointCloud.hpp"
-            timestampString = "543252625.5969369"
+            timestampString = "543429112.219792"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "89"
@@ -90,7 +90,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/Dataset.hpp"
-            timestampString = "543252625.597059"
+            timestampString = "543429112.220212"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "152"
@@ -106,7 +106,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/Dataset.hpp"
-            timestampString = "543252625.597128"
+            timestampString = "543429112.220408"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "191"
@@ -122,7 +122,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/Dataset.hpp"
-            timestampString = "543252625.5971971"
+            timestampString = "543429112.220553"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "216"
@@ -138,39 +138,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/KNNSearch.hpp"
-            timestampString = "543252625.597279"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "371"
-            endingLineNumber = "371"
-            landmarkName = "KNNSearch::KNN_PR2017(PointCloud &amp;ref, int k)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "HausdorffDistance/KNNSearch.hpp"
-            timestampString = "543252625.597441"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "372"
-            endingLineNumber = "372"
-            landmarkName = "KNNSearch::KNN_PR2017(PointCloud &amp;ref, int k)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "HausdorffDistance/KNNSearch.hpp"
-            timestampString = "543252625.597562"
+            timestampString = "543429112.220749"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "373"
@@ -186,7 +154,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/KNNSearch.hpp"
-            timestampString = "543252625.59773"
+            timestampString = "543429112.221216"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "374"
@@ -202,11 +170,43 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/KNNSearch.hpp"
-            timestampString = "543252625.597875"
+            timestampString = "543429112.2216671"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "142"
-            endingLineNumber = "142"
+            startingLineNumber = "375"
+            endingLineNumber = "375"
+            landmarkName = "KNNSearch::KNN_PR2017(PointCloud &amp;ref, int k)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "HausdorffDistance/KNNSearch.hpp"
+            timestampString = "543429112.222126"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "376"
+            endingLineNumber = "376"
+            landmarkName = "KNNSearch::KNN_PR2017(PointCloud &amp;ref, int k)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "HausdorffDistance/KNNSearch.hpp"
+            timestampString = "543429112.222674"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "144"
+            endingLineNumber = "144"
             landmarkName = "KNNSearch::KNN_PAMI2015(PointCloud &amp;ref, int k)"
             landmarkType = "7">
          </BreakpointContent>
@@ -218,11 +218,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/KNNSearch.hpp"
-            timestampString = "543252625.598013"
+            timestampString = "543429112.223061"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "365"
-            endingLineNumber = "365"
+            startingLineNumber = "367"
+            endingLineNumber = "367"
             landmarkName = "KNNSearch::KNN_PR2017(PointCloud &amp;ref, int k)"
             landmarkType = "7">
          </BreakpointContent>
@@ -234,11 +234,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/main.cpp"
-            timestampString = "543252625.598183"
+            timestampString = "543429112.2236429"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "218"
-            endingLineNumber = "218"
+            startingLineNumber = "227"
+            endingLineNumber = "227"
             landmarkName = "main(int argc, const char * argv[])"
             landmarkType = "9">
          </BreakpointContent>
@@ -250,11 +250,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/main.cpp"
-            timestampString = "543252625.5983649"
+            timestampString = "543429112.223999"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "219"
-            endingLineNumber = "219"
+            startingLineNumber = "228"
+            endingLineNumber = "228"
             landmarkName = "main(int argc, const char * argv[])"
             landmarkType = "9">
          </BreakpointContent>
@@ -266,7 +266,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/Comparison.hpp"
-            timestampString = "543252625.5986331"
+            timestampString = "543429112.22435"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "168"
@@ -282,7 +282,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/Comparison.hpp"
-            timestampString = "543252625.59875"
+            timestampString = "543429112.224923"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "171"
@@ -298,7 +298,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/Comparison.hpp"
-            timestampString = "543252625.598889"
+            timestampString = "543429112.2253931"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "172"
@@ -314,7 +314,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/Comparison.hpp"
-            timestampString = "543252625.599063"
+            timestampString = "543429112.225821"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "173"
@@ -330,11 +330,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/KNNSearch.hpp"
-            timestampString = "543252625.599209"
+            timestampString = "543429112.226276"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1811"
-            endingLineNumber = "1811"
+            startingLineNumber = "1874"
+            endingLineNumber = "1874"
             landmarkName = "KNNSearch::KNN_GIS2011(PointCloud &amp;ref, int k, int number)"
             landmarkType = "7">
          </BreakpointContent>
@@ -346,11 +346,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/KNNSearch.hpp"
-            timestampString = "543252625.599331"
+            timestampString = "543429112.2266769"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1740"
-            endingLineNumber = "1740"
+            startingLineNumber = "1803"
+            endingLineNumber = "1803"
             landmarkName = "KNNSearch::KNN_GIS2011(PointCloud &amp;ref, int k, int number)"
             landmarkType = "7">
          </BreakpointContent>
@@ -362,11 +362,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/KNNSearch.hpp"
-            timestampString = "543252625.599475"
+            timestampString = "543429112.227049"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1749"
-            endingLineNumber = "1749"
+            startingLineNumber = "1812"
+            endingLineNumber = "1812"
             landmarkName = "KNNSearch::KNN_GIS2011(PointCloud &amp;ref, int k, int number)"
             landmarkType = "7">
          </BreakpointContent>
@@ -378,11 +378,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/KNNSearch.hpp"
-            timestampString = "543252625.599612"
+            timestampString = "543429112.2274801"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "117"
-            endingLineNumber = "117"
+            startingLineNumber = "119"
+            endingLineNumber = "119"
             landmarkName = "KNNSearch::KNN_PAMI2015(PointCloud &amp;ref, int k)"
             landmarkType = "7">
          </BreakpointContent>
@@ -394,11 +394,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/KNNSearch.hpp"
-            timestampString = "543252625.599793"
+            timestampString = "543429112.2282211"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "276"
-            endingLineNumber = "276"
+            startingLineNumber = "278"
+            endingLineNumber = "278"
             landmarkName = "KNNSearch::Test_Time_KNN_PAMI2015_Pruning(PointCloud &amp;ref, int k)"
             landmarkType = "7">
          </BreakpointContent>
@@ -410,7 +410,23 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/KNNSearch.hpp"
-            timestampString = "543252625.599942"
+            timestampString = "543429112.228887"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "291"
+            endingLineNumber = "291"
+            landmarkName = "KNNSearch::Test_Time_KNN_PAMI2015_Pruning(PointCloud &amp;ref, int k)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "HausdorffDistance/KNNSearch.hpp"
+            timestampString = "543429112.229339"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "289"
@@ -425,24 +441,8 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "HausdorffDistance/KNNSearch.hpp"
-            timestampString = "543252625.600076"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "287"
-            endingLineNumber = "287"
-            landmarkName = "KNNSearch::Test_Time_KNN_PAMI2015_Pruning(PointCloud &amp;ref, int k)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/Comparison.hpp"
-            timestampString = "543252625.600227"
+            timestampString = "543429112.229793"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "306"
@@ -458,7 +458,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/Comparison.hpp"
-            timestampString = "543252625.600377"
+            timestampString = "543429112.230386"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "308"
@@ -474,7 +474,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/Comparison.hpp"
-            timestampString = "543252625.60049"
+            timestampString = "543429112.230894"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "312"
@@ -490,7 +490,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/Comparison.hpp"
-            timestampString = "543252625.600636"
+            timestampString = "543429112.231347"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "305"
@@ -506,11 +506,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/main.cpp"
-            timestampString = "543252625.600782"
+            timestampString = "543429112.231887"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "160"
-            endingLineNumber = "160"
+            startingLineNumber = "169"
+            endingLineNumber = "169"
             landmarkName = "main(int argc, const char * argv[])"
             landmarkType = "9">
          </BreakpointContent>
@@ -522,7 +522,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/Comparison.hpp"
-            timestampString = "543252625.601032"
+            timestampString = "543429112.23234"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "356"
@@ -538,7 +538,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/Comparison.hpp"
-            timestampString = "543252625.601197"
+            timestampString = "543429112.2328171"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "358"
@@ -554,11 +554,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/main.cpp"
-            timestampString = "543252625.601382"
+            timestampString = "543429112.233252"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "116"
-            endingLineNumber = "116"
+            startingLineNumber = "125"
+            endingLineNumber = "125"
             landmarkName = "main(int argc, const char * argv[])"
             landmarkType = "9">
          </BreakpointContent>
@@ -570,11 +570,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/KNNSearch.hpp"
-            timestampString = "543252625.601598"
+            timestampString = "543429112.233609"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1720"
-            endingLineNumber = "1720"
+            startingLineNumber = "1783"
+            endingLineNumber = "1783"
             landmarkName = "KNNSearch::KNN_GIS2011(PointCloud &amp;ref, int k, int number)"
             landmarkType = "7">
          </BreakpointContent>
@@ -586,11 +586,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/KNNSearch.hpp"
-            timestampString = "543252625.601799"
+            timestampString = "543429112.234174"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "690"
-            endingLineNumber = "690"
+            startingLineNumber = "692"
+            endingLineNumber = "692"
             landmarkName = "KNNSearch::KNN_COMBINED(PointCloud &amp;ref, int k, int number)"
             landmarkType = "7">
          </BreakpointContent>
@@ -602,11 +602,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/KNNSearch.hpp"
-            timestampString = "543252625.602013"
+            timestampString = "543429112.2347029"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "697"
-            endingLineNumber = "697"
+            startingLineNumber = "699"
+            endingLineNumber = "699"
             landmarkName = "KNNSearch::KNN_COMBINED(PointCloud &amp;ref, int k, int number)"
             landmarkType = "7">
          </BreakpointContent>
@@ -618,11 +618,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/KNNSearch.hpp"
-            timestampString = "543252625.60225"
+            timestampString = "543429112.235256"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "191"
-            endingLineNumber = "191"
+            startingLineNumber = "193"
+            endingLineNumber = "193"
             landmarkName = "KNNSearch::KNN_PAMI2015_Pruning(PointCloud &amp;ref, int k)"
             landmarkType = "7">
          </BreakpointContent>
@@ -634,11 +634,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/KNNSearch.hpp"
-            timestampString = "543252625.6024311"
+            timestampString = "543429112.235741"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "207"
-            endingLineNumber = "207"
+            startingLineNumber = "209"
+            endingLineNumber = "209"
             landmarkName = "KNNSearch::KNN_PAMI2015_Pruning(PointCloud &amp;ref, int k)"
             landmarkType = "7">
          </BreakpointContent>
@@ -650,11 +650,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/KNNSearch.hpp"
-            timestampString = "543252625.602614"
+            timestampString = "543429112.236199"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "221"
-            endingLineNumber = "221"
+            startingLineNumber = "223"
+            endingLineNumber = "223"
             landmarkName = "KNNSearch::KNN_PAMI2015_Pruning(PointCloud &amp;ref, int k)"
             landmarkType = "7">
          </BreakpointContent>
@@ -666,11 +666,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/KNNSearch.hpp"
-            timestampString = "543252625.602933"
+            timestampString = "543429112.2367311"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "948"
-            endingLineNumber = "948"
+            startingLineNumber = "950"
+            endingLineNumber = "950"
             landmarkName = "KNNSearch::KNN_MINE2(PointCloud &amp;ref, int k, int partialQuerySize)"
             landmarkType = "7">
          </BreakpointContent>
@@ -682,11 +682,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/KNNSearch.hpp"
-            timestampString = "543252625.6032701"
+            timestampString = "543429112.237293"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "938"
-            endingLineNumber = "938"
+            startingLineNumber = "940"
+            endingLineNumber = "940"
             landmarkName = "KNNSearch::KNN_MINE2(PointCloud &amp;ref, int k, int partialQuerySize)"
             landmarkType = "7">
          </BreakpointContent>
@@ -698,11 +698,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/KNNSearch.hpp"
-            timestampString = "543252625.603588"
+            timestampString = "543429112.237866"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1133"
-            endingLineNumber = "1133"
+            startingLineNumber = "1135"
+            endingLineNumber = "1135"
             landmarkName = "KNNSearch::KNN_MINE3(PointCloud &amp;ref, int k, double percentage, int LB, int UB, int queryMBRNumber)"
             landmarkType = "7">
          </BreakpointContent>
@@ -714,11 +714,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/KNNSearch.hpp"
-            timestampString = "543252625.603747"
+            timestampString = "543429112.23834"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1112"
-            endingLineNumber = "1112"
+            startingLineNumber = "1114"
+            endingLineNumber = "1114"
             landmarkName = "KNNSearch::KNN_MINE3(PointCloud &amp;ref, int k, double percentage, int LB, int UB, int queryMBRNumber)"
             landmarkType = "7">
          </BreakpointContent>
@@ -730,11 +730,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/KNNSearch.hpp"
-            timestampString = "543252625.603894"
+            timestampString = "543429112.238812"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1113"
-            endingLineNumber = "1113"
+            startingLineNumber = "1115"
+            endingLineNumber = "1115"
             landmarkName = "KNNSearch::KNN_MINE3(PointCloud &amp;ref, int k, double percentage, int LB, int UB, int queryMBRNumber)"
             landmarkType = "7">
          </BreakpointContent>
@@ -746,75 +746,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/PointCloud.hpp"
-            timestampString = "543252625.604182"
+            timestampString = "543429112.239364"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "472"
-            endingLineNumber = "472"
-            landmarkName = "PointCloud::sortByKcenter()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "HausdorffDistance/PointCloud.hpp"
-            timestampString = "543252625.604313"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "443"
-            endingLineNumber = "443"
-            landmarkName = "PointCloud::sortByKcenter()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "HausdorffDistance/PointCloud.hpp"
-            timestampString = "543252625.604447"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "472"
-            endingLineNumber = "472"
-            landmarkName = "PointCloud::sortByKcenter()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "HausdorffDistance/PointCloud.hpp"
-            timestampString = "543252625.604556"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "480"
-            endingLineNumber = "480"
-            landmarkName = "PointCloud::sortByKcenter()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "HausdorffDistance/PointCloud.hpp"
-            timestampString = "543252625.6047029"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "407"
-            endingLineNumber = "407"
+            startingLineNumber = "473"
+            endingLineNumber = "473"
             landmarkName = "PointCloud::sortByKcenter()"
             landmarkType = "7">
          </BreakpointContent>
@@ -826,7 +762,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/Dataset.hpp"
-            timestampString = "543252625.604849"
+            timestampString = "543429112.239821"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "311"
@@ -842,7 +778,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/Dataset.hpp"
-            timestampString = "543252625.6049449"
+            timestampString = "543429112.240051"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "313"
@@ -858,7 +794,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/Dataset.hpp"
-            timestampString = "543252625.605006"
+            timestampString = "543429112.240244"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "317"
@@ -874,7 +810,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/Dataset.hpp"
-            timestampString = "543252625.6050709"
+            timestampString = "543429112.2403949"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "309"
@@ -890,11 +826,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/PointCloud.hpp"
-            timestampString = "543252625.605136"
+            timestampString = "543429112.240563"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "458"
-            endingLineNumber = "458"
+            startingLineNumber = "454"
+            endingLineNumber = "454"
             landmarkName = "PointCloud::sortByKcenter()"
             landmarkType = "7">
          </BreakpointContent>
@@ -906,43 +842,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/PointCloud.hpp"
-            timestampString = "543252625.6052361"
+            timestampString = "543429112.240991"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "463"
-            endingLineNumber = "463"
-            landmarkName = "PointCloud::sortByKcenter()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "HausdorffDistance/PointCloud.hpp"
-            timestampString = "543252625.605336"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "444"
-            endingLineNumber = "444"
-            landmarkName = "PointCloud::sortByKcenter()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "HausdorffDistance/PointCloud.hpp"
-            timestampString = "543252625.605529"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "589"
-            endingLineNumber = "589"
+            startingLineNumber = "582"
+            endingLineNumber = "582"
             landmarkName = "PointCloud::sortByKcenter2()"
             landmarkType = "7">
          </BreakpointContent>
@@ -954,11 +858,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/PointCloud.hpp"
-            timestampString = "543252625.605724"
+            timestampString = "543429112.241416"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "563"
-            endingLineNumber = "563"
+            startingLineNumber = "556"
+            endingLineNumber = "556"
             landmarkName = "PointCloud::sortByKcenter2()"
             landmarkType = "7">
          </BreakpointContent>
@@ -970,11 +874,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/PointCloud.hpp"
-            timestampString = "543252625.605889"
+            timestampString = "543429112.241734"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "571"
-            endingLineNumber = "571"
+            startingLineNumber = "564"
+            endingLineNumber = "564"
             landmarkName = "PointCloud::sortByKcenter2()"
             landmarkType = "7">
          </BreakpointContent>
@@ -986,11 +890,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/PointCloud.hpp"
-            timestampString = "543252625.606046"
+            timestampString = "543429112.2421089"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "569"
-            endingLineNumber = "569"
+            startingLineNumber = "562"
+            endingLineNumber = "562"
             landmarkName = "PointCloud::sortByKcenter2()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1002,11 +906,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/PointCloud.hpp"
-            timestampString = "543252625.606207"
+            timestampString = "543429112.242589"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "568"
-            endingLineNumber = "568"
+            startingLineNumber = "561"
+            endingLineNumber = "561"
             landmarkName = "PointCloud::sortByKcenter2()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1018,11 +922,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/PointCloud.hpp"
-            timestampString = "543252625.606465"
+            timestampString = "543429112.243006"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "567"
-            endingLineNumber = "567"
+            startingLineNumber = "560"
+            endingLineNumber = "560"
             landmarkName = "PointCloud::sortByKcenter2()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1034,11 +938,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/PointCloud.hpp"
-            timestampString = "543252625.606612"
+            timestampString = "543429112.243367"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "593"
-            endingLineNumber = "593"
+            startingLineNumber = "586"
+            endingLineNumber = "586"
             landmarkName = "PointCloud::sortByKcenter2()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1050,11 +954,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/PointCloud.hpp"
-            timestampString = "543252625.606765"
+            timestampString = "543429112.243661"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "592"
-            endingLineNumber = "592"
+            startingLineNumber = "585"
+            endingLineNumber = "585"
             landmarkName = "PointCloud::sortByKcenter2()"
             landmarkType = "7">
          </BreakpointContent>
@@ -1066,13 +970,61 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HausdorffDistance/PointCloud.hpp"
-            timestampString = "543252625.606876"
+            timestampString = "543429112.244045"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "591"
-            endingLineNumber = "591"
+            startingLineNumber = "584"
+            endingLineNumber = "584"
             landmarkName = "PointCloud::sortByKcenter2()"
             landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "HausdorffDistance/Comparison.hpp"
+            timestampString = "543429112.244403"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "530"
+            endingLineNumber = "530"
+            landmarkName = "testGIS2011()"
+            landmarkType = "9">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "HausdorffDistance/KNNSearch.hpp"
+            timestampString = "543429112.244945"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1560"
+            endingLineNumber = "1560"
+            landmarkName = "KNNSearch::KNN_MINE6(PointCloud &amp;ref, int k, int step, int queryMBRNumber)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "HausdorffDistance/main.cpp"
+            timestampString = "543429112.245176"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "43"
+            endingLineNumber = "43"
+            landmarkName = "main(int argc, const char * argv[])"
+            landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

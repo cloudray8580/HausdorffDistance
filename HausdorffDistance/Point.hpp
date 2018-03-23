@@ -16,7 +16,7 @@
 
 class Point{
 public:
-    Point(double x = 0, double y = 0, double z = 0, int index = 0, int dimension = 3, bool isAvailable = true, bool isCenter = false, uint64_t zorder = 0);
+    Point(double x = 0, double y = 0, double z = 0, int index = 0, int dimension = 2, bool isAvailable = true, bool isCenter = false, uint64_t zorder = 0);
     double x;
     double y;
     double z;
@@ -48,6 +48,10 @@ Point::Point(double x, double y, double z, int index, int dimension, bool isAvai
 
 double Point::distanceTo(const Point &point){
     double distance = 0;
+//    double distanceX = fabs(this->x - point.x);
+//    double distanceY = fabs(this->y - point.y);
+//    double distanceZ = fabs(this->z - point.z);
+//    distance = sqrt(distanceX*distanceX + distanceY*distanceY + distanceZ*distanceZ);
     if(dimension == 2 && point.dimension == 2){
         double distanceX = fabs(this->x - point.x);
         double distanceY = fabs(this->y - point.y);

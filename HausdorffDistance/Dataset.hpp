@@ -310,7 +310,7 @@ void Dataset::ProcessWithKCenter(string filepath, vector<PointCloud> &dataset){
     
     for(int i = 0; i < dataset.size(); i++){
         cout << "calculating..." << i << endl;
-        dataset[i].sortByKcenter2();
+        dataset[i].sortByKcenter();
         for(int j = 0; j < dataset[i].pointcloud.size(); j++){
             outfile << dataset[i].pointcloud[j].x << " " << dataset[i].pointcloud[j].y << endl;
         }
