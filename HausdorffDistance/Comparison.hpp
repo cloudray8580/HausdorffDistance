@@ -570,11 +570,59 @@ void testGIS2011(){
 
     cout << "=========== segmentation =========" << endl;
 
+    knn.KNN_PAMI2015_Pruning_KCenter(pc1,10);
+    knn.KNN_PAMI2015_Pruning_KCenter(pc2,10);
+    knn.KNN_PAMI2015_Pruning_KCenter(pc3,10);
+    knn.KNN_PAMI2015_Pruning_KCenter(pc4,10);
+    knn.KNN_PAMI2015_Pruning_KCenter(pc5,10);
+    
+    cout << "=========== segmentation =========" << endl;
+    
+    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc1, 10);
+    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc2, 10);
+    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc3, 10);
+    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc4, 10);
+    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc5, 10);
+    
+    cout << "=========== segmentation =========" << endl;
+
     knn.KNN_COMBINED(pc1,10);
     knn.KNN_COMBINED(pc2,10);
     knn.KNN_COMBINED(pc3,10);
     knn.KNN_COMBINED(pc4,10);
     knn.KNN_COMBINED(pc5,10);
+
+    cout << "=========== segmentation =========" << endl;
+
+    knn.KNN_COMBINED_KCenter(pc1,10);
+    knn.KNN_COMBINED_KCenter(pc2,10);
+    knn.KNN_COMBINED_KCenter(pc3,10);
+    knn.KNN_COMBINED_KCenter(pc4,10);
+    knn.KNN_COMBINED_KCenter(pc5,10);
+    
+    cout << "=========== segmentation =========" << endl;
+    
+    knn.KNN_COMBINED_KCenter_UB(pc1, 10);
+    knn.KNN_COMBINED_KCenter_UB(pc2, 10);
+    knn.KNN_COMBINED_KCenter_UB(pc3, 10);
+    knn.KNN_COMBINED_KCenter_UB(pc4, 10);
+    knn.KNN_COMBINED_KCenter_UB(pc5, 10);
+    
+    cout << "=========== segmentation =========" << endl;
+    
+    knn.KNN_COMBINED_KCenter_UB2(pc1, 10);
+    knn.KNN_COMBINED_KCenter_UB2(pc2, 10);
+    knn.KNN_COMBINED_KCenter_UB2(pc3, 10);
+    knn.KNN_COMBINED_KCenter_UB2(pc4, 10);
+    knn.KNN_COMBINED_KCenter_UB2(pc5, 10);
+    
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_COMBINED_KCenter_LB(pc1, 10);
+//    knn.KNN_COMBINED_KCenter_LB(pc2, 10);
+//    knn.KNN_COMBINED_KCenter_LB(pc3, 10);
+//    knn.KNN_COMBINED_KCenter_LB(pc4, 10);
+//    knn.KNN_COMBINED_KCenter_LB(pc5, 10);
     
 //    cout << "=========== segmentation =========" << endl;
 //    // the result is not right !
@@ -607,7 +655,7 @@ void testGIS2011(){
     knn.KNN_MINE4(pc3, 10, 0.05, 20, 100, 10);
     knn.KNN_MINE4(pc4, 10, 0.05, 20, 100, 10);
     knn.KNN_MINE4(pc5, 10, 0.05, 20, 100, 10);
-    
+
     cout << "=========== segmentation =========" << endl;
 
     knn.KNN_MINE5(pc1, 10, 0.05, 20, 100, 10, 0.000316229);
@@ -615,15 +663,22 @@ void testGIS2011(){
     knn.KNN_MINE5(pc3, 10, 0.05, 20, 100, 10, 0.273380);
     knn.KNN_MINE5(pc4, 10, 0.05, 20, 100, 10, 0.187096);
     knn.KNN_MINE5(pc5, 10, 0.05, 20, 100, 10, 0.929885); // increase the threshold a little to avoid missing the true KNN
-    
+
     cout << "=========== segmentation =========" << endl;
-    
+
     knn.KNN_MINE6(pc1, 10, 5, 10);
     knn.KNN_MINE6(pc2, 10, 5, 10);
     knn.KNN_MINE6(pc3, 10, 5, 10);
     knn.KNN_MINE6(pc4, 10, 5, 10);
     knn.KNN_MINE6(pc5, 10, 5, 10);
     
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_MINE6(pc1, 10, 5, 10, 0.5, 20, 1000);
+//    knn.KNN_MINE6(pc2, 10, 5, 10, 0.5, 20, 1000);
+//    knn.KNN_MINE6(pc3, 10, 5, 10, 0.5, 20, 1000);
+//    knn.KNN_MINE6(pc4, 10, 5, 10, 0.5, 20, 1000);
+//    knn.KNN_MINE6(pc5, 10, 5, 10, 0.5, 20, 1000);
 }
 
 

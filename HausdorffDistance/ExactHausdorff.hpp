@@ -21,9 +21,23 @@ public:
     
     static double PAMI2015_recordMax(PointCloud &pc1, PointCloud &pc2, string filepath, bool pruning=false, double kthValue=std::numeric_limits<double>::infinity());
     
+    // call sortByKCenter first!!!
+    static double PAMI2015_Pruning_KCenterUB(PointCloud &pc1, PointCloud &pc2, vector<pair<double,int>> &disToKcenter, double kthValue=std::numeric_limits<double>::infinity());
+    
     static double Partial_PAMI2015(PointCloud &pc1, PointCloud &pc2, int progress);
     static double Partial_PAMI2015(PointCloud &pc1, PointCloud &pc2, int start, int end, double currentMax);
     static double Partial_PAMI2015_Pruning(PointCloud &pc1, PointCloud &pc2, int start, int end, double currentMax, double currentKNN);
+    
+    struct maxAndDistances{
+        double max;
+        vector<double> distances;
+        maxAndDistances(double m, vector<double> &d):max(m), distances(d){}
+    };
+    
+    static double Partial_PAMI2015_Pruning_KCenterUB(PointCloud &pc1, PointCloud &pc2, int start, int end, double currentMax, double currentKNN, vector<pair<double,int>> &disToKcenter, ExactHausdorff::maxAndDistances &result);
+    
+    static maxAndDistances Partial_PAMI2015_Pruning_WithRecord(PointCloud &pc1, PointCloud &pc2, int start, int end, double currentMax, double currentKNN);
+    static maxAndDistances Partial_PAMI2015_Pruning_WithRecord_FullInnerloop(PointCloud &pc1, PointCloud &pc2, int start, int end, double currentMax, double currentKNN);
 };
 
 double ExactHausdorff::definition(PointCloud pc1, PointCloud pc2){
@@ -174,6 +188,53 @@ double ExactHausdorff::PAMI2015_recordMax(PointCloud &pc1, PointCloud &pc2, stri
     return max; // the Hausdorff distance
 }
 
+// call sortByKCenter first!!!
+double ExactHausdorff::PAMI2015_Pruning_KCenterUB(PointCloud &pc1, PointCloud &pc2, vector<pair<double,int>> &disToKcenter, double kthValue){
+    
+    double max = 0;
+    double min = std::numeric_limits<double>::infinity();
+    double distance = 0;
+    int kcenterIndex = 0;
+    
+    int KNum = pc1.getKCenterNum();
+    double distToData[KNum];
+//    int breakcount = 0;
+    
+    for (int i = 0; i < pc1.pointcloud.size(); i++){
+        
+        if(i >= KNum){
+            kcenterIndex = disToKcenter[i-KNum].second;
+            distance = disToKcenter[i-KNum].first + distToData[kcenterIndex];
+            if(distance < max){
+//                breakcount++;
+                continue;
+            }
+        }
+        
+        min = std::numeric_limits<double>::infinity();
+        for(int j = 0; j < pc2.pointcloud.size(); j++){
+            distance = pc1.pointcloud[i].distanceTo(pc2.pointcloud[j]);
+            if(distance < min){
+                min = distance;
+            }
+            if(distance < max){
+                break;
+            }
+        }
+        if(min > max){
+            max = min;
+            if(max > kthValue){
+                return -1;
+            }
+        }
+        
+        if(i < KNum)
+            distToData[i] = distance;
+    }
+//    cout << "breakcount : " << breakcount << endl;
+    return max;
+}
+
 double ExactHausdorff::Partial_PAMI2015(PointCloud &pc1, PointCloud &pc2, int progress){
     double max = 0;
     double min = std::numeric_limits<double>::infinity();
@@ -261,6 +322,125 @@ inline double ExactHausdorff::Partial_PAMI2015_Pruning(PointCloud &pc1, PointClo
         }
     }
     return max;
+}
+
+inline double ExactHausdorff::Partial_PAMI2015_Pruning_KCenterUB(PointCloud &pc1, PointCloud &pc2, int start, int end, double currentMax, double currentKNN, vector<pair<double,int>> &disToKcenter, ExactHausdorff::maxAndDistances &result){
+    double max = currentMax;
+    double min = std::numeric_limits<double>::infinity();
+    double distance = 0;
+    
+    if(end > pc1.pointcloud.size())
+        end = pc1.pointcloud.size();
+    
+    if(start >= end)
+        return currentMax;
+    
+    int kcenterIndex = 0;
+//    int breakByKCUB = 0;
+    
+    for (int i = start,j=0; i < end; i++,j++){
+        
+        kcenterIndex = disToKcenter[j].second;
+        // UB still statisfy
+        distance = disToKcenter[j].first + result.distances[kcenterIndex];
+        if(distance < max){
+//            breakByKCUB++;
+            continue;
+        }
+        
+        min = std::numeric_limits<double>::infinity();
+        for(int j = 0; j < pc2.pointcloud.size(); j++){
+            distance = pc1.pointcloud[i].distanceTo(pc2.pointcloud[j]);
+            if(distance < min){
+                min = distance;
+            }
+            if(distance < max){
+                break;
+            }
+        }
+        if(min > max){
+            max = min;
+            if(max > currentKNN){
+                return -1; // should we change to max = -1 to denote early break? since this distance will not be used anymore
+            }
+        }
+    }
+//    cout << "break by kcenterUB: " << breakByKCUB << endl;
+    return max;
+}
+
+ExactHausdorff::maxAndDistances ExactHausdorff::Partial_PAMI2015_Pruning_WithRecord(PointCloud &pc1, PointCloud &pc2, int start, int end, double currentMax, double currentKNN){
+    double max = currentMax;
+    double min = std::numeric_limits<double>::infinity();
+    double distance = 0;
+    vector<double> distances;
+    
+    if(end > pc1.pointcloud.size())
+        end = pc1.pointcloud.size();
+    
+    if(start >= end){
+        return maxAndDistances(currentMax, distances);
+    }
+    
+    for (int i = start; i < end; i++){
+        min = std::numeric_limits<double>::infinity();
+        for(int j = 0; j < pc2.pointcloud.size(); j++){
+            distance = pc1.pointcloud[i].distanceTo(pc2.pointcloud[j]);
+            if(distance < min){
+                min = distance;
+            }
+            if(distance < max){
+                break;
+            }
+        }
+        distances.push_back(min);
+        if(min > max){
+            max = min;
+            if(max > currentKNN){
+                max = -1; // should we change to max = -1 to denote early break? since this distance will not be used anymore
+                break;
+            }
+        }
+    }
+    
+    return maxAndDistances(max, distances);
+}
+
+ExactHausdorff::maxAndDistances ExactHausdorff::Partial_PAMI2015_Pruning_WithRecord_FullInnerloop(PointCloud &pc1, PointCloud &pc2, int start, int end, double currentMax, double currentKNN){
+    double max = currentMax;
+    double min = std::numeric_limits<double>::infinity();
+    double distance = 0;
+    vector<double> distances;
+    
+    if(end > pc1.pointcloud.size())
+        end = pc1.pointcloud.size();
+    
+    if(start >= end){
+        return maxAndDistances(currentMax, distances);
+    }
+    
+    for (int i = start; i < end; i++){
+        min = std::numeric_limits<double>::infinity();
+        for(int j = 0; j < pc2.pointcloud.size(); j++){
+            distance = pc1.pointcloud[i].distanceTo(pc2.pointcloud[j]);
+            if(distance < min){
+                min = distance;
+            }
+            // we need to calculate the exactNN for first KCenters.
+//            if(distance < max){
+//                break;
+//            }
+        }
+        distances.push_back(min);
+        if(min > max){
+            max = min;
+            if(max > currentKNN){
+                max = -1; // should we change to max = -1 to denote early break? since this distance will not be used anymore
+                break;
+            }
+        }
+    }
+    return maxAndDistances(max, distances);
 }
 
 #endif /* ExactHausdorff_hpp */

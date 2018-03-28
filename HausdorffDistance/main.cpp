@@ -14,10 +14,52 @@ using namespace std;
 
 int main(int argc, const char * argv[]) {
     
+    testGIS2011();
+    
+//    PointCloud pc1("/Users/lizhe/Downloads/ICDE15data/TweetExtract1.pts");
+//    PointCloud pc2("/Users/lizhe/Downloads/ICDE15data/TweetExtract2.pts");
+//    PointCloud pc3("/Users/lizhe/Downloads/ICDE15data/TweetExtract3.pts");
+//    PointCloud pc4("/Users/lizhe/Downloads/ICDE15data/TweetExtract4.pts");
+//    PointCloud pc5("/Users/lizhe/Downloads/ICDE15data/TweetExtract5.pts");
+//
+//    PointCloud pc11("/Users/lizhe/Downloads/ICDE15data/TweetExtract1.pts");
+//    PointCloud pc22("/Users/lizhe/Downloads/ICDE15data/TweetExtract2.pts");
+//    PointCloud pc33("/Users/lizhe/Downloads/ICDE15data/TweetExtract3.pts");
+//    PointCloud pc44("/Users/lizhe/Downloads/ICDE15data/TweetExtract4.pts");
+//    PointCloud pc55("/Users/lizhe/Downloads/ICDE15data/TweetExtract5.pts");
+//
+//    vector<pair<double,int>> disToKcenter;
+//    pc1.sortByKcenter();
+//    disToKcenter = pc11.sortByKcenterWithRecord();
+//
+//    pc2.sortByKcenter();
+//    disToKcenter = pc22.sortByKcenterWithRecord();
+//
+//    pc3.sortByKcenter();
+//    disToKcenter = pc33.sortByKcenterWithRecord();
+//
+//    pc4.sortByKcenter();
+//    disToKcenter = pc44.sortByKcenterWithRecord();
+//
+//    pc5.sortByKcenter();
+//    disToKcenter = pc55.sortByKcenterWithRecord();
+//
+//    cout << "la" << endl;
+    
+    
+//    KNNSearch knn = KNNSearch();
+//    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/POIs.pts");
+//    knn.dataset = dataset;
+//    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/POIs-MBRs-10", "/Users/lizhe/Downloads/ICDE15data/POIs-Bound");
+//    knn.KNN_PAMI2015_Pruning(pc5, 10);
+//    knn.KNN_COMBINED_KCenter(pc5, 10);
+//    knn.KNN_COMBINED_KCenter_UB(pc5, 10);
+//    knn.KNN_COMBINED_KCenter_UB2(pc5, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc5, 10);
+    
+    
 //    PointCloud ref = PointCloud("/Users/lizhe/Desktop/pointclouddataset/other/rtreetest1.pts");
 //    ref.generateBoundAndMBRs(10);
-    
-    testGIS2011();
     
 //    AnalyseLowerBound();
     

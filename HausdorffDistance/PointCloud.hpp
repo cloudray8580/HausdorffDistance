@@ -51,8 +51,15 @@ public:
     void storeToFile(string filename);
     
     void generateBoundAndMBRs(int expectedNumber);
-    void sortByKcenter(); // without distanceMatrix, and use nearest_center_dist[i] for all point, O(nk)
+    
+    // without distanceMatrix, and use nearest_center_dist[i] for all point, O(nk)
+    void sortByKcenter(double percent=0.05, int lowerthreshold=10, int upperthreshold=100);
     void sortByKcenter2(); // O(nk^2)
+    
+    // return the distance of points to its nearest kcenter, and its kcenter index!
+    vector<pair<double,int>> sortByKcenterWithRecord(double percent=0.05, int lowerthreshold=10, int upperthreshold=100); // return the distance of points to its nearest kcenter
+    
+    int getKCenterNum();
 };
 
 PointCloud::PointCloud(const vector<Point> &pointcloud){
@@ -366,7 +373,7 @@ void PointCloud::generateBoundAndMBRs(int expectedNumber){
     this->FirstLevelMBRs = refMBRs;
 }
 
-void PointCloud::sortByKcenter(){
+void PointCloud::sortByKcenter(double percent, int lowerthreshold, int upperthreshold){
     
     if(pointcloud.size() <= 3)
         return;
@@ -377,12 +384,12 @@ void PointCloud::sortByKcenter(){
     }
     
     long num = this->pointcloud.size();
-    num *= 0.05;
-    if(num > 100){
-        num = 100;
+    num *= percent;
+    if(num > upperthreshold){
+        num = upperthreshold;
     }
-    if(num < 10){
-        num = 10;
+    if(num < lowerthreshold){
+        num = lowerthreshold;
     }
     if(num > pointcloud.size()){
         num = pointcloud.size();
@@ -583,6 +590,137 @@ void PointCloud::sortByKcenter2(){
     this->pointcloud = kcenters;
     
     cout << "lala";
+}
+
+vector<pair<double,int>> PointCloud::sortByKcenterWithRecord(double percent, int lowerthreshold, int upperthreshold){
+    if(pointcloud.size() <= 3){
+        vector<pair<double,int>> result1;
+        result1.push_back(pair<double,int>(0,0));
+        result1.push_back(pair<double,int>(0,1));
+        result1.push_back(pair<double,int>(0,2));
+        return result1;
+    }
+    
+    // every time you use this, refresh isCenter to all false!
+    for(int i = 0; i < pointcloud.size(); i++){
+        pointcloud[i].isCenter = false;
+    }
+    
+    long num = this->pointcloud.size();
+    num *= percent;
+    if(num > upperthreshold){
+        num = upperthreshold;
+    }
+    if(num < lowerthreshold){
+        num = lowerthreshold;
+    }
+    if(num > pointcloud.size()){
+        num = pointcloud.size();
+    }
+    
+    vector<Point> kcenters;
+    
+    // compute the first center, using centroid
+    double totalx = 0;
+    double totaly = 0;
+    double NNDistanceCentroid = std::numeric_limits<double>::infinity();
+    for(int i = 0; i < pointcloud.size(); i++){
+        totalx += pointcloud[i].x;
+        totaly += pointcloud[i].y;
+    }
+    Point centroid(totalx/pointcloud.size(), totaly/pointcloud.size());
+    double distance = 0;
+    int centerIndex = 0;
+    // finding its NN
+    for(int i = 0; i < pointcloud.size(); i++){
+        distance = centroid.distanceTo(pointcloud[i]);
+        if(distance < NNDistanceCentroid){
+            NNDistanceCentroid = distance;
+            centerIndex = i;
+        }
+    }
+    pointcloud[centerIndex].isCenter = true;
+    kcenters.push_back(pointcloud[centerIndex]);
+    //    pointcloud[centerIndex] = pointcloud.back();
+    //    pointcloud.pop_back();
+    
+    // calculate the distance for each point to its nearest kcenter
+    vector<pair<double,int>> nearest_center_dist;
+    for(int i = 0; i < pointcloud.size(); i++){
+        distance = pointcloud[i].distanceTo(kcenters[0]);
+        nearest_center_dist.push_back(pair<double,int>(distance,0));
+    }
+    
+    num -= 1; // besides the center
+    
+    double maxMinDistance = 0;
+    double mindistance = 0;
+    double targetIndex = 0;
+    // for the remaining points, find the max(min distance to current kcenters)
+    // for each remaining point, calculate its min distance to the current kcenters
+    while(num){
+        maxMinDistance = 0;
+        targetIndex = 0;
+        
+        // select the max NN distance
+        for(int i = 0; i < pointcloud.size(); i++){
+            if(pointcloud[i].isCenter)
+                continue;
+            if(nearest_center_dist[i].first > maxMinDistance){
+                maxMinDistance = nearest_center_dist[i].first;
+                targetIndex = i;
+            }
+        }
+        
+        // add as new center
+        pointcloud[targetIndex].isCenter = true;
+        kcenters.push_back(pointcloud[targetIndex]);
+        
+        // update NN distance for all
+        for(int i = 0; i < pointcloud.size(); i++){
+            distance = pointcloud[i].distanceTo(kcenters.back());
+            if(distance < nearest_center_dist[i].first){
+                nearest_center_dist[i].first = distance;
+                nearest_center_dist[i].second = kcenters.size()-1;
+            }
+        }
+        num--;
+    }
+    
+    // delete the center points
+    // the reason why use this is avoid the back is also center
+    int ksize = kcenters.size();
+    int currentIndex = 0;
+    while(ksize){
+        while(pointcloud[currentIndex].isCenter && ksize){
+            pointcloud[currentIndex] = pointcloud.back();
+            pointcloud.pop_back();
+            nearest_center_dist[currentIndex] = nearest_center_dist.back();
+            nearest_center_dist.pop_back();
+            ksize--;
+        }
+        currentIndex++;
+    }
+    
+    std::copy(pointcloud.begin(), pointcloud.end(), std::back_inserter(kcenters));
+    this->pointcloud = kcenters;
+    
+    return nearest_center_dist;
+}
+
+int PointCloud::getKCenterNum(){
+    long num = this->pointcloud.size();
+    num *= 0.05;
+    if(num > 100){
+        num = 100;
+    }
+    if(num < 10){
+        num = 10;
+    }
+    if(num > pointcloud.size()){
+        num = pointcloud.size();
+    }
+    return num;
 }
 
 #endif /* PointCloud_hpp */

@@ -33,16 +33,26 @@ public:
     vector<tempResult> KNN_GIS2011(PointCloud &ref, int k, int number = 10);
     
     void KNN_PAMI2015_Pruning(PointCloud &ref, int k); // use a priority queue to keep K
+    void KNN_PAMI2015_Pruning_KCenter(PointCloud &ref, int k); // use a priority queue to keep K, the query is ordered by KCenter ordering
+    void KNN_PAMI2015_Pruning_KCenter_UB(PointCloud &ref, int k); // using kcenter UB
+    
     void KNN_PR2017_Pruning(PointCloud &ref, int k); // use a priority queue to keep K
     
+    
     void KNN_COMBINED(PointCloud &ref, int k, int number = 10);
+    void KNN_COMBINED_KCenter(PointCloud &ref, int k, int number = 10);
+    // 错的！！！ 单边的hausdorff distance 不满足三角不等式！！！不要用这个method了！
+    void KNN_COMBINED_KCenter_LB(PointCloud &ref, int k, int number = 10);
+    // 但是 UB 仍然满足
+    void KNN_COMBINED_KCenter_UB(PointCloud &ref, int k, int number = 10);
+    void KNN_COMBINED_KCenter_UB2(PointCloud &ref, int k, int number = 10);
     
     void KNN_MINE(PointCloud &ref, int k, double a, double b, int c, int querythreshold);
     void KNN_MINE2(PointCloud &ref, int k, int partialQuerySize);
     void KNN_MINE3(PointCloud &ref, int k, double percentage, int LB, int UB, int queryMBRNumber);
     void KNN_MINE4(PointCloud &ref, int k, double percentage, int LB, int UB, int queryMBRNumber); // using kcenter ordering
     void KNN_MINE5(PointCloud &ref, int k, double percentage, int LB, int UB, int queryMBRNumber, double KNNValue); // using kcenter ordering, using threshold in PartialHD
-    void KNN_MINE6(PointCloud &ref, int k, int step, int queryMBRNumber); // using kcenter ordering, and gradually improve progress
+    void KNN_MINE6(PointCloud &ref, int k, int step, int queryMBRNumber, double percent=0.05, int lowerthreshold=20, int upperthreshold=100); // using kcenter ordering, and gradually improve progress
     
     
     void Test_Time_KNN_PAMI2015_Pruning(PointCloud &ref, int k);
@@ -247,6 +257,130 @@ void KNNSearch::KNN_PAMI2015_Pruning(PointCloud &ref, int k){
     for(int i = 0; i < k; i++){
         cout<< prqueue.top() << endl;
         prqueue.pop();
+    }
+}
+
+void KNNSearch::KNN_PAMI2015_Pruning_KCenter(PointCloud &ref, int k){
+    priority_queue<double, vector<double>, cmp_double> prqueue;
+    
+    ref.sortByKcenter();
+//    ref.randomize();
+    int count = 1;
+    for(int i = 0; i < dataset.size(); i++){
+        dataset[i].randomize();
+        //        if (count % 100000 == 0)
+        //            cout << count << endl;
+        //        count++;
+    }
+    
+    clock_t start, stop;
+    start = clock();
+    
+    double distance;
+    count = 1;
+    long size1 = ref.pointcloud.size();
+    double max = 0;
+    double min = 0;
+    double kthValue = 0;
+    bool readyTag = false;
+    bool breakTag = false;
+    for(int i = 0; i < dataset.size(); i++){
+        long size2 = dataset[i].pointcloud.size();
+        max = 0;
+        breakTag = false;
+        // calculation of Hausdorff distance
+        for (int j = 0; j < size1; j++){
+            min = std::numeric_limits<double>::infinity();
+            for(int m = 0; m < size2; m++){
+                distance = ref.pointcloud[j].distanceTo(dataset[i].pointcloud[m]);
+                if(distance < min){
+                    min = distance;
+                }
+                if(distance <= max){
+                    break;
+                }
+            }
+            if(min > max){
+                max = min;
+                if(readyTag){
+                    if(max >= kthValue){
+                        breakTag = true;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        //        if(fabs(max - 1.6393) < 0.0001){
+        //            cout << "here" << endl;
+        //        }
+        
+        if(breakTag){
+            continue;
+        }
+        
+        if(prqueue.size() < k){
+            prqueue.push(max);
+            if(prqueue.size() == k){
+                readyTag = true;
+                kthValue = prqueue.top(); // 这不是第K 个 吧 ？？？？？？？？？
+            }
+        } else{
+            // the new max must less than kthValue, or it will be prune
+            prqueue.pop();
+            prqueue.push(max);
+            kthValue = prqueue.top();
+        }
+        
+        //        if (count % 100000 == 0)
+        //            cout << count << endl;
+        count++;
+    }
+    stop = clock();
+    cout << "PAMI2015_pruning_kcenter time usage: " << stop-start << endl;
+    for(int i = 0; i < k; i++){
+        cout<< prqueue.top() << endl;
+        prqueue.pop();
+    }
+}
+
+// using kcenter UB
+void KNNSearch::KNN_PAMI2015_Pruning_KCenter_UB(PointCloud &ref, int k){
+    
+    vector<pair<double,int>> disToKcenter = ref.sortByKcenterWithRecord();
+    
+    // dataset.randomize();
+    for(int i = 0; i < dataset.size(); i++){
+        dataset[i].randomize();
+    }
+    
+    priority_queue<double> krecord; // descending
+    
+    clock_t start, stop;
+    start = clock();
+    
+    double distance = 0;
+    double kthValue = std::numeric_limits<double>::infinity();
+    
+    for(int i = 0; i < dataset.size(); i++){
+        distance = ExactHausdorff::PAMI2015_Pruning_KCenterUB(ref, dataset[i], disToKcenter, kthValue);
+        if(distance == -1){
+            continue;
+        } else if(krecord.size() < k){
+            krecord.push(distance);
+        } else if(distance < kthValue){
+            krecord.pop();
+            krecord.push(distance);
+            kthValue = krecord.top();
+        }
+    }
+    
+    stop = clock();
+    
+    cout << "PAMI kcenter UB method time usage: " << stop-start << endl;
+    for(int i = 0; i < k; i++){
+        cout << krecord.top() << endl;
+        krecord.pop();
     }
 }
 
@@ -708,6 +842,294 @@ void KNNSearch::KNN_COMBINED(PointCloud &ref, int k, int number){
     stop = clock();
     
     cout << "combined method time usage: " << stop-start << endl;
+    for(int i = 0; i < k; i++){
+        cout << krecord.top() << endl;
+        krecord.pop();
+    }
+}
+
+void KNNSearch::KNN_COMBINED_KCenter(PointCloud &ref, int k, int number){
+    rtree refRTree(ref.pointcloud.begin(), ref.pointcloud.end());
+    
+    // calculate ref's bound
+    RTV::box_type refbound = refRTree.bounds();
+    Point p1(refbound.m_min_corner.m_values[0], refbound.m_min_corner.m_values[1]);
+    p1.dimension = 2;
+    Point p2(refbound.m_max_corner.m_values[0], refbound.m_max_corner.m_values[1]);
+    p2.dimension = 2;
+    ref.bound = pair<Point, Point>(p1, p2);
+    
+    // calculate ref's MBRs
+    vector<RTV::box_type> refVec = getMBRs2(refRTree, number); // extract the first level
+    vector<pair<Point, Point>> refMBRs;
+    for(int i = 0; i < refVec.size(); i++){
+        Point p1(refVec[i].m_min_corner.m_values[0], refVec[i].m_min_corner.m_values[1]);
+        p1.dimension = 2;
+        Point p2(refVec[i].m_max_corner.m_values[0], refVec[i].m_max_corner.m_values[1]);
+        p2.dimension = 2;
+        refMBRs.push_back(pair<Point, Point>(p1, p2));
+    }
+    // if there are no first level MBRs
+    if(refMBRs.size() == 0){
+        refMBRs.push_back(pair<Point, Point>(ref.bound));
+    }
+    ref.FirstLevelMBRs = refMBRs;
+    
+    // do KCenter ordering
+    ref.sortByKcenter();
+//    ref.randomize();
+    for(int i = 0; i < dataset.size(); i++){
+        dataset[i].randomize();
+    }
+    
+    priority_queue<double> krecord; // descending
+    
+    clock_t start, stop;
+    start = clock();
+    
+    // random select k point cloud
+    double distance = 0;
+    for(int i = 0; i < k; i++){
+        distance = ExactHausdorff::PAMI2015(ref, dataset[i]);
+        krecord.push(distance);
+    }
+    
+    double kthValue = krecord.top();
+    
+    // calculate MBRs and prune, using MBRs to prune first
+    for(int i = k; i < dataset.size(); i++){
+        
+        distance = HausdorffDistanceForMBRs(ref.FirstLevelMBRs, dataset[i].FirstLevelMBRs); // no need to worry whether there is MBRs or not
+        
+        if(distance > kthValue){
+            continue;
+        } else {
+            distance = ExactHausdorff::PAMI2015(ref, dataset[i], true, kthValue);
+            if(distance < kthValue) {
+                krecord.pop();
+                krecord.push(distance);
+                kthValue = krecord.top();
+            }
+        }
+    }
+    
+    stop = clock();
+    
+    cout << "combined kcenter method time usage: " << stop-start << endl;
+    for(int i = 0; i < k; i++){
+        cout << krecord.top() << endl;
+        krecord.pop();
+    }
+}
+
+void KNNSearch::KNN_COMBINED_KCenter_LB(PointCloud &ref, int k, int number){
+    
+    ref.generateBoundAndMBRs(10);
+    vector<pair<double,int>> disToKcenter = ref.sortByKcenterWithRecord();
+
+    // dataset.randomize();
+    for(int i = 0; i < dataset.size(); i++){
+        dataset[i].randomize();
+    }
+    
+    priority_queue<double> krecord; // descending
+    
+    clock_t start, stop;
+    start = clock();
+    
+    // select k point cloud, calculate its exact HD
+    double distance = 0;
+    for(int i = 0; i < k; i++){
+        distance = ExactHausdorff::PAMI2015(ref, dataset[i]);
+        krecord.push(distance);
+    }
+    
+    double kthValue = krecord.top();
+    double kcenterNum = ref.getKCenterNum();
+    double maxLB = 0;
+    int kcenterIndex = 0;
+    bool breakTag = false;
+    int breakcount = 0;
+    
+    // calculate MBRs and prune, using MBRs to prune first
+    for(int i = k; i < dataset.size(); i++){
+        // first calculate its MBRs LB (i.e., ENHLB)
+        distance = HausdorffDistanceForMBRs(ref.FirstLevelMBRs, dataset[i].FirstLevelMBRs); // no need to worry whether there is MBRs or not
+        // try to prune by ENHLB
+        if(distance > kthValue){
+            continue;
+        } else {
+            ExactHausdorff::maxAndDistances result = ExactHausdorff::Partial_PAMI2015_Pruning_WithRecord_FullInnerloop(ref, dataset[i], 0, kcenterNum, 0, kthValue);
+            if(result.max == -1){
+                // pruned during the partialHD
+                continue;
+            }else if(kcenterNum < ref.pointcloud.size()){
+                // calculate LB first
+                maxLB = 0;
+                breakTag = false;
+                for(int i = kcenterNum, j=0; i < ref.pointcloud.size(); i++,j++){
+                    kcenterIndex = disToKcenter[j].second;
+                    // 错的！！！ 单边的hausdorff distance 不满足三角不等式！！！
+                    distance = fabs(result.distances[kcenterIndex] - disToKcenter[j].first); // if you use this to prune, make sure the above inner loop calculate the NN
+                    if(distance > maxLB){
+                        maxLB = distance;
+                        if(maxLB > kthValue){
+                            breakTag = true;
+                            break;
+                        }
+                    }
+                }
+                // pruned by KcenterLB
+                if(breakTag){
+                    breakcount++;
+                    continue;
+                } else {
+                // calculate the remaining HD
+                    distance = ExactHausdorff::Partial_PAMI2015_Pruning(ref, dataset[i], kcenterNum, ref.pointcloud.size(), result.max, kthValue);
+                    // pruned during calculating remaining HD
+                    if(distance == -1){
+                        continue;
+                    }else if(distance < kthValue) {
+                        krecord.pop();
+                        krecord.push(distance);
+                        kthValue = krecord.top();
+                    }
+                }
+            } else { // finish the loop already
+                // update krecord;
+                if(result.max < kthValue){
+                    krecord.pop();
+                    krecord.push(result.max);
+                    kthValue = krecord.top();
+                }
+            }
+        }
+    }
+    
+    stop = clock();
+    
+    cout << "combined kcenter LB method time usage: " << stop-start << endl;
+    cout << "break by KCenter LB count: " << breakcount << endl;
+    for(int i = 0; i < k; i++){
+        cout << krecord.top() << endl;
+        krecord.pop();
+    }
+}
+
+void KNNSearch::KNN_COMBINED_KCenter_UB(PointCloud &ref, int k, int number){
+    ref.generateBoundAndMBRs(10);
+    vector<pair<double,int>> disToKcenter = ref.sortByKcenterWithRecord();
+    
+    // dataset.randomize();
+    for(int i = 0; i < dataset.size(); i++){
+        dataset[i].randomize();
+    }
+    
+    priority_queue<double> krecord; // descending
+    
+    clock_t start, stop;
+    start = clock();
+    
+    // select k point cloud, calculate its exact HD
+    double distance = 0;
+    for(int i = 0; i < k; i++){
+        distance = ExactHausdorff::PAMI2015(ref, dataset[i]);
+        krecord.push(distance);
+    }
+    
+    double kthValue = krecord.top();
+    double kcenterNum = ref.getKCenterNum();
+    double maxLB = 0;
+    int kcenterIndex = 0;
+    bool breakTag = false;
+    
+    // calculate MBRs and prune, using MBRs to prune first
+    for(int i = k; i < dataset.size(); i++){
+        // first calculate its MBRs LB (i.e., ENHLB)
+        distance = HausdorffDistanceForMBRs(ref.FirstLevelMBRs, dataset[i].FirstLevelMBRs); // no need to worry whether there is MBRs or not
+        // try to prune by ENHLB
+        if(distance > kthValue){
+            continue;
+        } else {
+            ExactHausdorff::maxAndDistances result = ExactHausdorff::Partial_PAMI2015_Pruning_WithRecord(ref, dataset[i], 0, kcenterNum, 0, kthValue);
+            if(result.max == -1){
+                // pruned during the partialHD
+                continue;
+            }else if(kcenterNum < ref.pointcloud.size()){
+                distance = ExactHausdorff::Partial_PAMI2015_Pruning_KCenterUB(ref, dataset[i], kcenterNum, ref.pointcloud.size(), result.max, kthValue, disToKcenter, result);
+                // pruned during calculating remaining HD
+                if(distance == -1){
+                    continue;
+                }else if(distance < kthValue) {
+                    krecord.pop();
+                    krecord.push(distance);
+                    kthValue = krecord.top();
+                }
+            } else {
+                // finish the loop already
+                // update krecord;
+                if(result.max < kthValue){
+                    krecord.pop();
+                    krecord.push(result.max);
+                    kthValue = krecord.top();
+                }
+            }
+        }
+    }
+    
+    stop = clock();
+    
+    cout << "combined kcenter UB method time usage: " << stop-start << endl;
+    for(int i = 0; i < k; i++){
+        cout << krecord.top() << endl;
+        krecord.pop();
+    }
+}
+
+void KNNSearch::KNN_COMBINED_KCenter_UB2(PointCloud &ref, int k, int number){
+    ref.generateBoundAndMBRs(10);
+    vector<pair<double,int>> disToKcenter = ref.sortByKcenterWithRecord();
+    
+    // dataset.randomize();
+    for(int i = 0; i < dataset.size(); i++){
+        dataset[i].randomize();
+    }
+    
+    priority_queue<double> krecord; // descending
+    
+    clock_t start, stop;
+    start = clock();
+    
+    // select k point cloud, calculate its exact HD
+    double distance = 0;
+    for(int i = 0; i < k; i++){
+        distance = ExactHausdorff::PAMI2015(ref, dataset[i]);
+        krecord.push(distance);
+    }
+    
+    double kthValue = krecord.top();
+    
+    // calculate MBRs and prune, using MBRs to prune first
+    for(int i = k; i < dataset.size(); i++){
+        distance = HausdorffDistanceForMBRs(ref.FirstLevelMBRs, dataset[i].FirstLevelMBRs); // no need to worry whether there is MBRs or not
+        
+        if(distance > kthValue){
+            continue;
+        } else {
+            distance = ExactHausdorff::PAMI2015_Pruning_KCenterUB(ref, dataset[i], disToKcenter, kthValue);
+            if(distance == -1){
+                continue;
+            }else if(distance < kthValue){
+                krecord.pop();
+                krecord.push(distance);
+                kthValue = krecord.top();
+            }
+        }
+    }
+    
+    stop = clock();
+    
+    cout << "combined kcenter UB 2 method time usage: " << stop-start << endl;
     for(int i = 0; i < k; i++){
         cout << krecord.top() << endl;
         krecord.pop();
@@ -1529,13 +1951,13 @@ void KNNSearch::KNN_MINE5(PointCloud &ref, int k, double percentage, int LB, int
 
 // using kcenter ordering, and gradually improve progress
 // step should less than query's size!
-void KNNSearch::KNN_MINE6(PointCloud &ref, int k, int step, int queryMBRNumber){
+void KNNSearch::KNN_MINE6(PointCloud &ref, int k, int step, int queryMBRNumber, double percent, int lowerthreshold, int upperthreshold){
     vector<prqnode> result;
     priority_queue<prqnode, vector<prqnode>, cmp_prqnode> prqueue;
     long refsize = ref.pointcloud.size();
     
     ref.generateBoundAndMBRs(queryMBRNumber);
-    ref.sortByKcenter(); // this might be the reason
+    ref.sortByKcenter(percent, lowerthreshold, upperthreshold);
     
     clock_t start,stop;
     start = clock();
