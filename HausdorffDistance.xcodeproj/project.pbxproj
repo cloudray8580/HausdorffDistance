@@ -8,6 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		ADE6697D1FFCBDD2003CEA23 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = ADE6697C1FFCBDD2003CEA23 /* main.cpp */; };
+		ADF237B3209C5B1400A14CA4 /* libCGAL_Core.13.0.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ADF237B0209C5ADD00A14CA4 /* libCGAL_Core.13.0.2.dylib */; };
+		ADF237B4209C5B1400A14CA4 /* libCGAL.13.0.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ADF237AF209C5ADC00A14CA4 /* libCGAL.13.0.2.dylib */; };
+		ADF237B7209C5F9000A14CA4 /* libgmpxx.4.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ADF237B5209C5F9000A14CA4 /* libgmpxx.4.dylib */; };
+		ADF237B8209C5F9000A14CA4 /* libgmp.10.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ADF237B6209C5F9000A14CA4 /* libgmp.10.dylib */; };
+		ADF237BA209C607B00A14CA4 /* libmpfr.6.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = ADF237B9209C607B00A14CA4 /* libmpfr.6.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -36,6 +41,12 @@
 		ADE6698F1FFCC941003CEA23 /* KNNSearch.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KNNSearch.hpp; sourceTree = "<group>"; };
 		ADE669921FFD1710003CEA23 /* Comparison.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Comparison.hpp; sourceTree = "<group>"; };
 		ADE669952004CD92003CEA23 /* boost */ = {isa = PBXFileReference; lastKnownFileType = folder; name = boost; path = ../../../../usr/local/Cellar/boost/1.66.0/include/boost; sourceTree = "<group>"; };
+		ADF237AF209C5ADC00A14CA4 /* libCGAL.13.0.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libCGAL.13.0.2.dylib; path = ../../../../usr/local/Cellar/cgal/4.12/lib/libCGAL.13.0.2.dylib; sourceTree = "<group>"; };
+		ADF237B0209C5ADD00A14CA4 /* libCGAL_Core.13.0.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libCGAL_Core.13.0.2.dylib; path = ../../../../usr/local/Cellar/cgal/4.12/lib/libCGAL_Core.13.0.2.dylib; sourceTree = "<group>"; };
+		ADF237B5209C5F9000A14CA4 /* libgmpxx.4.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libgmpxx.4.dylib; path = ../../../../usr/local/Cellar/gmp/6.1.2_2/lib/libgmpxx.4.dylib; sourceTree = "<group>"; };
+		ADF237B6209C5F9000A14CA4 /* libgmp.10.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libgmp.10.dylib; path = ../../../../usr/local/Cellar/gmp/6.1.2_2/lib/libgmp.10.dylib; sourceTree = "<group>"; };
+		ADF237B9209C607B00A14CA4 /* libmpfr.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpfr.6.dylib; path = ../../../../usr/local/Cellar/mpfr/4.0.1/lib/libmpfr.6.dylib; sourceTree = "<group>"; };
+		ADF237BC209D7CB000A14CA4 /* HilbertCurve.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = HilbertCurve.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -43,6 +54,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ADF237BA209C607B00A14CA4 /* libmpfr.6.dylib in Frameworks */,
+				ADF237B7209C5F9000A14CA4 /* libgmpxx.4.dylib in Frameworks */,
+				ADF237B8209C5F9000A14CA4 /* libgmp.10.dylib in Frameworks */,
+				ADF237B3209C5B1400A14CA4 /* libCGAL_Core.13.0.2.dylib in Frameworks */,
+				ADF237B4209C5B1400A14CA4 /* libCGAL.13.0.2.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -80,6 +96,7 @@
 				ADD6562520511F8E00329AC7 /* AnalyseTask.hpp */,
 				ADD6562820511FB500329AC7 /* Util.hpp */,
 				ADD6562B205120E500329AC7 /* BoostRTreeSetting.hpp */,
+				ADF237BC209D7CB000A14CA4 /* HilbertCurve.hpp */,
 			);
 			path = HausdorffDistance;
 			sourceTree = "<group>";
@@ -87,6 +104,11 @@
 		ADE669942004CD91003CEA23 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				ADF237B9209C607B00A14CA4 /* libmpfr.6.dylib */,
+				ADF237B6209C5F9000A14CA4 /* libgmp.10.dylib */,
+				ADF237B5209C5F9000A14CA4 /* libgmpxx.4.dylib */,
+				ADF237B0209C5ADD00A14CA4 /* libCGAL_Core.13.0.2.dylib */,
+				ADF237AF209C5ADC00A14CA4 /* libCGAL.13.0.2.dylib */,
 				ADE669952004CD92003CEA23 /* boost */,
 			);
 			name = Frameworks;
@@ -267,6 +289,14 @@
 				HEADER_SEARCH_PATHS = (
 					/usr/local/Cellar/boost/1.66.0/include/,
 					"/Users/lizhe/Downloads/RTree-master/",
+					/usr/local/Cellar/cgal/4.12/include,
+					/usr/local/Cellar/gmp/6.1.2_2/include,
+					/usr/local/Cellar/mpfr/4.0.1/include,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/Cellar/cgal/4.12/lib,
+					/usr/local/Cellar/gmp/6.1.2_2/lib,
+					/usr/local/Cellar/mpfr/4.0.1/lib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -280,6 +310,14 @@
 				HEADER_SEARCH_PATHS = (
 					/usr/local/Cellar/boost/1.66.0/include/,
 					"/Users/lizhe/Downloads/RTree-master/",
+					/usr/local/Cellar/cgal/4.12/include,
+					/usr/local/Cellar/gmp/6.1.2_2/include,
+					/usr/local/Cellar/mpfr/4.0.1/include,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/Cellar/cgal/4.12/lib,
+					/usr/local/Cellar/gmp/6.1.2_2/lib,
+					/usr/local/Cellar/mpfr/4.0.1/lib,
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

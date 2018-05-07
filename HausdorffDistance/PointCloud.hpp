@@ -17,7 +17,42 @@
 
 #include <boost/algorithm/string.hpp>
 #include "BoostRTreeSetting.hpp"
+
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/point_generators_2.h>
+#include <CGAL/spatial_sort.h>
+#include <CGAL/hilbert_sort.h>
+
+#include "HilbertCurve.hpp"
+
 using namespace std;
+
+struct MyLessX{
+    bool operator()(const Point& p, const Point& q) const{
+        return p.x < q.x;
+    }
+};
+
+struct MyLessY{
+    bool operator()(const Point& p, const Point& q) const{
+        return p.y < q.y;
+    }
+};
+
+struct MySpatialSortingTraits {
+    typedef Point Point_2;
+    typedef MyLessX Less_x_2;
+    typedef MyLessY Less_y_2;
+    
+    Less_x_2 less_x_2_object() const
+    {
+        return Less_x_2();
+    }
+    Less_y_2 less_y_2_object() const
+    {
+        return Less_y_2();
+    }
+};
 
 class PointCloud{
 public:
@@ -46,6 +81,11 @@ public:
     void prezorder(int magnitude=3); // operate on z_pointcloud 2^10 ~= 10^3, 10 bits
     // about z-order : http://www.forceflow.be/2013/10/07/morton-encodingdecoding-through-bit-interleaving-implementations/
     void zorder(); // after prezorder, each coordinate value should less than 2^21, as each coordinate only consider the first 21 bits
+    
+    void calculateHilbertValue();
+    void myHilbertOrder();
+    
+    void hilbertOrder(); // using CGAL library, support double (including negative double value)
     
     void printAll();
     void storeToFile(string filename);
@@ -305,6 +345,37 @@ void PointCloud::zorder(){
     }
     // sort the pointcloud according to zorder
     sort(this->pointcloud.begin(), this->pointcloud.end(), cmp_zorder);
+}
+
+void PointCloud::calculateHilbertValue(){
+    // x stands for latitude
+    // y stands for longitude
+    
+    // increase x by 90, increase y by 180
+    for (int i = 0; i < pointcloud.size(); i++){
+        int map_x = (pointcloud[i].x + 90) * 10000; // ignore the part after 4 decimal point
+        int map_y = (pointcloud[i].y + 180) * 10000;
+//        int map_x = (pointcloud[i].x + 180);
+//        int map_y = (pointcloud[i].y + 180);
+//        int map_x = (pointcloud[i].x);
+//        int map_y = (pointcloud[i].y);
+        double _hilbertValue = xy2d(HILBERT_N, map_x, map_y);
+        pointcloud[i].hilbertValue = _hilbertValue;
+    }
+}
+
+bool cmp_hilbertValue(Point &p1, Point& p2){
+    return p1.hilbertValue < p2.hilbertValue;
+}
+
+void PointCloud::myHilbertOrder(){
+    sort(pointcloud.begin(), pointcloud.end(), cmp_hilbertValue);
+}
+
+void PointCloud::hilbertOrder(){
+    MySpatialSortingTraits sst;
+    CGAL::hilbert_sort(this->pointcloud.begin(), this->pointcloud.end(), sst);
+//    CGAL::spatial_sort(this->pointcloud.begin(), this->pointcloud.end(), sst); // by default using zorder I think
 }
 
 void PointCloud::printAll(){

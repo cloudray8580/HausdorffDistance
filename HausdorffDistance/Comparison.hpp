@@ -550,15 +550,16 @@ void testGIS2011(){
     
     
     KNNSearch knn = KNNSearch();
-//    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/Tweets-KCenter.pts");
-    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/Tweets.pts");
+//    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/POIs.pts");
+    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/Tweets-KCenter.pts");
+//    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/Tweets.pts");
     knn.dataset = dataset;
     knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/Tweets-MBRs-10", "/Users/lizhe/Downloads/ICDE15data/Tweets-Bound");
-    knn.KNN_GIS2011(pc1, 10);
-    knn.KNN_GIS2011(pc2, 10);
-    knn.KNN_GIS2011(pc3, 10);
-    knn.KNN_GIS2011(pc4, 10);
-    knn.KNN_GIS2011(pc5, 10);
+//    knn.KNN_GIS2011(pc1, 10);
+//    knn.KNN_GIS2011(pc2, 10);
+//    knn.KNN_GIS2011(pc3, 10);
+//    knn.KNN_GIS2011(pc4, 10);
+//    knn.KNN_GIS2011(pc5, 10);
 
     cout << "=========== segmentation =========" << endl;
 
@@ -567,7 +568,7 @@ void testGIS2011(){
     knn.KNN_PAMI2015_Pruning(pc3,10);
     knn.KNN_PAMI2015_Pruning(pc4,10);
     knn.KNN_PAMI2015_Pruning(pc5,10);
-
+//
     cout << "=========== segmentation =========" << endl;
 
     knn.KNN_PAMI2015_Pruning_KCenter(pc1,10);
@@ -575,46 +576,404 @@ void testGIS2011(){
     knn.KNN_PAMI2015_Pruning_KCenter(pc3,10);
     knn.KNN_PAMI2015_Pruning_KCenter(pc4,10);
     knn.KNN_PAMI2015_Pruning_KCenter(pc5,10);
-    
-    cout << "=========== segmentation =========" << endl;
-    
-    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc1, 10);
-    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc2, 10);
-    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc3, 10);
-    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc4, 10);
-    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc5, 10);
-    
-    cout << "=========== segmentation =========" << endl;
-
-    knn.KNN_COMBINED(pc1,10);
-    knn.KNN_COMBINED(pc2,10);
-    knn.KNN_COMBINED(pc3,10);
-    knn.KNN_COMBINED(pc4,10);
-    knn.KNN_COMBINED(pc5,10);
 
     cout << "=========== segmentation =========" << endl;
-
-    knn.KNN_COMBINED_KCenter(pc1,10);
-    knn.KNN_COMBINED_KCenter(pc2,10);
-    knn.KNN_COMBINED_KCenter(pc3,10);
-    knn.KNN_COMBINED_KCenter(pc4,10);
-    knn.KNN_COMBINED_KCenter(pc5,10);
+    
+    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc1, 10);
+    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc2, 10);
+    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc3, 10);
+    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc4, 10);
+    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc5, 10);
     
     cout << "=========== segmentation =========" << endl;
     
-    knn.KNN_COMBINED_KCenter_UB(pc1, 10);
-    knn.KNN_COMBINED_KCenter_UB(pc2, 10);
-    knn.KNN_COMBINED_KCenter_UB(pc3, 10);
-    knn.KNN_COMBINED_KCenter_UB(pc4, 10);
-    knn.KNN_COMBINED_KCenter_UB(pc5, 10);
+    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc1, 10, 100000);
+    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc2, 10, 100000);
+    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc3, 10, 100000);
+    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc4, 10, 100000);
+    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc5, 10, 100000);
     
     cout << "=========== segmentation =========" << endl;
     
-    knn.KNN_COMBINED_KCenter_UB2(pc1, 10);
-    knn.KNN_COMBINED_KCenter_UB2(pc2, 10);
-    knn.KNN_COMBINED_KCenter_UB2(pc3, 10);
-    knn.KNN_COMBINED_KCenter_UB2(pc4, 10);
-    knn.KNN_COMBINED_KCenter_UB2(pc5, 10);
+    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc1, 10, 100);
+    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc2, 10, 100);
+    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc3, 10, 100);
+    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc4, 10, 100);
+    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc5, 10, 100);
+    
+    cout << "=========== segmentation =========" << endl;
+    
+    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc1, 10, 10);
+    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc2, 10, 10);
+    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc3, 10, 10);
+    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc4, 10, 10);
+    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc5, 10, 10);
+                                               
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_orderdata(pc1,10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_orderdata(pc2,10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_orderdata(pc3,10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_orderdata(pc4,10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_orderdata(pc5,10);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc1, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc2, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc3, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc4, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc5, 10);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc1, 10, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc2, 10, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc3, 10, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc4, 10, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc5, 10, 100);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc1, 10, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc2, 10, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc3, 10, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc4, 10, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc5, 10, 1000);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc1, 10, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc2, 10, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc3, 10, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc4, 10, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc5, 10, 10000);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc1, 10, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc2, 10, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc3, 10, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc4, 10, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc5, 10, 100000);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB(pc1, 10, 100000, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB(pc2, 10, 100000, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB(pc3, 10, 100000, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB(pc4, 10, 100000, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB(pc5, 10, 100000, 10);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB(pc1, 10, 100000, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB(pc2, 10, 100000, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB(pc3, 10, 100000, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB(pc4, 10, 100000, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB(pc5, 10, 100000, 100);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB(pc1, 10, 100000, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB(pc2, 10, 100000, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB(pc3, 10, 100000, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB(pc4, 10, 100000, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB(pc5, 10, 100000, 1000);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB(pc1, 10, 100000, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB(pc2, 10, 100000, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB(pc3, 10, 100000, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB(pc4, 10, 100000, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB(pc5, 10, 100000, 10000);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB(pc1, 10, 100000, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB(pc2, 10, 100000, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB(pc3, 10, 100000, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB(pc4, 10, 100000, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB(pc5, 10, 100000, 100000);
+    
+//    cout << "===== BscLB = 10 ====" << endl;
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10, 10, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10, 10, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 10, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 10, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 10, 10);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10, 100, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10, 100, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 100, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 100, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 100, 10);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10, 1000, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10, 1000, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 1000, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 1000, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 1000, 10);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10, 10000, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10, 10000, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 10000, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 10000, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 10000, 10);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10, 100000, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10, 100000, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 100000, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 100000, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 100000, 10);
+//
+//    cout << "===== BscLB = 100 ====" << endl;
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10, 10, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10, 10, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 10, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 10, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 10, 100);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10, 100, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10, 100, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 100, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 100, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 100, 100);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10, 1000, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10, 1000, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 1000, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 1000, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 1000, 100);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10, 10000, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10, 10000, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 10000, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 10000, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 10000, 100);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10, 100000, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10, 100000, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 100000, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 100000, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 100000, 100);
+//
+//    cout << "===== BscLB = 1000 ====" << endl;
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10, 10, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10, 10, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 10, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 10, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 10, 1000);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10, 100, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10, 100, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 100, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 100, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 100, 1000);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10, 1000, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10, 1000, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 1000, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 1000, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 1000, 1000);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10, 10000, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10, 10000, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 10000, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 10000, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 10000, 1000);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10, 100000, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10, 100000, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 100000, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 100000, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 100000, 1000);
+//
+//    cout << "===== BscLB = 10000 ====" << endl;
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10, 10, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10, 10, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 10, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 10, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 10, 10000);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10, 100, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10, 100, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 100, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 100, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 100, 10000);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10, 1000, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10, 1000, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 1000, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 1000, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 1000, 10000);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10, 10000, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10, 10000, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 10000, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 10000, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 10000, 10000);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10, 100000, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10, 100000, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 100000, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 100000, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 100000, 10000);
+//
+//    cout << "===== BscLB = 100,000 ====" << endl;
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10, 10, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10, 10, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 10, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 10, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 10, 100000);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10, 100, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10, 100, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 100, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 100, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 100, 100000);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10, 1000, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10, 1000, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 1000, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 1000, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 1000, 100000);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10, 10000, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10, 10000, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 10000, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 10000, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 10000, 100000);
+//
+    cout << "=========== segmentation =========" << endl;
+    
+    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10, 100000, 100000);
+    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10, 100000, 100000);
+    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 100000, 100000);
+    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 100000, 100000);
+    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 100000, 100000);
+    
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB3(pc1, 10, 100000, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB3(pc2, 10, 100000, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB3(pc3, 10, 100000, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB3(pc4, 10, 100000, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB3(pc5, 10, 100000, 100000);
+    
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_COMBINED(pc1,10);
+//    knn.KNN_COMBINED(pc2,10);
+//    knn.KNN_COMBINED(pc3,10);
+//    knn.KNN_COMBINED(pc4,10);
+//    knn.KNN_COMBINED(pc5,10);
+////
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_COMBINED_KCenter(pc1,10);
+//    knn.KNN_COMBINED_KCenter(pc2,10);
+//    knn.KNN_COMBINED_KCenter(pc3,10);
+//    knn.KNN_COMBINED_KCenter(pc4,10);
+//    knn.KNN_COMBINED_KCenter(pc5,10);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_COMBINED_KCenter_UB(pc1, 10);
+//    knn.KNN_COMBINED_KCenter_UB(pc2, 10);
+//    knn.KNN_COMBINED_KCenter_UB(pc3, 10);
+//    knn.KNN_COMBINED_KCenter_UB(pc4, 10);
+//    knn.KNN_COMBINED_KCenter_UB(pc5, 10);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_COMBINED_KCenter_UB2(pc1, 10);
+//    knn.KNN_COMBINED_KCenter_UB2(pc2, 10);
+//    knn.KNN_COMBINED_KCenter_UB2(pc3, 10);
+//    knn.KNN_COMBINED_KCenter_UB2(pc4, 10);
+//    knn.KNN_COMBINED_KCenter_UB2(pc5, 10);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_COMBINED_KCenter_UB2(pc1, 10, 10, 100);
+//    knn.KNN_COMBINED_KCenter_UB2(pc2, 10, 10, 100);
+//    knn.KNN_COMBINED_KCenter_UB2(pc3, 10, 10, 100);
+//    knn.KNN_COMBINED_KCenter_UB2(pc4, 10, 10, 100);
+//    knn.KNN_COMBINED_KCenter_UB2(pc5, 10, 10, 100);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_COMBINED_KCenter_UB2(pc1, 10, 10, 1000);
+//    knn.KNN_COMBINED_KCenter_UB2(pc2, 10, 10, 1000);
+//    knn.KNN_COMBINED_KCenter_UB2(pc3, 10, 10, 1000);
+//    knn.KNN_COMBINED_KCenter_UB2(pc4, 10, 10, 1000);
+//    knn.KNN_COMBINED_KCenter_UB2(pc5, 10, 10, 1000);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_COMBINED_KCenter_UB2(pc1, 10, 10, 10000);
+//    knn.KNN_COMBINED_KCenter_UB2(pc2, 10, 10, 10000);
+//    knn.KNN_COMBINED_KCenter_UB2(pc3, 10, 10, 10000);
+//    knn.KNN_COMBINED_KCenter_UB2(pc4, 10, 10, 10000);
+//    knn.KNN_COMBINED_KCenter_UB2(pc5, 10, 10, 10000);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_COMBINED_KCenter_UB2(pc1, 10, 10, 100000);
+//    knn.KNN_COMBINED_KCenter_UB2(pc2, 10, 10, 100000);
+//    knn.KNN_COMBINED_KCenter_UB2(pc3, 10, 10, 100000);
+//    knn.KNN_COMBINED_KCenter_UB2(pc4, 10, 10, 100000);
+//    knn.KNN_COMBINED_KCenter_UB2(pc5, 10, 10, 100000);
     
 //    cout << "=========== segmentation =========" << endl;
 //
@@ -632,45 +991,45 @@ void testGIS2011(){
 //    knn.KNN_MINE(pc4, 10, 1, 0.01, 0, 20);
 //    knn.KNN_MINE(pc5, 10, 1, 0.01, 0, 20);
     
-    cout << "=========== segmentation =========" << endl;
-
-    knn.KNN_MINE2(pc1, 10, 20);
-    knn.KNN_MINE2(pc2, 10, 20);
-    knn.KNN_MINE2(pc3, 10, 20);
-    knn.KNN_MINE2(pc4, 10, 20);
-    knn.KNN_MINE2(pc5, 10, 20);
-
-    cout << "=========== segmentation =========" << endl;
-
-    knn.KNN_MINE3(pc1, 10, 0.05, 20, 1000, 10);
-    knn.KNN_MINE3(pc2, 10, 0.05, 20, 1000, 10);
-    knn.KNN_MINE3(pc3, 10, 0.05, 20, 1000, 10);
-    knn.KNN_MINE3(pc4, 10, 0.05, 20, 1000, 10);
-    knn.KNN_MINE3(pc5, 10, 0.05, 20, 1000, 10);
-
-    cout << "=========== segmentation =========" << endl;
-
-    knn.KNN_MINE4(pc1, 10, 0.05, 20, 100, 10);
-    knn.KNN_MINE4(pc2, 10, 0.05, 20, 100, 10);
-    knn.KNN_MINE4(pc3, 10, 0.05, 20, 100, 10);
-    knn.KNN_MINE4(pc4, 10, 0.05, 20, 100, 10);
-    knn.KNN_MINE4(pc5, 10, 0.05, 20, 100, 10);
-
-    cout << "=========== segmentation =========" << endl;
-
-    knn.KNN_MINE5(pc1, 10, 0.05, 20, 100, 10, 0.000316229);
-    knn.KNN_MINE5(pc2, 10, 0.05, 20, 100, 10, 0.032309);
-    knn.KNN_MINE5(pc3, 10, 0.05, 20, 100, 10, 0.273380);
-    knn.KNN_MINE5(pc4, 10, 0.05, 20, 100, 10, 0.187096);
-    knn.KNN_MINE5(pc5, 10, 0.05, 20, 100, 10, 0.929885); // increase the threshold a little to avoid missing the true KNN
-
-    cout << "=========== segmentation =========" << endl;
-
-    knn.KNN_MINE6(pc1, 10, 5, 10);
-    knn.KNN_MINE6(pc2, 10, 5, 10);
-    knn.KNN_MINE6(pc3, 10, 5, 10);
-    knn.KNN_MINE6(pc4, 10, 5, 10);
-    knn.KNN_MINE6(pc5, 10, 5, 10);
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_MINE2(pc1, 10, 20);
+//    knn.KNN_MINE2(pc2, 10, 20);
+//    knn.KNN_MINE2(pc3, 10, 20);
+//    knn.KNN_MINE2(pc4, 10, 20);
+//    knn.KNN_MINE2(pc5, 10, 20);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_MINE3(pc1, 10, 0.05, 20, 1000, 10);
+//    knn.KNN_MINE3(pc2, 10, 0.05, 20, 1000, 10);
+//    knn.KNN_MINE3(pc3, 10, 0.05, 20, 1000, 10);
+//    knn.KNN_MINE3(pc4, 10, 0.05, 20, 1000, 10);
+//    knn.KNN_MINE3(pc5, 10, 0.05, 20, 1000, 10);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_MINE4(pc1, 10, 0.05, 20, 100, 10);
+//    knn.KNN_MINE4(pc2, 10, 0.05, 20, 100, 10);
+//    knn.KNN_MINE4(pc3, 10, 0.05, 20, 100, 10);
+//    knn.KNN_MINE4(pc4, 10, 0.05, 20, 100, 10);
+//    knn.KNN_MINE4(pc5, 10, 0.05, 20, 100, 10);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_MINE5(pc1, 10, 0.05, 20, 100, 10, 0.000316229);
+//    knn.KNN_MINE5(pc2, 10, 0.05, 20, 100, 10, 0.032309);
+//    knn.KNN_MINE5(pc3, 10, 0.05, 20, 100, 10, 0.273380);
+//    knn.KNN_MINE5(pc4, 10, 0.05, 20, 100, 10, 0.187096);
+//    knn.KNN_MINE5(pc5, 10, 0.05, 20, 100, 10, 0.929885); // increase the threshold a little to avoid missing the true KNN
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_MINE6(pc1, 10, 5, 10);
+//    knn.KNN_MINE6(pc2, 10, 5, 10);
+//    knn.KNN_MINE6(pc3, 10, 5, 10);
+//    knn.KNN_MINE6(pc4, 10, 5, 10);
+//    knn.KNN_MINE6(pc5, 10, 5, 10);
     
 //    cout << "=========== segmentation =========" << endl;
 //
@@ -679,6 +1038,46 @@ void testGIS2011(){
 //    knn.KNN_MINE6(pc3, 10, 5, 10, 0.5, 20, 1000);
 //    knn.KNN_MINE6(pc4, 10, 5, 10, 0.5, 20, 1000);
 //    knn.KNN_MINE6(pc5, 10, 5, 10, 0.5, 20, 1000);
+    
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_MINE7(pc1, 10, 5, 10);
+//    knn.KNN_MINE7(pc2, 10, 5, 10);
+//    knn.KNN_MINE7(pc3, 10, 5, 10);
+//    knn.KNN_MINE7(pc4, 10, 5, 10);
+//    knn.KNN_MINE7(pc5, 10, 5, 10);
+    
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_MINE7_2(pc1, 10, 5, 10);
+//    knn.KNN_MINE7_2(pc2, 10, 5, 10);
+//    knn.KNN_MINE7_2(pc3, 10, 5, 10);
+//    knn.KNN_MINE7_2(pc4, 10, 5, 10);
+//    knn.KNN_MINE7_2(pc5, 10, 5, 10);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_MINE7_2(pc1, 10, 5, 10, 0.05, 20, 100, 100000);
+//    knn.KNN_MINE7_2(pc2, 10, 5, 10, 0.05, 20, 100, 100000);
+//    knn.KNN_MINE7_2(pc3, 10, 5, 10, 0.05, 20, 100, 100000);
+//    knn.KNN_MINE7_2(pc4, 10, 5, 10, 0.05, 20, 100, 100000);
+//    knn.KNN_MINE7_2(pc5, 10, 5, 10, 0.05, 20, 100, 100000);
+    
+//    cout << "=========== segmentation =========" << endl;
+//    
+//    knn.KNN_MINE7_2(pc1, 10, 20, 10, 0.05, 20, 100, 100000);
+//    knn.KNN_MINE7_2(pc2, 10, 20, 10, 0.05, 20, 100, 100000);
+//    knn.KNN_MINE7_2(pc3, 10, 20, 10, 0.05, 20, 100, 100000);
+//    knn.KNN_MINE7_2(pc4, 10, 20, 10, 0.05, 20, 100, 100000);
+//    knn.KNN_MINE7_2(pc5, 10, 20, 10, 0.05, 20, 100, 100000);
+    
+//    cout << "=========== segmentation =========" << endl;
+//    
+//    knn.KNN_MINE7_3(pc1, 10, 20, 10, 0.05, 20, 100, 100000);
+//    knn.KNN_MINE7_3(pc2, 10, 20, 10, 0.05, 20, 100, 100000);
+//    knn.KNN_MINE7_3(pc3, 10, 20, 10, 0.05, 20, 100, 100000);
+//    knn.KNN_MINE7_3(pc4, 10, 20, 10, 0.05, 20, 100, 100000);
+//    knn.KNN_MINE7_3(pc5, 10, 20, 10, 0.05, 20, 100, 100000);
 }
 
 

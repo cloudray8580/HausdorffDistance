@@ -10,11 +10,64 @@
 #include "Comparison.hpp"
 #include "AnalyseTask.hpp"
 #include "Util.hpp"
+#include "HilbertCurve.hpp"
 using namespace std;
+
+bool cmp_hilbert(pair<Point, int>& hilbertpoint1, pair<Point, int>& hilbertpoint2){
+    return hilbertpoint1.second < hilbertpoint2.second;
+}
 
 int main(int argc, const char * argv[]) {
     
+//    PointCloud pc2("/Users/lizhe/Downloads/ICDE15data/TweetExtract2.pts");
+//    PointCloud pc3("/Users/lizhe/Downloads/ICDE15data/TweetExtract3.pts");
+//    PointCloud pc4("/Users/lizhe/Downloads/ICDE15data/TweetExtract4.pts");
+//    PointCloud pc5("/Users/lizhe/Downloads/ICDE15data/TweetExtract5.pts");
+//
+//    double dis1 = ExactHausdorff::PAMI2015(pc4, pc5);
+//    double dis2 = ExactHausdorff::PAMI2015_UsingHilbert(pc4, pc5);
+    
     testGIS2011();
+    
+//    PointCloud pc5("/Users/lizhe/Downloads/ICDE15data/TweetExtract5.pts");
+//    pc5.calculateHilbertValue();
+//    pc5.myHilbertOrder();
+//    int pos = binarySearch(100, 0, pc5.pointcloud.size()-1, pc5);
+    
+//    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/Tweets.pts");
+    
+//    PointCloud ref = PointCloud("/Users/lizhe/Desktop/pointclouddataset/other/rtreetest1.pts"); // pass, valid for int
+//    for(int i = 0; i < ref.pointcloud.size(); i++){
+//        cout << ref.pointcloud[i].x << " " << ref.pointcloud[i].y << endl;
+//    }
+//    ref.calculateHilbertValue();
+//    ref.myHilbertOrder();
+//    cout << "after my sorting..." << endl;
+//    for(int i = 0; i < ref.pointcloud.size(); i++){
+//        cout << ref.pointcloud[i].x << " " << ref.pointcloud[i].y << "\t hilbert value: " << ref.pointcloud[i].hilbertValue << endl;
+//    }
+//    cout << "after CGAL sorting..." << endl;
+//    ref.hilbertOrder();
+//    for(int i = 0; i < ref.pointcloud.size(); i++){
+//        cout << ref.pointcloud[i].x << " " << ref.pointcloud[i].y << endl;
+//    }
+    
+    
+//    PointCloud pc5("/Users/lizhe/Downloads/ICDE15data/TweetExtract5.pts");
+//    KNNSearch knn = KNNSearch();
+//    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/POIs.pts");
+//    knn.dataset = dataset;
+//    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/POIs-MBRs-10", "/Users/lizhe/Downloads/ICDE15data/POIs-Bound");
+////    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/Tweets.pts");
+//
+////    knn.Test_Time__KNN_PAMI2015_Pruning_KCenter2(pc5, 10);
+////    knn.KNN_PAMI2015_Pruning_KCenter(pc5, 10);
+////    knn.KthValueRecord_KNN_PAMI2015_Pruning_KCenter(pc5, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc5, 10);
+//    knn.KNN_MINE7(pc5, 10, 5, 10);
+//    knn.KNN_MINE7_2(pc5, 10, 5, 10);
+    
+//    testGIS2011();
     
 //    PointCloud pc1("/Users/lizhe/Downloads/ICDE15data/TweetExtract1.pts");
 //    PointCloud pc2("/Users/lizhe/Downloads/ICDE15data/TweetExtract2.pts");
@@ -46,16 +99,17 @@ int main(int argc, const char * argv[]) {
 //
 //    cout << "la" << endl;
     
-    
+//
 //    KNNSearch knn = KNNSearch();
 //    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/POIs.pts");
 //    knn.dataset = dataset;
 //    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/POIs-MBRs-10", "/Users/lizhe/Downloads/ICDE15data/POIs-Bound");
-//    knn.KNN_PAMI2015_Pruning(pc5, 10);
-//    knn.KNN_COMBINED_KCenter(pc5, 10);
+//    knn.KNN_COMBINED_KCenter_UB(pc5, 10);
 //    knn.KNN_COMBINED_KCenter_UB(pc5, 10);
 //    knn.KNN_COMBINED_KCenter_UB2(pc5, 10);
-//    knn.KNN_PAMI2015_Pruning_KCenter_UB(pc5, 10);
+//    knn.KNN_COMBINED_KCenter_UB2(pc5, 10);
+    
+
     
     
 //    PointCloud ref = PointCloud("/Users/lizhe/Desktop/pointclouddataset/other/rtreetest1.pts");

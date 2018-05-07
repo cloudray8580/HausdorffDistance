@@ -21,6 +21,8 @@ public:
     
     static double PAMI2015_recordMax(PointCloud &pc1, PointCloud &pc2, string filepath, bool pruning=false, double kthValue=std::numeric_limits<double>::infinity());
     
+    static double PAMI2015_UsingHilbert(PointCloud &pc1, PointCloud &pc2, bool pruning=false, double kthValue=std::numeric_limits<double>::infinity());
+    
     // call sortByKCenter first!!!
     static double PAMI2015_Pruning_KCenterUB(PointCloud &pc1, PointCloud &pc2, vector<pair<double,int>> &disToKcenter, double kthValue=std::numeric_limits<double>::infinity());
     
@@ -71,8 +73,7 @@ double ExactHausdorff::PAMI2015(PointCloud &pc1, PointCloud &pc2, bool pruning, 
     // seperate to count time
 //    pc1.randomize();
 //    pc2.randomize();
-//    vector<Point> pointcloud1 = pc1.getPoints_1();
-//    vector<Point> pointcloud2 = pc2.getPoints_1();
+
     vector<Point> *pointcloud1 = &pc1.pointcloud;
     vector<Point> *pointcloud2 = &pc2.pointcloud;
     
@@ -92,7 +93,7 @@ double ExactHausdorff::PAMI2015(PointCloud &pc1, PointCloud &pc2, bool pruning, 
         if(min > max){
             max = min;
             if(pruning && max >= kthValue){
-                //max = -1; // usig -1 to denote early break
+                max = -1; // usig -1 to denote early break
                 return max;
             }
         }
@@ -184,6 +185,81 @@ double ExactHausdorff::PAMI2015_recordMax(PointCloud &pc1, PointCloud &pc2, stri
             }
         }
         outfile << i << " " << max << endl;
+    }
+    return max; // the Hausdorff distance
+}
+
+int binarySearch(double value, int start, int end, PointCloud& pc){
+    
+    if ((end - start <= 1) || start >= pc.pointcloud.size() || end == 0) {
+        return end;
+    }
+    
+    int middle = (end+start)/2;
+    double middleValue = pc.pointcloud[middle].hilbertValue;
+    if (fabs(middleValue - value) < 0.000001){
+        return middle;
+    } else if (middleValue < value) {
+        return binarySearch(value, middle, end, pc);
+    } else {
+        return binarySearch(value, start, middle, pc);
+    }
+}
+
+double ExactHausdorff::PAMI2015_UsingHilbert(PointCloud &pc1, PointCloud &pc2, bool pruning, double kthValue){
+    double max = 0;
+    double min = std::numeric_limits<double>::infinity(); // infinity
+    double distance = 0;
+
+    vector<Point> *pointcloud1 = &pc1.pointcloud;
+    vector<Point> *pointcloud2 = &pc2.pointcloud;
+    
+    long size1 = pointcloud1->size();
+    long size2 = pointcloud2->size();
+    double HilbertUB = std::numeric_limits<double>::infinity();
+    
+    for (int i = 0; i < size1; i++){
+        
+        int startPosition = binarySearch(pc1.pointcloud[i].hilbertValue, 0, size2-1, pc2);
+        min = std::numeric_limits<double>::infinity();
+        HilbertUB = pc1.pointcloud[i].distanceTo(pc2.pointcloud[startPosition]);
+        
+        // ignore this inner loop
+        if (HilbertUB <= max){
+            continue;
+        } else {
+            min = HilbertUB;
+        }
+        
+        for(int j = startPosition, step = 1; j-step > 0 || j+step < size2 ; step++){
+            if (j-step > 0){
+                distance = (*pointcloud1)[i].distanceTo((*pointcloud2)[j-step]);
+                if(distance < min){
+                    min = distance;
+                }
+                if(distance <= max){
+                    break;
+                }
+            }
+            if (j+step < size2){
+                distance = (*pointcloud1)[i].distanceTo((*pointcloud2)[j+step]);
+                if(distance < min){
+                    min = distance;
+                }
+                if(distance <= max){
+                    break;
+                }
+            }
+        }
+        
+        if(min > max){
+            max = min;
+            if(pruning && max >= kthValue){
+                max = -1; // usig -1 to denote early break
+                return max;
+            }
+        }
+        
     }
     return max; // the Hausdorff distance
 }

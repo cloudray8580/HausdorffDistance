@@ -33,6 +33,10 @@ public:
     void setY(double y){this->y = y;};
     double getZ() const {return z;};
     void setZ(double z){this->z = z;};
+    
+    double zvalue = 0;
+    double hilbertValue = 0;
+    double getZValue();
 };
 
 Point::Point(double x, double y, double z, int index, int dimension, bool isAvailable, bool isCenter, uint64_t zorder){
@@ -63,5 +67,9 @@ double Point::distanceTo(const Point &point){
         distance = sqrt(distanceX*distanceX + distanceY*distanceY + distanceZ*distanceZ);
     }
     return distance;
+}
+
+double Point::getZValue(){
+    return zvalue;
 }
 #endif /* Point_hpp */

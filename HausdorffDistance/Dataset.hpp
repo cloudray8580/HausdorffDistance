@@ -278,6 +278,10 @@ bool Dataset::StorePointCloudIntoFile(string filepath, vector<PointCloud> &datas
 vector<PointCloud> Dataset::RestorePointCloudFromFile(string filepath){
     vector<PointCloud> dataset;
     
+//    // use for obervation
+//    double maxx = 0, maxy =0;
+//    double minx = 200, miny = 200;
+    
     ifstream infile;
     infile.open(filepath);
     string str;
@@ -297,10 +301,30 @@ vector<PointCloud> Dataset::RestorePointCloudFromFile(string filepath){
             split(coordinates, str, boost::is_any_of(" "));
             xcor = stod(coordinates[0]);
             ycor = stod(coordinates[1]);
+            
+//            if(xcor > maxx){
+//                maxx = xcor;
+//            }
+//            if(xcor < minx){
+//                minx = xcor;
+//            }
+//            if(ycor > maxy){
+//                maxy = ycor;
+//            }
+//            if(ycor < miny){
+//                miny = ycor;
+//            }
+            
             Point point = Point(xcor, ycor);
             pc.pointcloud.push_back(point);
         }
     }
+    
+//    cout << "x max: " << maxx << endl;
+//    cout << "y max: " << maxy << endl;
+//    cout << "x min: " << minx << endl;
+//    cout << "y min: " << miny << endl;
+    
     return dataset;
 }
 
