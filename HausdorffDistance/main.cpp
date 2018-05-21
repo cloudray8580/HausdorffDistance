@@ -11,6 +11,7 @@
 #include "AnalyseTask.hpp"
 #include "Util.hpp"
 #include "HilbertCurve.hpp"
+#include "BoostRTreeSetting.hpp"
 using namespace std;
 
 bool cmp_hilbert(pair<Point, int>& hilbertpoint1, pair<Point, int>& hilbertpoint2){
@@ -18,6 +19,261 @@ bool cmp_hilbert(pair<Point, int>& hilbertpoint1, pair<Point, int>& hilbertpoint
 }
 
 int main(int argc, const char * argv[]) {
+    
+    testGIS2011();
+    
+//    Point p1(2,4);
+//    Point p2(1,-1);
+//    Point p3(3,3);
+//    vector<Point> v;
+//    v.push_back(p1);
+//    v.push_back(p2);
+//    v.push_back(p3);
+//    PointCloud pc(v);
+//
+//    Point pb1(0,0);
+//    Point pb2(2,2);
+//    pair<Point, Point> pair1(pb1, pb2);
+////    double distance = distanceFromPointToMBR(p1, pair1);
+////    cout << distance << endl;
+//
+//    double distance = LowerboundFromKCenterToBound(pc, pair1);
+//    cout << distance << endl;
+    
+//    vector<PointCloud> data = Dataset::RestorePointCloudFromFileWithKeyword("/Users/lizhe/Downloads/ICDE15data/Tweets-keyword-character-lowercase");
+//    KNNSearch knn = KNNSearch();
+//    knn.dataset = data;
+////    knn.generateMBRsForDataset("/Users/lizhe/Downloads/ICDE15data/Tweets-keyword-lowercase-MBRs", "/Users/lizhe/Downloads/ICDE15data/Tweets-keyword-lowercase-Bound", data, 10);
+//    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/Tweets-keyword-lowercase-MBRs", "/Users/lizhe/Downloads/ICDE15data/Tweets-keyword-lowercase-Bound");
+//
+//    ofstream outfile;
+//    outfile.open("/Users/lizhe/Desktop/reports/final_01/compare2");
+//    int count = 0;
+//    double distance1, distance2;
+//    for(int i = 0; i < knn.dataset.size(); i++){
+//        if(data[i].pointcloud.size() < 1000 && data[i].pointcloud.size() > 100){
+//            for(int j = 0; j < knn.dataset.size(); j++){
+//                if(data[j].pointcloud.size() < 1000 && data[j].pointcloud.size() > 100){
+//                    distance1 = HausdorffDistanceForBound(data[i].bound, data[i].bound);
+//                    distance2 = ExactHausdorff::PAMI2015(data[i], data[j]);
+//                    if(distance1 != 0 && distance2 > 3*distance1){
+//                        outfile << i << " " << data[i].keyword << " " << j << " " << data[j].keyword << " " << distance1 << " " << distance2 << endl;
+//                        count++;
+//                        if(count == 10){
+//                            return 0;
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
+    
+    
+//    map<string, PointCloud> dataset = Dataset::GeneratePointCloudFromTwitterFileWithKeyword("/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase");
+//    Dataset::StorePointCloudIntoFileWithKeyword("/Users/lizhe/Downloads/ICDE15data/Tweets-keyword-character-lowercase",dataset);
+    
+//    Dataset::removeNonCharacter("/Users/lizhe/Downloads/ICDE15data/Tweets", "/Users/lizhe/Downloads/ICDE15data/Tweets-Character");
+//    Dataset::transferToLowercase("/Users/lizhe/Downloads/ICDE15data/Tweets-Character", "/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase");
+    
+//    vector<PointCloud> data = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/POIs.pts");
+//    vector<PointCloud> data = Dataset::RestorePointCloudFromFileWithKeyword("/Users/lizhe/Downloads/ICDE15data/Tweets-keyword");
+    
+//    vector<PointCloud> data = Dataset::RestorePointCloudFromFileWithKeyword("/Users/lizhe/Downloads/ICDE15data/Tweets-keyword-character-lowercase");
+//    KNNSearch knn = KNNSearch();
+//    knn.dataset = data;
+    
+//    PointCloud pc1, pc2, pc3, pc4, pc5, pc6, pc7, pc8, pc9, pc10, pc11, pc12, pc13;
+//    for(int i = 0; i < data.size(); i++){
+//        if(data[i].keyword == "food"){
+//            pc1 = data[i];
+//            pc1.storeToFile("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/food.pts");
+//        }
+//        if(data[i].keyword == "sandwich"){
+//            pc2 = data[i];
+//            pc2.storeToFile("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/sandwich.pts");
+//        }
+//        if(data[i].keyword == "dog"){
+//            pc3 = data[i];
+//            pc3.storeToFile("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/dog.pts");
+//        }
+//        if(data[i].keyword == "kid"){
+//            pc4 = data[i];
+//            pc4.storeToFile("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/kid.pts");
+//        }
+//        if(data[i].keyword == "flower"){
+//            pc5 = data[i];
+//            pc5.storeToFile("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/flower.pts");
+//        }
+//        if(data[i].keyword == "university"){
+//            pc6 = data[i];
+//            pc6.storeToFile("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/university.pts");
+//        }
+//        if(data[i].keyword == "tired"){
+//            pc7 = data[i];
+//            pc7.storeToFile("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/tired.pts");
+//        }
+//        if(data[i].keyword == "travel"){
+//            pc8 = data[i];
+//            pc8.storeToFile("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/travel.pts");
+//        }
+//        if(data[i].keyword == "hiking"){
+//            pc9 = data[i];
+//            pc9.storeToFile("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/hiking.pts");
+//        }
+//        if(data[i].keyword == "iphone"){
+//            pc10 = data[i];
+//            pc10.storeToFile("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/iphone.pts");
+//        }
+//        if(data[i].keyword == "buy"){
+//            pc11 = data[i];
+//            pc11.storeToFile("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/buy.pts");
+//        }
+//        if(data[i].keyword == "ironman"){
+//            pc12 = data[i];
+//            pc12.storeToFile("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/ironman.pts");
+//        }
+//        if(data[i].keyword == "basketball"){
+//            pc13 = data[i];
+//            pc13.storeToFile("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/basketball.pts");
+//        }
+//    }
+    
+//    cout << "======== search for keyword 'food' =========" << endl;
+//    PointCloud pc1("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/food.pts");
+//    knn.KNN_Center(pc1, 20);
+//    cout << endl;
+//    knn.KNN_BHD(pc1, 20);
+//    cout << endl;
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc1, 20);
+//    cout << endl;
+//    knn.KNN_HDLog(pc1, 20);
+//    cout << endl;
+
+//    cout << "======== search for keyword 'sandwich' =========" << endl;
+//    PointCloud pc2("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/sandwich.pts");
+//    knn.KNN_Center(pc2, 20);
+//    cout << endl;
+//    knn.KNN_BHD(pc2, 20);
+//    cout << endl;
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc2, 20);
+//    cout << endl;
+//    knn.KNN_HDLog(pc2, 20);
+//    cout << endl;
+
+//    cout << "======== search for keyword 'dog' =========" << endl;
+//    PointCloud pc3("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/dog.pts");
+//    knn.KNN_Center(pc3, 20);
+//    cout << endl;
+//    knn.KNN_BHD(pc3, 20);
+//    cout << endl;
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc3, 20);
+//    cout << endl;
+//    knn.KNN_HDLog(pc3, 20);
+//    cout << endl;
+
+//    cout << "======== search for keyword 'kid' =========" << endl;
+//    PointCloud pc4("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/kid.pts");
+//    knn.KNN_Center(pc4, 20);
+//    cout << endl;
+//    knn.KNN_BHD(pc4, 20);
+//    cout << endl;
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc4, 20);
+//    cout << endl;
+//    knn.KNN_HDLog(pc4, 20);
+//    cout << endl;
+
+//    cout << "======== search for keyword 'flower' =========" << endl;
+//    PointCloud pc5("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/flower.pts");
+//    knn.KNN_Center(pc5, 20);
+//    cout << endl;
+//    knn.KNN_BHD(pc5, 20);
+//    cout << endl;
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc5, 20);
+//    cout << endl;
+//    knn.KNN_HDLog(pc5, 20);
+//    cout << endl;
+//
+//    cout << "======== search for keyword 'university' =========" << endl;
+//    PointCloud pc6("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/university.pts");
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc6, 20);
+//    cout << endl;
+//
+//    cout << "======== search for keyword 'tired' =========" << endl;
+//    PointCloud pc7("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/tired.pts");
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc7, 20);
+//    cout << endl;
+//
+//    cout << "======== search for keyword 'travel' =========" << endl;
+//    PointCloud pc8("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/travel.pts");
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc8, 20);
+//    cout << endl;
+//
+//    cout << "======== search for keyword 'hiking' =========" << endl;
+//    PointCloud pc9("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/hiking.pts");
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc9, 20);
+//    cout << endl;
+//
+//    cout << "======== search for keyword 'iphone' =========" << endl;
+//    PointCloud pc10("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/iphone.pts");
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc10, 20);
+//    cout << endl;
+//
+//    cout << "======== search for keyword 'buy' =========" << endl;
+//    PointCloud pc11("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/buy.pts");
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc11, 20);
+//    cout << endl;
+//
+//    cout << "======== search for keyword 'ironman' =========" << endl;
+//    PointCloud pc12("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/ironman.pts");
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc12, 20);
+//    cout << endl;
+//
+//    cout << "======== search for keyword 'basketball' =========" << endl;
+//    PointCloud pc13("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/basketball.pts");
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc13, 20);
+//    cout << endl;
+    
+    
+//    map<string, PointCloud> dataset = Dataset::GeneratePointCloudFromTwitterFileWithKeyword("/Users/lizhe/Downloads/ICDE15data/Tweets");
+//    Dataset::StorePointCloudIntoFileWithKeyword("/Users/lizhe/Downloads/ICDE15data/Tweets-keyword",dataset);
+//    vector<PointCloud> data = Dataset::RestorePointCloudFromFileWithKeyword("/Users/lizhe/Downloads/ICDE15data/Tweets-keyword");
+//    KNNSearch knn = KNNSearch();
+//    knn.dataset = data;
+//    knn.generateMBRsForDataset("/Users/lizhe/Downloads/ICDE15data/Tweets-keyword-MBRs", "/Users/lizhe/Downloads/ICDE15data/Tweets-keyword-Bound", data, 10);
+//    PointCloud pc1, pc2, pc3, pc4, pc5;
+//    for(int i = 0; i < data.size(); i++){
+//        if(data[i].keyword == "FOOD"){
+//            pc1 = data[i];
+//            pc1.storeToFile("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/FOOD.pts");
+//        }
+//        if(data[i].keyword == "SANDWICH"){
+//            pc2 = data[i];
+//            pc2.storeToFile("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/SANDWICH.pts");
+//        }
+//        if(data[i].keyword == "DOG"){
+//            pc3 = data[i];
+//            pc3.storeToFile("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/DOG.pts");
+//        }
+//        if(data[i].keyword == "KID"){
+//            pc4 = data[i];
+//            pc4.storeToFile("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/KID.pts");
+//        }
+//        if(data[i].keyword == "FLOWER"){
+//            pc5 = data[i];
+//            pc5.storeToFile("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/FLOWER.pts");
+//        }
+//    }
+//    cout << "======== search for keyword FOOD =========" << endl;
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc1, 20);
+//    cout << "======== search for keyword SANDWICH =========" << endl;
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc2, 20);
+//    cout << "======== search for keyword DOG =========" << endl;
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc3, 20);
+//    cout << "======== search for keyword KID =========" << endl;
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc4, 20);
+//    cout << "======== search for keyword FLOWER =========" << endl;
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc5, 20);
+    
     
 //    PointCloud pc2("/Users/lizhe/Downloads/ICDE15data/TweetExtract2.pts");
 //    PointCloud pc3("/Users/lizhe/Downloads/ICDE15data/TweetExtract3.pts");
@@ -27,7 +283,7 @@ int main(int argc, const char * argv[]) {
 //    double dis1 = ExactHausdorff::PAMI2015(pc4, pc5);
 //    double dis2 = ExactHausdorff::PAMI2015_UsingHilbert(pc4, pc5);
     
-    testGIS2011();
+//    testGIS2011();
     
 //    PointCloud pc5("/Users/lizhe/Downloads/ICDE15data/TweetExtract5.pts");
 //    pc5.calculateHilbertValue();

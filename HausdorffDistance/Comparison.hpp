@@ -551,8 +551,8 @@ void testGIS2011(){
     
     KNNSearch knn = KNNSearch();
 //    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/POIs.pts");
-    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/Tweets-KCenter.pts");
-//    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/Tweets.pts");
+//    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/Tweets-KCenter.pts");
+    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/Tweets.pts");
     knn.dataset = dataset;
     knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/Tweets-MBRs-10", "/Users/lizhe/Downloads/ICDE15data/Tweets-Bound");
 //    knn.KNN_GIS2011(pc1, 10);
@@ -579,36 +579,76 @@ void testGIS2011(){
 
     cout << "=========== segmentation =========" << endl;
     
-    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc1, 10);
-    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc2, 10);
-    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc3, 10);
-    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc4, 10);
-    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc5, 10);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc1, 10);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc2, 10);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc3, 10);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc4, 10);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc5, 10);
     
     cout << "=========== segmentation =========" << endl;
     
-    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc1, 10, 100000);
-    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc2, 10, 100000);
-    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc3, 10, 100000);
-    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc4, 10, 100000);
-    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc5, 10, 100000);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc1, 10, 1000);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc2, 10, 1000);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc3, 10, 1000);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc4, 10, 1000);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc5, 10, 1000);
     
     cout << "=========== segmentation =========" << endl;
     
-    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc1, 10, 100);
-    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc2, 10, 100);
-    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc3, 10, 100);
-    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc4, 10, 100);
-    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc5, 10, 100);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc1, 10, 10000);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc2, 10, 10000);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc3, 10, 10000);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc4, 10, 10000);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc5, 10, 10000);
     
-    cout << "=========== segmentation =========" << endl;
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertOrder(pc1, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertOrder(pc2, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertOrder(pc3, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertOrder(pc4, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertOrder(pc5, 10);
     
-    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc1, 10, 10);
-    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc2, 10, 10);
-    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc3, 10, 10);
-    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc4, 10, 10);
-    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc5, 10, 10);
-                                               
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc1, 10); // 10000
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc2, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc3, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc4, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc5, 10);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc1, 10, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc2, 10, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc3, 10, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc4, 10, 100000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc5, 10, 100000);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc1, 10, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc2, 10, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc3, 10, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc4, 10, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc5, 10, 1000);
+    
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc1, 10, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc2, 10, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc3, 10, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc4, 10, 100);
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc5, 10, 100);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc1, 10, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc2, 10, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc3, 10, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc4, 10, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_HilbertUB(pc5, 10, 10);
+    
 //    cout << "=========== segmentation =========" << endl;
 //
 //    knn.KNN_PAMI2015_Pruning_KCenter_orderdata(pc1,10);
@@ -902,7 +942,7 @@ void testGIS2011(){
     knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10, 100000, 100000);
     knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10, 100000, 100000);
     knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10, 100000, 100000);
-    
+//
 //    cout << "=========== segmentation =========" << endl;
 //
 //    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB3(pc1, 10, 100000, 100000);

@@ -47,6 +47,7 @@
 		ADF237B6209C5F9000A14CA4 /* libgmp.10.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libgmp.10.dylib; path = ../../../../usr/local/Cellar/gmp/6.1.2_2/lib/libgmp.10.dylib; sourceTree = "<group>"; };
 		ADF237B9209C607B00A14CA4 /* libmpfr.6.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libmpfr.6.dylib; path = ../../../../usr/local/Cellar/mpfr/4.0.1/lib/libmpfr.6.dylib; sourceTree = "<group>"; };
 		ADF237BC209D7CB000A14CA4 /* HilbertCurve.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = HilbertCurve.hpp; sourceTree = "<group>"; };
+		ADF237BF20A4289500A14CA4 /* OtherDistanceMetric.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = OtherDistanceMetric.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -97,6 +98,7 @@
 				ADD6562820511FB500329AC7 /* Util.hpp */,
 				ADD6562B205120E500329AC7 /* BoostRTreeSetting.hpp */,
 				ADF237BC209D7CB000A14CA4 /* HilbertCurve.hpp */,
+				ADF237BF20A4289500A14CA4 /* OtherDistanceMetric.hpp */,
 			);
 			path = HausdorffDistance;
 			sourceTree = "<group>";

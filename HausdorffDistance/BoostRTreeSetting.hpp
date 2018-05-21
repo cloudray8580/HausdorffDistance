@@ -17,6 +17,10 @@
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/geometries/box.hpp>
 #include <queue> // used for priority_queue
+
+//#include "PointCloud.hpp" // do not do this, cause you have include this in pointcloud
+//#include "KNNSearch.hpp"
+
 namespace bg = boost::geometry;
 namespace bgi = boost::geometry::index;
 namespace bgid = bgi::detail;
@@ -41,6 +45,7 @@ struct tempResult{
 double HausdorffDistanceForBound(pair<Point, Point> &refBound, pair<Point, Point> &bound);
 double HausdorffDistanceForMBRs(vector<pair<Point,Point>> &refMBRs, vector<pair<Point,Point>> &MBRs);
 double distanceFromEdgeToMBR(double &edgeminx, double &edgeminy, double &edgemaxx, double &edgemaxy, double &mbrminx, double &mbrminy, double &mbrmaxx, double &mbrmaxy);
+double distanceFromPointToMBR(Point& p, pair<Point, Point> &bound);
 vector<RTV::box_type> getMBRs(rtree &RTree);
 vector<RTV::box_type> getMBRsWithNumber(rtree &RTree, int number);
 vector<RTV::box_type> getMBRs2(rtree &RTree, int number);
@@ -273,5 +278,37 @@ double distanceFromEdgeToMBR(double &edgeminx, double &edgeminy, double &edgemax
     return distance;
 }
 
+double distanceFromPointToMBR(Point& p, pair<Point, Point> &bound){
+    
+    double distance;
+    
+    double mbrminx, mbrminy, mbrmaxx, mbrmaxy;
+    mbrminx = bound.first.x;
+    mbrminy = bound.first.y;
+    mbrmaxx = bound.second.x;
+    mbrmaxy = bound.second.y;
+    
+    bool horizontal_valid = false;
+    bool vertical_valid = false;
+    if(p.x < mbrminx || p.x > mbrmaxx){
+        horizontal_valid = true;
+    }
+    if(p.y < mbrminy || p.y > mbrmaxy){
+        vertical_valid = true;
+    }
+    if(!horizontal_valid && !vertical_valid){
+        distance = 0;
+    } else if(horizontal_valid && !vertical_valid){
+        distance = min(fabs(p.x-mbrminx), fabs(p.x-mbrmaxx));
+    } else if(vertical_valid && !horizontal_valid){
+        distance = min(fabs(p.y-mbrminy), fabs(p.y-mbrmaxy));
+    } else {
+        double tempx = min(fabs(p.x-mbrminx), fabs(p.x-mbrmaxx));
+        double tempy = min(fabs(p.y-mbrminy), fabs(p.y-mbrmaxy));
+        distance = sqrt(tempx*tempx + tempy*tempy);
+    }
+    
+    return distance;
+}
 
 #endif /* BoostRTreeSetting_hpp */

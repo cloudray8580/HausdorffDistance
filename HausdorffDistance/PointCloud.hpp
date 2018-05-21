@@ -73,6 +73,10 @@ public:
     
     bool isAvailable = true;
     int dimension = 2;
+    string keyword;
+    Point center;
+    
+    void calculateCenterPoint();
     
     void randomize();
     
@@ -228,6 +232,15 @@ PointCloud::PointCloud(PointCloud &pc, int size){
     for(int i = 0; i < size; i++){
         pointcloud.push_back(pc.pointcloud[i]);
     }
+}
+
+void PointCloud::calculateCenterPoint(){
+    double sum_x = 0, sum_y = 0;
+    for(int i = 0; i < pointcloud.size(); i++){
+        sum_x += pointcloud[i].x;
+        sum_y += pointcloud[i].y;
+    }
+    center = Point(sum_x/pointcloud.size(), sum_y/pointcloud.size());
 }
 
 void PointCloud::randomize(){

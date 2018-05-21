@@ -45,6 +45,9 @@ public:
     
     // using hilbert order value as UB in inner loop
     void KNN_PAMI2015_Pruning_KCenter_HilbertUB(PointCloud &ref, int k, int dataSizeThreshold = 10000);
+    void KNN_PAMI2015_Pruning_KCenter_HilbertOrder(PointCloud &ref, int k);
+    
+    void KNN_PAMI2015_Pruning_KCenter_MBR(PointCloud &ref, int k, int threshold = 100); //using kcenter and MBR to calculate lower bound.
     
     void KNN_PR2017_Pruning(PointCloud &ref, int k); // use a priority queue to keep K
 
@@ -75,6 +78,10 @@ public:
     void Test_Time_KNN_PAMI2015_Pruning2(PointCloud &ref, int k);
     
     void AnalyseLBs(PointCloud &ref);
+    
+    void KNN_Center(PointCloud &ref, int k);
+    void KNN_BHD(PointCloud &ref, int k);
+    void KNN_HDLog(PointCloud &ref, int k); // HD(p,q)*log|p|
 };
 
 bool cmp_pointcloudsize(PointCloud &pc1, PointCloud &pc2){
@@ -196,6 +203,12 @@ struct cmp_double{
     }
 };
 
+struct cmp_pair{
+    bool operator()(pair<double,int> p1, pair<double,int> p2){
+        return p1.first < p2.first;
+    }
+};
+
 void KNNSearch::KNN_PAMI2015_Pruning(PointCloud &ref, int k){
     
     priority_queue<double, vector<double>, cmp_double> prqueue;
@@ -281,7 +294,8 @@ void KNNSearch::KNN_PAMI2015_Pruning(PointCloud &ref, int k){
 }
 
 void KNNSearch::KNN_PAMI2015_Pruning_KCenter(PointCloud &ref, int k){
-    priority_queue<double, vector<double>, cmp_double> prqueue;
+//    priority_queue<double, vector<double>, cmp_double> prqueue;
+    priority_queue<pair<double, int>, vector<pair<double, int>>, cmp_pair> prqueue;
     
     ref.sortByKcenter();
 //    ref.randomize();
@@ -340,16 +354,20 @@ void KNNSearch::KNN_PAMI2015_Pruning_KCenter(PointCloud &ref, int k){
         }
         
         if(prqueue.size() < k){
-            prqueue.push(max);
+//            prqueue.push(max);
+            prqueue.push(pair<double,int>(max,i));
             if(prqueue.size() == k){
                 readyTag = true;
-                kthValue = prqueue.top(); // 这不是第K 个 吧 ？？？？？？？？？
+//                kthValue = prqueue.top(); // 这不是第K 个 吧 ？？？？？？？？？
+                kthValue = prqueue.top().first;
             }
         } else{
             // the new max must less than kthValue, or it will be prune
             prqueue.pop();
-            prqueue.push(max);
-            kthValue = prqueue.top();
+//            prqueue.push(max);
+            prqueue.push(pair<double,int>(max,i));
+//            kthValue = prqueue.top();
+            kthValue = prqueue.top().first;
         }
         
         //        if (count % 100000 == 0)
@@ -357,9 +375,15 @@ void KNNSearch::KNN_PAMI2015_Pruning_KCenter(PointCloud &ref, int k){
         count++;
     }
     stop = clock();
+    
+    ofstream outfile;
+    outfile.open("/Users/lizhe/Desktop/reports/final_01/using_HD.csv", ofstream::app);
+    outfile << endl;
+    
     cout << "PAMI2015_pruning_kcenter time usage: " << stop-start << endl;
     for(int i = 0; i < k; i++){
-        cout<< prqueue.top() << endl;
+        cout << dataset[prqueue.top().second].keyword << "\t\tdistance: " << prqueue.top().first << "\t\tsize: "<< dataset[prqueue.top().second].pointcloud.size() << endl;
+        outfile << dataset[prqueue.top().second].keyword << "," << prqueue.top().first << ","<< dataset[prqueue.top().second].pointcloud.size() << endl;
         prqueue.pop();
     }
 }
@@ -587,7 +611,7 @@ void KNNSearch::KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(PointCloud &ref, int k, i
             continue;
         } else if(krecord.size() < k){
             krecord.push(distance);
-        } else if(distance < kthValue){
+        } else if(distance < krecord.top()){
             krecord.pop();
             krecord.push(distance);
             kthValue = krecord.top();
@@ -716,6 +740,48 @@ void KNNSearch::KNN_PAMI2015_Pruning_KCenter_HilbertUB(PointCloud &ref, int k, i
     stop = clock();
     
     cout << "PAMI kcenter Hilbert UB method time usage: " << stop-start << endl;
+    for(int i = 0; i < k; i++){
+        cout << krecord.top() << endl;
+        krecord.pop();
+    }
+}
+
+void KNNSearch::KNN_PAMI2015_Pruning_KCenter_HilbertOrder(PointCloud &ref, int k){
+    ref.sortByKcenter();
+//    ref.calculateHilbertValue();
+    // dataset.order by hilbert value
+    for(int i = 0; i < dataset.size(); i++){
+//        dataset[i].calculateHilbertValue();
+//        dataset[i].myHilbertOrder();
+        dataset[i].hilbertOrder();
+    }
+    cout << "finish hilbert preparement..." << endl;
+    
+    priority_queue<double> krecord; // descending
+    
+    clock_t start, stop;
+    start = clock();
+    
+    double distance = 0;
+    double kthValue = std::numeric_limits<double>::infinity();
+    
+    for(int i = 0; i < dataset.size(); i++){
+
+        distance = ExactHausdorff::PAMI2015(ref, dataset[i], true, kthValue);
+        if(distance == -1){
+            continue;
+        } else if(krecord.size() < k){
+            krecord.push(distance);
+        } else if(distance < kthValue){
+            krecord.pop();
+            krecord.push(distance);
+            kthValue = krecord.top();
+        }
+    }
+    
+    stop = clock();
+    
+    cout << "PAMI kcenter Hilbert Order method time usage: " << stop-start << endl;
     for(int i = 0; i < k; i++){
         cout << krecord.top() << endl;
         krecord.pop();
@@ -1064,6 +1130,57 @@ vector<pair<double,PointCloud>> KNNSearch::KNN_PR2017(PointCloud &ref, int k){
 //    outfile.close();
     
     return result;
+}
+
+void KNNSearch::KNN_PAMI2015_Pruning_KCenter_MBR(PointCloud &ref, int k, int threshold){
+    priority_queue<pair<double, int>, vector<pair<double, int>>, cmp_pair> prqueue;
+    ref.calculateCenterPoint();
+
+    for(int i = 0; i < dataset.size(); i++){
+        dataset[i].randomize();
+    }
+    
+    clock_t start, stop;
+    start = clock();
+    
+    double kthValue = std::numeric_limits<double>::infinity();
+    double distance = 0;
+    double lowerbound = 0;
+    double bsclb = 0;
+    
+    for(int i = 0; i < dataset.size(); i++){
+        bsclb = HausdorffDistanceForBound(ref.bound, dataset[i].bound);
+        if(dataset[i].pointcloud.size() > threshold && bsclb != 0){
+            lowerbound = ExactHausdorff::LowerboundFromKCenterToBound(ref,dataset[i].bound,kthValue);
+            if(lowerbound >= kthValue){
+                continue;
+            }
+        }
+        distance = ExactHausdorff::PAMI2015(ref, dataset[i], true, kthValue);
+        if(distance == -1){
+            continue;
+        }
+        if(prqueue.size() < k){
+            prqueue.push(pair<double, int>(distance, i));
+        } else if(distance < prqueue.top().first){
+            prqueue.pop();
+            prqueue.push(pair<double, int>(distance, i));
+            kthValue = prqueue.top().first;
+        }
+    }
+    
+    stop = clock();
+    
+    ofstream outfile;
+    outfile.open("/Users/lizhe/Desktop/reports/final_01/using_Center.csv", ofstream::app);
+    outfile << endl;
+    
+    cout << "using kcenter+MBR for LB" << " time usage: " << stop-start << endl;
+    for(int i = 0; i < k; i++){
+        cout << dataset[prqueue.top().second].keyword << "\t\tdistance: " << prqueue.top().first << "\t\tsize: "<< dataset[prqueue.top().second].pointcloud.size() << endl;
+        outfile << dataset[prqueue.top().second].keyword << "," << prqueue.top().first << ","<< dataset[prqueue.top().second].pointcloud.size() << endl;
+        prqueue.pop();
+    }
 }
 
 void KNNSearch::KNN_PR2017_Pruning(PointCloud &ref, int k){
@@ -3172,6 +3289,146 @@ vector<tempResult> KNNSearch::KNN_GIS2011(PointCloud &ref, int k, int number){
 //    cout << "exact value size: " << exactcount.size() << endl;
     
     return result;
+}
+
+void KNNSearch::KNN_Center(PointCloud &ref, int k){
+    
+    priority_queue<pair<double, int>, vector<pair<double, int>>, cmp_pair> prqueue;
+    ref.calculateCenterPoint();
+    // dataset.order by hilbert value
+    for(int i = 0; i < dataset.size(); i++){
+        dataset[i].calculateCenterPoint();
+    }
+    
+    clock_t start, stop;
+    start = clock();
+    
+    double distance = 0;
+
+    for(int i = 0; i < dataset.size(); i++){
+        distance = ref.center.distanceTo(dataset[i].center);
+        
+        if(prqueue.size() < k){
+            prqueue.push(pair<double, int>(distance, i));
+        } else if(distance < prqueue.top().first){
+            prqueue.pop();
+            prqueue.push(pair<double, int>(distance, i));
+        }
+    }
+    
+    stop = clock();
+    
+    ofstream outfile;
+    outfile.open("/Users/lizhe/Desktop/reports/final_01/using_Center.csv", ofstream::app);
+    outfile << endl;
+    
+    cout << "using center as distance metric..." << " time usage: " << stop-start << endl;
+    for(int i = 0; i < k; i++){
+        cout << dataset[prqueue.top().second].keyword << "\t\tdistance: " << prqueue.top().first << "\t\tsize: "<< dataset[prqueue.top().second].pointcloud.size() << endl;
+        outfile << dataset[prqueue.top().second].keyword << "," << prqueue.top().first << ","<< dataset[prqueue.top().second].pointcloud.size() << endl;
+        prqueue.pop();
+    }
+}
+
+void KNNSearch::KNN_BHD(PointCloud &ref, int k){
+    
+    priority_queue<pair<double, int>, vector<pair<double, int>>, cmp_pair> prqueue; // descending
+    
+    // dataset.randomize();
+    for(int i = 0; i < dataset.size(); i++){
+        dataset[i].randomize();
+    }
+    
+    clock_t start, stop;
+    start = clock();
+    
+    double distance1 = 0, distance2 = 0, distance = 0;
+    double kthValue = std::numeric_limits<double>::infinity();
+    
+    for(int i = 0; i < dataset.size(); i++){
+        distance1 = ExactHausdorff::PAMI2015(ref, dataset[i], true, kthValue);
+        if(distance1 == -1){
+            continue;
+        }
+        distance2 = ExactHausdorff::PAMI2015(dataset[i], ref, true, kthValue);
+        if(distance2 == -1){
+            continue;
+        }
+        
+//        if (distance1 == -1 || distance2 == -1){
+//            continue;
+//        }
+        
+        distance = max(distance1, distance2);
+        
+        if(prqueue.size() < k){
+            prqueue.push(pair<double, int>(distance, i));
+        } else if(distance < prqueue.top().first){
+            prqueue.pop();
+            prqueue.push(pair<double, int>(distance, i));
+            kthValue = prqueue.top().first;
+        }
+    }
+    
+    stop = clock();
+    
+    ofstream outfile;
+    outfile.open("/Users/lizhe/Desktop/reports/final_01/using_BHD.csv", ofstream::app);
+    outfile << endl;
+    cout << "using BHD as distance metric..." << " time usage: " << stop-start << endl;
+    for(int i = 0; i < k; i++){
+        cout << dataset[prqueue.top().second].keyword << "\t\tdistance: " << prqueue.top().first << "\t\tsize: "<< dataset[prqueue.top().second].pointcloud.size() << endl;
+        outfile << dataset[prqueue.top().second].keyword << "," << prqueue.top().first << ","<< dataset[prqueue.top().second].pointcloud.size() << endl;
+        prqueue.pop();
+    }
+}
+
+void KNNSearch::KNN_HDLog(PointCloud &ref, int k){
+    
+    priority_queue<pair<double, int>, vector<pair<double, int>>, cmp_pair> prqueue; // descending
+    
+    // dataset.randomize();
+    for(int i = 0; i < dataset.size(); i++){
+        dataset[i].randomize();
+    }
+    
+    clock_t start, stop;
+    start = clock();
+    
+    double distance = 0;
+    double kthValue = std::numeric_limits<double>::infinity();
+    
+    for(int i = 0; i < dataset.size(); i++){
+        
+        if(dataset[i].keyword == "check"){
+            cout << "here" << endl;
+        }
+        
+        distance = ExactHausdorff::PAMI2015_Log(ref, dataset[i], true, kthValue);
+//        distance = ExactHausdorff::PAMI2015_Log(ref, dataset[i]);
+        if(distance == -1){
+            continue;
+        }
+        if(prqueue.size() < k){
+            prqueue.push(pair<double, int>(distance, i));
+        } else if(distance < prqueue.top().first){
+            prqueue.pop();
+            prqueue.push(pair<double, int>(distance, i));
+            kthValue = prqueue.top().first;
+        }
+    }
+    
+    stop = clock();
+    
+    ofstream outfile;
+    outfile.open("/Users/lizhe/Desktop/reports/final_01/using_HDLog.csv", ofstream::app);
+    outfile << endl;
+    cout << "using HDLog as distance metric..." << " time usage: " << stop-start << endl;
+    for(int i = 0; i < k; i++){
+        cout << dataset[prqueue.top().second].keyword << "\t\tdistance: " << prqueue.top().first << "\t\tsize: "<< dataset[prqueue.top().second].pointcloud.size() << endl;
+        outfile << dataset[prqueue.top().second].keyword << "," << prqueue.top().first << ","<< dataset[prqueue.top().second].pointcloud.size() << endl;
+        prqueue.pop();
+    }
 }
 
 #endif /* KNNSearch_hpp */
