@@ -22,12 +22,14 @@ public:
     static vector<PointCloud> GeneratePointCloudFromTwitterFile(string filepath);
     static map<string, PointCloud> GeneratePointCloudFromTwitterFileWithKeyword(string filepath);
     static vector<PointCloud> GeneratePointCloudFromTwitterFileWithKeyword2(string filepath);
+    static vector<Point> GetAllPoints(string filepath);
     
     static bool StorePointCloudIntoFile(string filepath, vector<PointCloud> &dataset);
     static bool StorePointCloudIntoFileWithKeyword(string filepath, map<string, PointCloud>& dataset);
     
     static vector<PointCloud> RestorePointCloudFromFile(string filepath);
     static vector<PointCloud> RestorePointCloudFromFileWithKeyword(string filepath);
+//    static vector<PointCloud> RestorePointCloudFromFileWithKeyword(string filepath, vector<Point> points);
     
     static void ProcessWithKCenter(string filepath, vector<PointCloud> &dataset);
     
@@ -441,6 +443,48 @@ vector<PointCloud> Dataset::GeneratePointCloudFromTwitterFileWithKeyword2(string
     cout << ">>>>>>>>> size : " << dataset.size() << " max: "<< max << "  min: " << min << "  Average points: " << totalpoints/totalpointclouds << " totalpoints:" << totalpoints << "  totalpointclouds: " << totalpointclouds << endl;
     
     return dataset;
+}
+
+vector<Point> Dataset::GetAllPoints(string filepath){
+    vector<Point> points;
+    
+    ifstream infile;
+    infile.open(filepath);
+    vector<string> fields;
+    string str;
+    
+    string coordinate;
+    string feature;
+    vector<string> features;
+    string latitude_str;
+    string longitude_str;
+    double latitude;
+    double longitude;
+    int lines = 0;
+    
+    bool contains_only_character = true;
+    
+    while(getline(infile,str)){
+        lines++;
+        fields.clear();
+        split(fields, str, boost::is_any_of("\t"));
+        feature = fields[1];
+        latitude_str = fields[2];
+        longitude_str = fields[3];
+        latitude = stod(latitude_str);
+        longitude = stod(longitude_str);
+        split(features, feature, boost::is_any_of(","));
+        
+        Point point = Point(latitude, longitude);
+        point.dimension = 2;
+        point.keywords = set<string>(std::make_move_iterator(features.begin()), std::make_move_iterator(features.end()));
+        points.push_back(point);
+  
+        if(lines%10000 == 0){
+            cout << lines << endl;
+        }
+    }
+    return points;
 }
 
 bool Dataset::StorePointCloudIntoFile(string filepath, vector<PointCloud> &dataset){

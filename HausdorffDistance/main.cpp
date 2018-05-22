@@ -20,7 +20,34 @@ bool cmp_hilbert(pair<Point, int>& hilbertpoint1, pair<Point, int>& hilbertpoint
 
 int main(int argc, const char * argv[]) {
     
-    testGIS2011();
+    vector<PointCloud> data = Dataset::RestorePointCloudFromFileWithKeyword("/Users/lizhe/Downloads/ICDE15data/Tweets-keyword-character-lowercase");
+    KNNSearch knn = KNNSearch();
+    knn.dataset = data;
+    knn.generateKeywordMap();
+    knn.buildRtreeForAllPoints();
+    PointCloud pc1("/Users/lizhe/Downloads/ICDE15data/TweetExtract1.pts");
+    PointCloud pc2("/Users/lizhe/Downloads/ICDE15data/TweetExtract2.pts");
+    PointCloud pc3("/Users/lizhe/Downloads/ICDE15data/TweetExtract3.pts");
+    PointCloud pc4("/Users/lizhe/Downloads/ICDE15data/TweetExtract4.pts");
+    PointCloud pc5("/Users/lizhe/Downloads/ICDE15data/TweetExtract5.pts");
+    
+    knn.KNN_UsingPoint(pc1);
+    knn.KNN_UsingPoint(pc2);
+    knn.KNN_UsingPoint(pc3);
+    knn.KNN_UsingPoint(pc4);
+    knn.KNN_UsingPoint(pc5);
+    
+//    PointCloud ref("/Users/lizhe/Downloads/ICDE15data/Second-TweetExtract3.pts");
+//    rtree refRTree(ref.pointcloud.begin(), ref.pointcloud.end());
+//    std::vector<Point> returned_values;
+//    box box_region(Point(30,-90), Point(35,-80));
+//    bgi::query(refRTree, bgi::intersects(box_region), std::back_inserter(returned_values));
+//    for(int i = 0; i < returned_values.size(); i++){
+//        cout << returned_values[i].x << " " << returned_values[i].y << " " << returned_values[i].isAvailable << endl;
+//    }
+    
+    
+//    testGIS2011();
     
 //    Point p1(2,4);
 //    Point p2(1,-1);

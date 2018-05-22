@@ -20,13 +20,18 @@ public:
     KNNSearch(string directory);
     
     vector<PointCloud> dataset;
-    void randomizeDataset();
+    map<string, int> keywordMapForDataset;
+    vector<Point> allPoints;
+    rtree refRTree;
     
+    void randomizeDataset();
     void loadDataset(string directory);
     void generateBoundsForDataset(string filepath, vector<PointCloud> &dataset);
     void generateRTreeForDataset(string filepath1, string filepath2, vector<PointCloud> &dataset);
     void generateMBRsForDataset(string filepath1, string filepath2, vector<PointCloud> &dataset, int number);
     void associateMBRs(string filepath1, string filepath2);
+    void generateKeywordMap(); // need to bind dataset first;
+    void buildRtreeForAllPoints();
     
     vector<pair<double,PointCloud>> KNN_PAMI2015(PointCloud &ref, int k);
     vector<pair<double,PointCloud>> KNN_PR2017(PointCloud &ref, int k);
@@ -47,7 +52,8 @@ public:
     void KNN_PAMI2015_Pruning_KCenter_HilbertUB(PointCloud &ref, int k, int dataSizeThreshold = 10000);
     void KNN_PAMI2015_Pruning_KCenter_HilbertOrder(PointCloud &ref, int k);
     
-    void KNN_PAMI2015_Pruning_KCenter_MBR(PointCloud &ref, int k, int threshold = 100); //using kcenter and MBR to calculate lower bound.
+    void KNN_PAMI2015_Pruning_KCenter_MBR(PointCloud &ref, int k, int threshold = 100); //using kcenter and MBR(root mbr) to calculate lower bound.
+    void KNN_PAMI2015_Pruning_KCenter_MBRs(PointCloud &ref, int k, int threshold = 100); //using kcenter and MBRs(ENHLB) to calculate lower bound.
     
     void KNN_PR2017_Pruning(PointCloud &ref, int k); // use a priority queue to keep K
 
@@ -82,6 +88,8 @@ public:
     void KNN_Center(PointCloud &ref, int k);
     void KNN_BHD(PointCloud &ref, int k);
     void KNN_HDLog(PointCloud &ref, int k); // HD(p,q)*log|p|
+    
+    void KNN_UsingPoint(PointCloud &ref); // currently do not support K, // need to bind call generateKeywordMap() AND buildRtreeForAllPoints() FIRST
 };
 
 bool cmp_pointcloudsize(PointCloud &pc1, PointCloud &pc2){
@@ -1176,6 +1184,60 @@ void KNNSearch::KNN_PAMI2015_Pruning_KCenter_MBR(PointCloud &ref, int k, int thr
     outfile << endl;
     
     cout << "using kcenter+MBR for LB" << " time usage: " << stop-start << endl;
+    for(int i = 0; i < k; i++){
+        cout << dataset[prqueue.top().second].keyword << "\t\tdistance: " << prqueue.top().first << "\t\tsize: "<< dataset[prqueue.top().second].pointcloud.size() << endl;
+        outfile << dataset[prqueue.top().second].keyword << "," << prqueue.top().first << ","<< dataset[prqueue.top().second].pointcloud.size() << endl;
+        prqueue.pop();
+    }
+}
+
+
+
+void KNNSearch::KNN_PAMI2015_Pruning_KCenter_MBRs(PointCloud &ref, int k, int threshold){
+    priority_queue<pair<double, int>, vector<pair<double, int>>, cmp_pair> prqueue;
+    ref.calculateCenterPoint();
+    
+    for(int i = 0; i < dataset.size(); i++){
+        dataset[i].randomize();
+    }
+    
+    clock_t start, stop;
+    start = clock();
+    
+    double kthValue = std::numeric_limits<double>::infinity();
+    double distance = 0;
+    double lowerbound = 0;
+    double bsclb = 0;
+    
+    for(int i = 0; i < dataset.size(); i++){
+        bsclb = HausdorffDistanceForBound(ref.bound, dataset[i].bound);
+        if(dataset[i].pointcloud.size() > threshold && bsclb != 0){
+//            lowerbound = ExactHausdorff::LowerboundFromKCenterToBound(ref,dataset[i].bound,kthValue);
+            lowerbound = ExactHausdorff::LowerboundFromKCenterToENHLB(ref, dataset[i].FirstLevelMBRs, kthValue);
+            if(lowerbound >= kthValue){
+                continue;
+            }
+        }
+        distance = ExactHausdorff::PAMI2015(ref, dataset[i], true, kthValue);
+        if(distance == -1){
+            continue;
+        }
+        if(prqueue.size() < k){
+            prqueue.push(pair<double, int>(distance, i));
+        } else if(distance < prqueue.top().first){
+            prqueue.pop();
+            prqueue.push(pair<double, int>(distance, i));
+            kthValue = prqueue.top().first;
+        }
+    }
+    
+    stop = clock();
+    
+    ofstream outfile;
+    outfile.open("/Users/lizhe/Desktop/reports/final_01/using_Center.csv", ofstream::app);
+    outfile << endl;
+    
+    cout << "using kcenter+MBRs for LB" << " time usage: " << stop-start << endl;
     for(int i = 0; i < k; i++){
         cout << dataset[prqueue.top().second].keyword << "\t\tdistance: " << prqueue.top().first << "\t\tsize: "<< dataset[prqueue.top().second].pointcloud.size() << endl;
         outfile << dataset[prqueue.top().second].keyword << "," << prqueue.top().first << ","<< dataset[prqueue.top().second].pointcloud.size() << endl;
@@ -3145,6 +3207,19 @@ void KNNSearch::associateMBRs(string filepath1, string filepath2){
     }
 }
 
+void KNNSearch::generateKeywordMap(){
+    for(int i = 0; i < dataset.size(); i++){
+        keywordMapForDataset[dataset[i].keyword] = i;
+    }
+    cout << "finish gererating keyword map..." << endl;
+}
+
+    
+void KNNSearch::buildRtreeForAllPoints(){
+    allPoints = Dataset::GetAllPoints("/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase");
+    this->refRTree = rtree(allPoints.begin(), allPoints.end());
+    cout << "finish building Rtree..." << endl;
+}
 //========================== GIS2011 =================================
 
 
@@ -3429,6 +3504,51 @@ void KNNSearch::KNN_HDLog(PointCloud &ref, int k){
         outfile << dataset[prqueue.top().second].keyword << "," << prqueue.top().first << ","<< dataset[prqueue.top().second].pointcloud.size() << endl;
         prqueue.pop();
     }
+}
+
+// need to bind keywordMapForDataset first
+void KNNSearch::KNN_UsingPoint(PointCloud &ref){ // but searching the nearest one, it should be exactly itself
+    
+    clock_t start, stop;
+    start = clock();
+    
+    double distance = ExactHausdorff::PAMI2015(ref, dataset[keywordMapForDataset["love"]]);
+    
+    long size = ref.pointcloud.size();
+    int randomIndex = 0;
+    srand((unsigned)time(NULL));
+    randomIndex = rand()%size;
+    
+    double px = ref.pointcloud[randomIndex].x;
+    double py = ref.pointcloud[randomIndex].y;
+    
+    vector<Point> nearbyPoints;
+    box box_region(Point(px-0.5*distance,py-0.5*distance), Point(px+0.5*distance,py+0.5*distance));
+    bgi::query(refRTree, bgi::intersects(box_region), std::back_inserter(nearbyPoints));
+    
+    map<string,bool> check;
+    double currentBest = distance;
+    int index = 0;
+    
+    for(int i = 0; i < nearbyPoints.size(); i++){
+        for(auto it = nearbyPoints[i].keywords.begin(); it != nearbyPoints[i].keywords.end(); it++){
+            if(check.find(*it) == check.end()){ // unconsidered before
+                index = keywordMapForDataset[*it];
+                distance = ExactHausdorff::PAMI2015(ref, dataset[index], true, currentBest);
+                if(distance == -1){
+                    continue;
+                }
+                if(distance < currentBest){
+                    currentBest = distance;
+                }
+                check[*it] = true;
+            }
+        }
+    }
+    
+    stop = clock();
+    cout << "using only points method" << " time usage: " << stop-start << endl;
+    cout << "distance " << currentBest << endl;
 }
 
 #endif /* KNNSearch_hpp */

@@ -44,6 +44,7 @@ public:
     static double PAMI2015_Log(PointCloud &pc1, PointCloud &pc2, bool pruning=false, double kthValue=std::numeric_limits<double>::infinity());
     
     static double LowerboundFromKCenterToBound(PointCloud &pc, pair<Point, Point> &bound, double kthValue);
+    static double LowerboundFromKCenterToENHLB(PointCloud &pc, vector<pair<Point,Point>> &MBRs, double kthValue);
 };
 
 double ExactHausdorff::definition(PointCloud pc1, PointCloud pc2){
@@ -591,7 +592,7 @@ double ExactHausdorff::PAMI2015_Log(PointCloud &pc1, PointCloud &pc2, bool pruni
     return HDLog; // the Hausdorff distance
 }
 
-double ExactHausdorff::LowerboundFromKCenterToBound(PointCloud& pc, pair<Point, Point> &bound, double kthValue){
+inline double ExactHausdorff::LowerboundFromKCenterToBound(PointCloud& pc, pair<Point, Point> &bound, double kthValue){
     
     double max = 0;
     double distance = 0;
@@ -600,6 +601,29 @@ double ExactHausdorff::LowerboundFromKCenterToBound(PointCloud& pc, pair<Point, 
         distance = distanceFromPointToMBR(pc.pointcloud[i], bound);
         if(distance > max){
             max = distance;
+            if(max >= kthValue){
+                return max;
+            }
+        }
+    }
+    return max;
+}
+
+inline double ExactHausdorff::LowerboundFromKCenterToENHLB(PointCloud &pc, vector<pair<Point,Point>> &MBRs, double kthValue){
+    double max = 0;
+    double min = std::numeric_limits<double>::infinity();
+    double distance = 0;
+    int kcenterCount = pc.getKCenterNum();
+    for(int i = 0; i < kcenterCount; i++){
+        min = std::numeric_limits<double>::infinity();
+        for(int j = 0; j < MBRs.size(); j++){
+            distance = distanceFromPointToMBR(pc.pointcloud[i], MBRs[j]);
+            if(distance < min){
+                min = distance;
+            }
+        }
+        if(min > max){
+            max = min;
             if(max >= kthValue){
                 return max;
             }

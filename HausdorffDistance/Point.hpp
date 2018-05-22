@@ -13,6 +13,9 @@
 #include <stdio.h>
 #include <math.h>
 #include <limits>
+#include <set>
+#include <string>
+using namespace std;
 
 class Point{
 public:
@@ -25,6 +28,7 @@ public:
     bool isAvailable = true;
     bool isCenter = false;
     uint64_t zorder;
+    set<string> keywords;
     
     double distanceTo(const Point &point);
     double getX() const {return x;};

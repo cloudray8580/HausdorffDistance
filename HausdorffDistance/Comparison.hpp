@@ -585,21 +585,45 @@ void testGIS2011(){
     knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc4, 10);
     knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc5, 10);
     
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc1, 10, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc2, 10, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc3, 10, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc4, 10, 1000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc5, 10, 1000);
+//
+//    cout << "=========== segmentation =========" << endl;
+//
+//    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc1, 10, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc2, 10, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc3, 10, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc4, 10, 10000);
+//    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc5, 10, 10000);
+    
     cout << "=========== segmentation =========" << endl;
     
-    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc1, 10, 1000);
-    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc2, 10, 1000);
-    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc3, 10, 1000);
-    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc4, 10, 1000);
-    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc5, 10, 1000);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBRs(pc1, 10);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBRs(pc2, 10);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBRs(pc3, 10);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBRs(pc4, 10);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBRs(pc5, 10);
     
     cout << "=========== segmentation =========" << endl;
     
-    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc1, 10, 10000);
-    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc2, 10, 10000);
-    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc3, 10, 10000);
-    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc4, 10, 10000);
-    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc5, 10, 10000);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBRs(pc1, 10, 1000);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBRs(pc2, 10, 1000);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBRs(pc3, 10, 1000);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBRs(pc4, 10, 1000);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBRs(pc5, 10, 1000);
+    
+    cout << "=========== segmentation =========" << endl;
+    
+    knn.KNN_PAMI2015_Pruning_KCenter_MBRs(pc1, 10, 10000);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBRs(pc2, 10, 10000);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBRs(pc3, 10, 10000);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBRs(pc4, 10, 10000);
+    knn.KNN_PAMI2015_Pruning_KCenter_MBRs(pc5, 10, 10000);
     
 //    cout << "=========== segmentation =========" << endl;
 //

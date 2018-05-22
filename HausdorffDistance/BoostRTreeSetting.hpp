@@ -278,7 +278,7 @@ double distanceFromEdgeToMBR(double &edgeminx, double &edgeminy, double &edgemax
     return distance;
 }
 
-double distanceFromPointToMBR(Point& p, pair<Point, Point> &bound){
+inline double distanceFromPointToMBR(Point& p, pair<Point, Point> &bound){
     
     double distance;
     
