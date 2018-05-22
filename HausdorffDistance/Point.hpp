@@ -29,6 +29,8 @@ public:
     bool isCenter = false;
     uint64_t zorder;
     set<string> keywords;
+    set<int> keywordIds;
+    double distance = 0;
     
     double distanceTo(const Point &point);
     double getX() const {return x;};

@@ -24,6 +24,11 @@ public:
     static vector<PointCloud> GeneratePointCloudFromTwitterFileWithKeyword2(string filepath);
     static vector<Point> GetAllPoints(string filepath);
     
+    static void GenerateTweetPointCloudsAndAllPoints(string filepath, vector<PointCloud> &pcs, vector<Point> &ps);
+    
+    static map<string, PointCloud> GeneratePointCloudFromTwitterFileWithKeywordUSA(string filepath);
+    static vector<PointCloud> GeneratePointCloudFromTwitterFileWithKeywordUSA2(string filepath);
+    
     static bool StorePointCloudIntoFile(string filepath, vector<PointCloud> &dataset);
     static bool StorePointCloudIntoFileWithKeyword(string filepath, map<string, PointCloud>& dataset);
     
@@ -485,6 +490,230 @@ vector<Point> Dataset::GetAllPoints(string filepath){
         }
     }
     return points;
+}
+
+void Dataset::GenerateTweetPointCloudsAndAllPoints(string filepath, vector<PointCloud> &pcs, vector<Point> &ps){
+    
+    ifstream infile;
+    infile.open(filepath);
+    vector<string> fields;
+    string str;
+    
+    string coordinate;
+    string feature;
+    vector<string> features;
+    string latitude_str;
+    string longitude_str;
+    double latitude;
+    double longitude;
+    map<string, PointCloud> dataset_feature;
+    int lines = 0;
+    
+    bool contains_only_character = true;
+    int featureId = 0;
+    ps.clear();
+    while(getline(infile,str)){
+        lines++;
+        fields.clear();
+        split(fields, str, boost::is_any_of("\t"));
+        feature = fields[1];
+        latitude_str = fields[2];
+        longitude_str = fields[3];
+        latitude = stod(latitude_str);
+        longitude = stod(longitude_str);
+        split(features, feature, boost::is_any_of(","));
+        
+        Point point = Point(latitude, longitude);
+        point.dimension = 2;
+        for (int i = 0; i < features.size(); i++){
+            feature = features[i];
+//            contains_only_character = std::regex_match(feature, std::regex("^[A-Za-z]+$"));
+//            if (!contains_only_character){
+//                continue;
+//            }
+            if(dataset_feature.find(feature) == dataset_feature.end()){
+                PointCloud pc = PointCloud();
+                pc.keyword = feature;
+                pc.keywordId = featureId;
+                featureId++;
+                pc.dimension = 2;
+                pc.pointcloud.push_back(point);
+                dataset_feature.insert(pair<string, PointCloud>(feature, pc));
+                point.keywordIds.insert(pc.keywordId);
+            } else {
+                dataset_feature[feature].pointcloud.push_back(point);
+                point.keywordIds.insert(dataset_feature[feature].keywordId);
+            }
+        }
+        ps.push_back(point);
+        
+        if(lines%10000 == 0){
+            cout << lines << endl;
+        }
+        //        if (lines == 1000000){
+        //            break;
+        //        }
+    }
+    
+    long min = 100000000;
+    long max = 0;
+    long totalpoints = 0;
+    long totalpointclouds = 0;
+    
+    pcs.clear();
+    for(auto it = dataset_feature.begin(); it != dataset_feature.end(); it++){
+        pcs.push_back(it->second);
+    }
+
+}
+
+map<string, PointCloud> Dataset::GeneratePointCloudFromTwitterFileWithKeywordUSA(string filepath){
+    vector<PointCloud> dataset;
+    
+    ifstream infile;
+    infile.open(filepath);
+    vector<string> fields;
+    string str;
+    
+    string coordinate;
+    string feature;
+    vector<string> features;
+    string latitude_str;
+    string longitude_str;
+    double latitude;
+    double longitude;
+    map<string, PointCloud> dataset_feature;
+    int lines = 0;
+    
+    bool contains_only_character = true;
+    
+    while(getline(infile,str)){
+        lines++;
+        fields.clear();
+        split(fields, str, boost::is_any_of("\t"));
+        feature = fields[1];
+        latitude_str = fields[2];
+        longitude_str = fields[3];
+        latitude = stod(latitude_str);
+        longitude = stod(longitude_str);
+        
+        if(!(latitude >= 24.7433195 && latitude <= 49.3457868 && longitude >= -124.7844079 && longitude <= -66.9513812)){
+            continue; // not in USA continent
+        }
+        
+        split(features, feature, boost::is_any_of(","));
+        
+        Point point = Point(latitude, longitude);
+        point.dimension = 2;
+        for (int i = 0; i < features.size(); i++){
+            feature = features[i];
+            contains_only_character = std::regex_match(feature, std::regex("^[A-Za-z]+$"));
+            if (!contains_only_character){
+                continue;
+            }
+            if(dataset_feature.find(feature) == dataset_feature.end()){
+                PointCloud pc = PointCloud();
+                pc.keyword = feature;
+                pc.dimension = 2;
+                pc.pointcloud.push_back(point);
+                dataset_feature.insert(pair<string, PointCloud>(feature, pc));
+            } else {
+                dataset_feature[feature].pointcloud.push_back(point);
+            }
+        }
+        
+        if(lines%10000 == 0){
+            cout << lines << endl;
+        }
+    }
+    
+    return dataset_feature;
+}
+
+vector<PointCloud> Dataset::GeneratePointCloudFromTwitterFileWithKeywordUSA2(string filepath){
+    vector<PointCloud> dataset;
+    
+    ifstream infile;
+    infile.open(filepath);
+    vector<string> fields;
+    string str;
+    
+    string coordinate;
+    string feature;
+    vector<string> features;
+    string latitude_str;
+    string longitude_str;
+    double latitude;
+    double longitude;
+    map<string, PointCloud> dataset_feature;
+    int lines = 0;
+    
+    bool contains_only_character = true;
+    
+    while(getline(infile,str)){
+        lines++;
+        fields.clear();
+        split(fields, str, boost::is_any_of("\t"));
+        feature = fields[1];
+        latitude_str = fields[2];
+        longitude_str = fields[3];
+        latitude = stod(latitude_str);
+        longitude = stod(longitude_str);
+        
+        if(!(latitude >= 24.7433195 && latitude <= 49.3457868 && longitude >= -124.7844079 && longitude <= -66.9513812)){
+            continue; // not in USA continent
+        }
+        
+        split(features, feature, boost::is_any_of(","));
+        
+        Point point = Point(latitude, longitude);
+        point.dimension = 2;
+        for (int i = 0; i < features.size(); i++){
+            feature = features[i];
+            contains_only_character = std::regex_match(feature, std::regex("^[A-Za-z]+$"));
+            if (!contains_only_character){
+                continue;
+            }
+            if(dataset_feature.find(feature) == dataset_feature.end()){
+                PointCloud pc = PointCloud();
+                pc.keyword = feature;
+                pc.dimension = 2;
+                pc.pointcloud.push_back(point);
+                dataset_feature.insert(pair<string, PointCloud>(feature, pc));
+            } else {
+                dataset_feature[feature].pointcloud.push_back(point);
+            }
+        }
+        
+        if(lines%10000 == 0){
+            cout << lines << endl;
+        }
+        //        if (lines == 1000000){
+        //            break;
+        //        }
+    }
+    
+    long min = 100000000;
+    long max = 0;
+    long totalpoints = 0;
+    long totalpointclouds = 0;
+    
+    for(auto it = dataset_feature.begin(); it != dataset_feature.end(); it++){
+        //        cout << it->first << " " << it->second.pointcloud.size() << endl;
+        //            outfile << it->first << " " << it->second.pointcloud.size() << endl;
+        dataset.push_back(it->second);
+        if(it->second.pointcloud.size() < min){
+            min = it->second.pointcloud.size();
+        }
+        if(it->second.pointcloud.size() > max){
+            max = it->second.pointcloud.size();
+        }
+        totalpoints += it->second.pointcloud.size();
+        totalpointclouds += 1;
+    }
+    cout << ">>>>>>>>> size : " << dataset.size() << " max: "<< max << "  min: " << min << "  Average points: " << totalpoints/totalpointclouds << " totalpoints:" << totalpoints << "  totalpointclouds: " << totalpointclouds << endl;
+    
+    return dataset;
 }
 
 bool Dataset::StorePointCloudIntoFile(string filepath, vector<PointCloud> &dataset){

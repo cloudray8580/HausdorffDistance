@@ -74,6 +74,7 @@ public:
     bool isAvailable = true;
     int dimension = 2;
     string keyword;
+    int keywordId;
     Point center;
     
     void calculateCenterPoint();
@@ -104,6 +105,7 @@ public:
     vector<pair<double,int>> sortByKcenterWithRecord(double percent=0.05, int lowerthreshold=10, int upperthreshold=100); // return the distance of points to its nearest kcenter
     
     int getKCenterNum();
+    void generateRealWorldPosition(string outputfile); // from latitude-longitude to longitude-latitude
 };
 
 PointCloud::PointCloud(const vector<Point> &pointcloud){
@@ -805,6 +807,15 @@ int PointCloud::getKCenterNum(){
         num = pointcloud.size();
     }
     return num;
+}
+
+void PointCloud::generateRealWorldPosition(string outputfile){
+    for(int i = 0; i < pointcloud.size(); i++){
+        double temp = pointcloud[i].x;
+        pointcloud[i].x = pointcloud[i].y;
+        pointcloud[i].y = temp;
+    }
+    this->storeToFile(outputfile);
 }
 
 #endif /* PointCloud_hpp */
