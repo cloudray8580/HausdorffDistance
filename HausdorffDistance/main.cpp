@@ -20,6 +20,158 @@ bool cmp_hilbert(pair<Point, int>& hilbertpoint1, pair<Point, int>& hilbertpoint
 
 int main(int argc, const char * argv[]) {
     
+    testGIS2011();
+//    map<string, int> keywordIdMap = Dataset::GenerateKeywordIdMapFromOriginal("/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase", "/Users/lizhe/Desktop/dataset/keywordIdMap");
+//    Dataset::mapKeywordIntoId("/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase", "/Users/lizhe/Desktop/dataset/original", keywordIdMap);
+//    vector<Point> points = Dataset::RestorePointFromFileWithKeywordId("/Users/lizhe/Desktop/dataset/original");
+//    vector<PointCloud> pointclouds = Dataset::GeneratePointCloudFromTwitterFileWithKeywordId("/Users/lizhe/Desktop/dataset/original");
+//    Dataset::StorePointCloudIntoFileWithKeywordId("/Users/lizhe/Desktop/dataset/pointclouds", pointclouds);
+//    Dataset::Binary_StoreKeywordIdDatasetToFile("/Users/lizhe/Desktop/dataset/pointclouds-binary", pointclouds);
+//    Dataset::Binary_StoreKeywordIdPointsToFile("/Users/lizhe/Desktop/dataset/points-binary", points);
+    
+//    vector<Point> points = Dataset::Binary_RestoreKeywordIdPointsFromFile("/Users/lizhe/Desktop/dataset/points-binary");
+//    vector<PointCloud> dataset = Dataset::Binary_RestoreKeywordIdDatasetFromFile("/Users/lizhe/Desktop/dataset/pointclouds-binary");
+    vector<Point> points;
+    map<int, vector<int>> pidMap;
+    Dataset::Binary_RestoreKeywordIdPointsFromFile_Seperate("/Users/lizhe/Desktop/dataset/points-binary", points, pidMap);
+//    KNNSearch knn(dataset);
+//    knn.dataset = dataset;
+//    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/Tweets-keyword-lowercase-MBRs", "/Users/lizhe/Downloads/ICDE15data/Tweets-keyword-lowercase-Bound");
+//    knn.allPoints = points;
+//    PointCloud pc1("/Users/lizhe/Downloads/ICDE15data/TweetExtract1.pts");
+//    PointCloud pc2("/Users/lizhe/Downloads/ICDE15data/TweetExtract2.pts");
+//    PointCloud pc3("/Users/lizhe/Downloads/ICDE15data/TweetExtract3.pts");
+//    PointCloud pc4("/Users/lizhe/Downloads/ICDE15data/TweetExtract4.pts");
+//    PointCloud pc5("/Users/lizhe/Downloads/ICDE15data/TweetExtract5.pts");
+//    PointCloud pc1("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/food.pts");
+//    PointCloud pc2("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/sandwich.pts");
+//    PointCloud pc3("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/dog.pts");
+//    PointCloud pc4("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/kid.pts");
+//    PointCloud pc5("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/flower.pts");
+
+//    knn.orderDatasetWithSize(); // 20s
+//    knn.buildRtreeForAllPoints(); // 60s
+//    knn.generateKeywordIdMap(); // 1s
+//    knn.generateKeywordCheck(); // 1s
+
+//    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc1, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc1, 10);
+//    knn.NN_UsingPoint_Efficient(pc1);
+//    knn.KNN_UsingPoint_Efficient(pc1, 10);
+
+////    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc2, 10);
+////    knn.KNN_PAMI2015_Pruning_KCenter(pc2, 10);
+//    knn.NN_UsingPoint_Efficient(pc2);
+//    knn.KNN_UsingPoint_Efficient(pc2, 10);
+//
+////    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc3, 10);
+////    knn.KNN_PAMI2015_Pruning_KCenter(pc3, 10);
+//    knn.NN_UsingPoint_Efficient(pc3);
+//    knn.KNN_UsingPoint_Efficient(pc3, 10);
+//
+////    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc4, 10);
+////    knn.KNN_PAMI2015_Pruning_KCenter(pc4, 10);
+//    knn.NN_UsingPoint_Efficient(pc4);
+//    knn.KNN_UsingPoint_Efficient(pc4, 10);
+//
+////    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc5, 10);
+////    knn.KNN_PAMI2015_Pruning_KCenter(pc5, 10);
+//    knn.NN_UsingPoint_Efficient(pc5);
+//    knn.KNN_UsingPoint_Efficient(pc5, 10);
+    
+    
+    
+    
+//    vector<PointCloud> data = Dataset::RestorePointCloudFromFileWithKeywordId("/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase-OnlyKeywordId-PointClouds");
+//    Dataset::Binary_StoreKeywordIdDatasetToFile("/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase-OnlyKeywordId-PointClouds-Binary", data);
+//    vector<PointCloud> dataset = Dataset::Binary_RestoreKeywordIdDatasetFromFile("/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase-OnlyKeywordId-PointClouds-Binary");
+    
+//    for(int i = 0; i < data.size(); i++){
+//        if(data[i].keywordId == 909120){
+//            for(int j = 0; j < data[i].pointcloud.size(); j++){
+//                PointCloud pctemp = data[i];
+//                if(data[i].pointcloud[j].x == 35.95042563 && data[i].pointcloud[j].y == -83.9331553){
+//                    cout << "find it" << endl;
+//                    return 0;
+//                }
+//            }
+//        }
+//    }
+    
+    
+    
+//    vector<Point> points = Dataset::RestorePointFromFileWithKeywordId("/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase-KeywordToId");
+//    Dataset::Binary_StoreKeywordIdPointsToFile("/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase-KeywordToId-Points-Binary", points);
+    
+//    vector<PointCloud> dataset = Dataset::Binary_RestoreKeywordIdDatasetFromFile("/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase-OnlyKeywordId-PointClouds-Binary");
+//    vector<Point> ps = Dataset::Binary_RestoreKeywordIdPointsFromFile("/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase-KeywordToId-Points-Binary");
+
+//    PointCloud pc1("/Users/lizhe/Downloads/ICDE15data/TweetExtract1.pts");
+//    PointCloud pc2("/Users/lizhe/Downloads/ICDE15data/TweetExtract2.pts");
+//    PointCloud pc3("/Users/lizhe/Downloads/ICDE15data/TweetExtract3.pts");
+//    PointCloud pc4("/Users/lizhe/Downloads/ICDE15data/TweetExtract4.pts");
+//    PointCloud pc5("/Users/lizhe/Downloads/ICDE15data/TweetExtract5.pts");
+    
+//    PointCloud pc1("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/food.pts");
+//    PointCloud pc2("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/sandwich.pts");
+//    PointCloud pc3("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/dog.pts");
+//    PointCloud pc4("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/kid.pts");
+//    PointCloud pc5("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/flower.pts");
+//
+//    KNNSearch knn = KNNSearch();
+//    knn.dataset = dataset;
+//    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/Tweets-keyword-lowercase-MBRs", "/Users/lizhe/Downloads/ICDE15data/Tweets-keyword-lowercase-Bound");
+//    knn.allPoints = ps;
+////    knn.orderDatasetWithSize(); // 20s
+//    knn.buildRtreeForAllPoints(); // 60s
+//    knn.generateKeywordIdMap(); // 1s
+//    knn.generateKeywordCheck(); // 1s
+//
+////    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc1, 10);
+////    knn.KNN_PAMI2015_Pruning_KCenter(pc1, 10);
+//    knn.NN_UsingPoint_Efficient(pc1);
+//
+////    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc2, 10);
+////    knn.KNN_PAMI2015_Pruning_KCenter(pc2, 10);
+//    knn.NN_UsingPoint_Efficient(pc2);
+//
+////    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc3, 10);
+////    knn.KNN_PAMI2015_Pruning_KCenter(pc3, 10);
+//    knn.NN_UsingPoint_Efficient(pc3);
+//
+////    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc4, 10);
+////    knn.KNN_PAMI2015_Pruning_KCenter(pc4, 10);
+//    knn.NN_UsingPoint_Efficient(pc4);
+//
+////    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc5, 10);
+////    knn.KNN_PAMI2015_Pruning_KCenter(pc5, 10);
+//    knn.NN_UsingPoint_Efficient(pc5);
+//
+    
+
+    
+//    Dataset::GenerateKeywordIdMap("/Users/lizhe/Downloads/ICDE15data/Tweets-keyword-character-lowercase", "/Users/lizhe/Downloads/ICDE15data/Tweets-keywordIdMap-character-lowercase");
+//    map<string, int> keywordIdMap = Dataset::RestoreKeywordIdMap("/Users/lizhe/Downloads/ICDE15data/Tweets-keywordIdMap-character-lowercase");
+//    Dataset::mapKeywordIntoId("/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase", "/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase-KeywordToId", keywordIdMap);
+//    vector<Point> points = Dataset::RestorePointFromFileWithKeywordId("/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase-KeywordToId");
+    
+//    vector<PointCloud> pointclouds = Dataset::GeneratePointCloudFromTwitterFileWithKeywordId("/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase-KeywordToId");
+//    Dataset::StorePointCloudIntoFileWithKeywordId("/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase-OnlyKeywordId-PointClouds", pointclouds);
+//    vector<PointCloud> pcs = Dataset::RestorePointCloudFromFileWithKeywordId("/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase-OnlyKeywordId-PointClouds");
+//    vector<PointCloud> data = Dataset::RestorePointCloudFromFileWithKeyword("/Users/lizhe/Downloads/ICDE15data/Tweets-keyword-character-lowercase-USA");
+//    PointCloud p1("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/kid-USA.pts");
+//    double distance = 0;
+//    double max = 0;
+//    int index = 0;
+//    for(int i = 0; i < data.size(); i++){
+//        distance = ExactHausdorff::PAMI2015(p1, data[i]);
+//        if(distance > max){
+//            max = distance;
+//            index = i;
+//            cout << "index: " << i << " keyword: " << data[i].keyword << " size: " << data[i].pointcloud.size() << " distance: " << max << endl;
+//        }
+//    }
+    
 //    PointCloud p1("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/kid-USA.pts");
 //    p1.generateRealWorldPosition("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/kid-USA-T.pts");
 //    PointCloud p2("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/young-USA.pts");
@@ -29,22 +181,22 @@ int main(int argc, const char * argv[]) {
     
 //    vector<PointCloud> data = Dataset::RestorePointCloudFromFileWithKeyword("/Users/lizhe/Downloads/ICDE15data/Tweets-keyword-character-lowercase-USA");
     
-    PointCloud pc1("/Users/lizhe/Downloads/ICDE15data/TweetExtract1.pts");
-    PointCloud pc2("/Users/lizhe/Downloads/ICDE15data/TweetExtract2.pts");
-    PointCloud pc3("/Users/lizhe/Downloads/ICDE15data/TweetExtract3.pts");
-    PointCloud pc4("/Users/lizhe/Downloads/ICDE15data/TweetExtract4.pts");
-    PointCloud pc5("/Users/lizhe/Downloads/ICDE15data/TweetExtract5.pts");
-    KNNSearch knn = KNNSearch();
-    Dataset::GenerateTweetPointCloudsAndAllPoints("/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase", knn.dataset, knn.allPoints);
-    knn.orderDatasetWithSize();
-    knn.buildRtreeForAllPoints();
-    knn.generateKeywordIdMap();
-    knn.generateKeywordCheck();
-    knn.KNN_UsingPoint_Efficient(pc1);
-    knn.KNN_UsingPoint_Efficient(pc2);
-    knn.KNN_UsingPoint_Efficient(pc3);
-    knn.KNN_UsingPoint_Efficient(pc4);
-    knn.KNN_UsingPoint_Efficient(pc5);
+//    PointCloud pc1("/Users/lizhe/Downloads/ICDE15data/TweetExtract1.pts");
+//    PointCloud pc2("/Users/lizhe/Downloads/ICDE15data/TweetExtract2.pts");
+//    PointCloud pc3("/Users/lizhe/Downloads/ICDE15data/TweetExtract3.pts");
+//    PointCloud pc4("/Users/lizhe/Downloads/ICDE15data/TweetExtract4.pts");
+//    PointCloud pc5("/Users/lizhe/Downloads/ICDE15data/TweetExtract5.pts");
+//    KNNSearch knn = KNNSearch();
+//    Dataset::GenerateTweetPointCloudsAndAllPoints("/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase", knn.dataset, knn.allPoints);
+//    knn.orderDatasetWithSize();
+//    knn.buildRtreeForAllPoints();
+//    knn.generateKeywordIdMap();
+//    knn.generateKeywordCheck();
+//    knn.KNN_UsingPoint_Efficient(pc1);
+//    knn.KNN_UsingPoint_Efficient(pc2);
+//    knn.KNN_UsingPoint_Efficient(pc3);
+//    knn.KNN_UsingPoint_Efficient(pc4);
+//    knn.KNN_UsingPoint_Efficient(pc5);
 
     
     

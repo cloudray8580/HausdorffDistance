@@ -17,9 +17,12 @@
 class KNNSearch{
 public:
     KNNSearch(){this->dataset.clear();};
-    KNNSearch(string directory);
+    KNNSearch(vector<PointCloud> &dataset){
+        this->dataset = dataset;
+    }
+//    KNNSearch(string directory);
     
-    vector<PointCloud> dataset;
+    vector<PointCloud>dataset;
     map<string, int> keywordMapForDataset;
     map<int, int> keywordIdMapForDataset; // first keywordId, second point cloud index
     vector<Point> allPoints;
@@ -32,6 +35,7 @@ public:
     void generateRTreeForDataset(string filepath1, string filepath2, vector<PointCloud> &dataset);
     void generateMBRsForDataset(string filepath1, string filepath2, vector<PointCloud> &dataset, int number);
     void associateMBRs(string filepath1, string filepath2);
+    void generateKeywordId(map<string,int> keywordmap);
     void generateKeywordMap(); // need to bind dataset first;
     void generateKeywordIdMap();
     void generateKeywordCheck();
@@ -94,17 +98,19 @@ public:
     void KNN_BHD(PointCloud &ref, int k);
     void KNN_HDLog(PointCloud &ref, int k); // HD(p,q)*log|p|
     
-    void KNN_UsingPoint(PointCloud &ref); // currently do not support K, // need to bind call generateKeywordMap() AND buildRtreeForAllPoints() FIRST
-    void KNN_UsingPoint_Efficient(PointCloud &ref); // 1.first sort dataset, then call build Rtree then generateBitmap
+//    void NN_UsingPoint(PointCloud &ref); // currently do not support K, // need to bind call generateKeywordMap() AND buildRtreeForAllPoints() FIRST
+//    void NN_UsingPoint_Efficient(PointCloud &ref); // 1.first sort dataset, then call build Rtree then generateBitmap
+//    void KNN_UsingPoint_Efficient(PointCloud &ref, int k); // 1.first sort dataset, then call build Rtree then generateBitmap
+    void KNN_UsingPoint_Efficient(PointCloud &ref, int k, map<int, vector<int>> &pidKeywordIdsMap);
 };
 
 bool cmp_pointcloudsize(PointCloud &pc1, PointCloud &pc2){
     return pc1.pointcloud.size() < pc2.pointcloud.size();
 }
 
-KNNSearch::KNNSearch(string directory){
-    loadDataset(directory);
-}
+//KNNSearch::KNNSearch(string directory){
+//    loadDataset(directory);
+//}
 
 void KNNSearch::randomizeDataset(){
     
@@ -396,8 +402,8 @@ void KNNSearch::KNN_PAMI2015_Pruning_KCenter(PointCloud &ref, int k){
     
     cout << "PAMI2015_pruning_kcenter time usage: " << stop-start << endl;
     for(int i = 0; i < k; i++){
-        cout << dataset[prqueue.top().second].keyword << "\t\tdistance: " << prqueue.top().first << "\t\tsize: "<< dataset[prqueue.top().second].pointcloud.size() << endl;
-        outfile << dataset[prqueue.top().second].keyword << "," << prqueue.top().first << ","<< dataset[prqueue.top().second].pointcloud.size() << endl;
+        cout << dataset[prqueue.top().second].keywordId << "\t\tdistance: " << prqueue.top().first << "\t\tsize: "<< dataset[prqueue.top().second].pointcloud.size() << endl;
+        outfile << dataset[prqueue.top().second].keywordId << "," << prqueue.top().first << ","<< dataset[prqueue.top().second].pointcloud.size() << endl;
         prqueue.pop();
     }
 }
@@ -3213,6 +3219,13 @@ void KNNSearch::associateMBRs(string filepath1, string filepath2){
     }
 }
 
+void KNNSearch::generateKeywordId(map<string,int> keywordmap){
+    for(int i = 0; i < dataset.size(); i++){
+        dataset[i].keywordId = keywordmap[dataset[i].keyword];
+    }
+    cout << "finish gererating keyword id..." << endl;
+}
+
 void KNNSearch::generateKeywordMap(){
     keywordMapForDataset.clear();
     for(int i = 0; i < dataset.size(); i++){
@@ -3226,22 +3239,24 @@ void KNNSearch::generateKeywordIdMap(){
     for(int i = 0; i < dataset.size(); i++){
         keywordIdMapForDataset[dataset[i].keywordId] = i;
     }
-    cout << "finish gererating keyword map..." << endl;
+    cout << "finish gererating keyword Id map..." << endl;
 }
 
 void KNNSearch::generateKeywordCheck(){
     keywordCheck = new bool[dataset.size()];
     std::fill(keywordCheck, keywordCheck+dataset.size(), false);
+    cout << "finish gererating keyword check array..." << endl;
 }
 
 void KNNSearch::buildRtreeForAllPoints(){
-    allPoints = Dataset::GetAllPoints("/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase");
+//    allPoints = Dataset::GetAllPoints("/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase");
     this->refRTree = rtree(allPoints.begin(), allPoints.end());
     cout << "finish building Rtree..." << endl;
 }
 
 void KNNSearch::orderDatasetWithSize(){
     sort(dataset.begin(), dataset.end(), cmp_pointcloudsize);
+    cout << "finish sorting dataset..." << endl;
 }
 
 //========================== GIS2011 =================================
@@ -3530,125 +3545,293 @@ void KNNSearch::KNN_HDLog(PointCloud &ref, int k){
     }
 }
 
-// need to build Rtree and bind keywordMapForDataset first
-void KNNSearch::KNN_UsingPoint(PointCloud &ref){ // but searching the nearest one, it should be exactly itself
-    
+//// need to build Rtree and bind keywordMapForDataset first
+//void KNNSearch::NN_UsingPoint(PointCloud &ref){ // but searching the nearest one, it should be exactly itself
+//
+//    clock_t start, stop;
+//    start = clock();
+//
+//    double distance = ExactHausdorff::PAMI2015(ref, dataset[keywordMapForDataset["love"]]);
+//
+//    long size = ref.pointcloud.size();
+//    int randomIndex = 0;
+//    srand((unsigned)time(NULL));
+//    randomIndex = rand()%size;
+//
+//    double px = ref.pointcloud[randomIndex].x;
+//    double py = ref.pointcloud[randomIndex].y;
+//
+//    vector<Point> nearbyPoints;
+//    box box_region(Point(px-0.5*distance,py-0.5*distance), Point(px+0.5*distance,py+0.5*distance));
+//    bgi::query(refRTree, bgi::intersects(box_region), std::back_inserter(nearbyPoints));
+//
+//    map<string,bool> check;
+//    double currentBest = distance;
+//    int index = 0;
+//
+//    for(int i = 0; i < nearbyPoints.size(); i++){
+//        for(auto it = nearbyPoints[i].keywords.begin(); it != nearbyPoints[i].keywords.end(); it++){
+//            if(check.find(*it) == check.end()){ // unconsidered before
+//                index = keywordMapForDataset[*it];
+//                distance = ExactHausdorff::PAMI2015(ref, dataset[index], true, currentBest);
+//                if(distance == -1){
+//                    continue;
+//                }
+//                if(distance < currentBest){
+//                    currentBest = distance;
+//                }
+//                check[*it] = true;
+//            }
+//        }
+//    }
+//
+//    stop = clock();
+//    cout << "using only points method" << " time usage: " << stop-start << endl;
+//    cout << "distance " << currentBest << endl;
+//}
+//
+//bool cmp_nearbyPoints(Point &p1, Point &p2){
+//    return p1.distance < p2.distance;
+//}
+//
+//// prerequest:
+//// 1. sort dataset according to its size
+//// 2. collect all points
+//// 3. build Rtree for points
+//// 4. build index from keyword to pointcloud-id
+//// 5. generateKeywordCheck()
+//void KNNSearch::NN_UsingPoint_Efficient(PointCloud &ref){
+//
+//    ref.sortByKcenter();
+//
+//    clock_t start, stop;
+//    start = clock();
+//
+//    // calculated upperbound using top 5% of dataset, make sure dataset already sorted
+////    int top5 = 0.05*dataset.size();
+//    double minupperbound = std::numeric_limits<double>::infinity();
+////    double upperbound = 0;
+////    for(int i = 0; i < top5; i++){
+////        upperbound = ExactHausdorff::PAMI2015(ref, dataset[i]);
+////        if(upperbound < minupperbound){
+////            minupperbound = upperbound;
+////        }
+////    }
+//
+//    for(int i = 0; i < 3; i++){
+//        minupperbound = min(minupperbound, ExactHausdorff::PAMI2015(ref, dataset[dataset.size()-100-i])); // distance to love
+//    }
+//
+//    // randomly choose a point for query
+//    long size = ref.pointcloud.size();
+//    int randomIndex = 0;
+//    srand((unsigned)time(NULL));
+//    randomIndex = rand()%size;
+//
+//    double px = ref.pointcloud[randomIndex].x;
+//    double py = ref.pointcloud[randomIndex].y;
+//
+//    vector<Point> nearbyPoints;
+//    box box_region(Point(px-minupperbound,py-minupperbound), Point(px+minupperbound,py+minupperbound));
+////    box box_region(Point(px-1,py-1), Point(px+1,py+1));
+//    bgi::query(refRTree, bgi::intersects(box_region), std::back_inserter(nearbyPoints));
+//    for(int i = 0; i < nearbyPoints.size(); i++){
+//        nearbyPoints[i].distance = nearbyPoints[i].distanceTo(ref.pointcloud[randomIndex]);
+//    }
+//    // sort points
+//    sort(nearbyPoints.begin(), nearbyPoints.end(), cmp_nearbyPoints); // ascending order
+//
+//
+//    // clear bool array
+//    std::fill(keywordCheck, keywordCheck+dataset.size(), false);
+//
+//    double distance = 0;
+//    double currentBest = minupperbound;
+//    int pointcloudindex = 0;
+//
+//    for(int i = 0; i < nearbyPoints.size(); i++){
+//        if(nearbyPoints[i].distance >= currentBest){
+//            break;
+//        }
+//        for(auto it = nearbyPoints[i].keywordIds.begin(); it != nearbyPoints[i].keywordIds.end(); it++){
+//            if(!keywordCheck[*it]){ // unconsidered before
+//                pointcloudindex = keywordIdMapForDataset[*it]; // from keyword-id to point cloud index
+//                distance = ExactHausdorff::PAMI2015(ref, dataset[pointcloudindex], true, currentBest);
+//                if(distance == -1){
+//                    continue;
+//                }
+//                if(distance < currentBest){
+//                    currentBest = distance;
+//                }
+//                keywordCheck[*it] = true;
+//            }
+//        }
+//    }
+//
+//    stop = clock();
+//    cout << "using only points method" << " time usage: " << stop-start << endl;
+//    cout << "distance " << currentBest << endl;
+//}
+//
+//// prerequest:
+//// 1. sort dataset according to its size
+//// 2. collect all points
+//// 3. build Rtree for points
+//// 4. build index from keyword to pointcloud-id
+//// 5. generateKeywordCheck()
+//void KNNSearch::KNN_UsingPoint_Efficient(PointCloud &ref, int k){
+//
+//    priority_queue<pair<double, int>, vector<pair<double, int>>, cmp_pair> prqueue;
+//    ref.sortByKcenter();
+//
+//    clock_t start, stop;
+//    start = clock();
+//
+//    // here we should use k upper bound and choose the max
+//    double maxupperbound = 0;
+//    double upperbound = 0;
+//    for(int i = 0; i < k; i++){
+//        upperbound = ExactHausdorff::PAMI2015(ref, dataset[dataset.size()-50-i]); // from the end
+//        if(upperbound > maxupperbound){
+//            maxupperbound = upperbound;
+//        }
+//    }
+//
+//    // randomly choose a point for query
+//    long size = ref.pointcloud.size();
+//    int randomIndex = 0;
+//    srand((unsigned)time(NULL));
+//    randomIndex = rand()%size;
+//
+//    double px = ref.pointcloud[randomIndex].x;
+//    double py = ref.pointcloud[randomIndex].y;
+//
+//    vector<Point> nearbyPoints;
+//    box box_region(Point(px-maxupperbound,py-maxupperbound), Point(px+maxupperbound,py+maxupperbound));
+//    bgi::query(refRTree, bgi::intersects(box_region), std::back_inserter(nearbyPoints));
+//    for(int i = 0; i < nearbyPoints.size(); i++){
+//        nearbyPoints[i].distance = nearbyPoints[i].distanceTo(ref.pointcloud[randomIndex]);
+//    }
+//    // sort points
+//    sort(nearbyPoints.begin(), nearbyPoints.end(), cmp_nearbyPoints); // ascending order
+//
+//
+//    // clear bool array
+//    std::fill(keywordCheck, keywordCheck+dataset.size(), false);
+//
+//    double distance = 0;
+//    double kthValue = maxupperbound;
+//    int pointcloudindex = 0;
+//
+//    for(int i = 0; i < nearbyPoints.size(); i++){
+//        if(nearbyPoints[i].distance >= kthValue){
+//            break;
+//        }
+//        for(auto it = nearbyPoints[i].keywordIds.begin(); it != nearbyPoints[i].keywordIds.end(); it++){
+//            if(!keywordCheck[*it]){ // unconsidered before
+//                keywordCheck[*it] = true;
+//                pointcloudindex = keywordIdMapForDataset[*it]; // from keyword-id to point cloud index
+//                distance = ExactHausdorff::PAMI2015(ref, dataset[pointcloudindex], true, kthValue);
+//                if(distance == -1){
+//                    continue;
+//                }
+//                if(prqueue.size() < k){
+//                    prqueue.push(pair<double, int>(distance, *it));
+//                } else if(distance < prqueue.top().first){
+//                    prqueue.pop();
+//                    prqueue.push(pair<double, int>(distance, *it));
+//                    kthValue = prqueue.top().first;
+//                }
+//            }
+//        }
+//    }
+//
+//    stop = clock();
+//    cout << "using only points method" << " time usage: " << stop-start << endl;
+//    for(int i = 0; i < k; i++){
+//        cout << prqueue.top().first << endl;
+//        prqueue.pop();
+//    }
+//////    cout << "distance " << currentBest << endl;
+////    for(int i = 0; i < k; i++){
+////        cout << prqueue.top().second << "\t\tdistance: " << prqueue.top().first << "\t\tsize: "<< dataset[keywordIdMapForDataset[prqueue.top().second]].size << endl; // there are some problem
+//////        outfile << dataset[prqueue.top().second].keywordId << "," << prqueue.top().first << ","<< dataset[prqueue.top().second].pointcloud.size() << endl;
+////        prqueue.pop();
+////    }
+//}
+
+void KNN_UsingPoint_Efficient(PointCloud &ref, int k, map<int, vector<int>> &pidKeywordIdsMap){
+    priority_queue<pair<double, int>, vector<pair<double, int>>, cmp_pair> prqueue;
+    ref.sortByKcenter();
+
     clock_t start, stop;
     start = clock();
-    
-    double distance = ExactHausdorff::PAMI2015(ref, dataset[keywordMapForDataset["love"]]);
-    
-    long size = ref.pointcloud.size();
-    int randomIndex = 0;
-    srand((unsigned)time(NULL));
-    randomIndex = rand()%size;
-    
-    double px = ref.pointcloud[randomIndex].x;
-    double py = ref.pointcloud[randomIndex].y;
-    
-    vector<Point> nearbyPoints;
-    box box_region(Point(px-0.5*distance,py-0.5*distance), Point(px+0.5*distance,py+0.5*distance));
-    bgi::query(refRTree, bgi::intersects(box_region), std::back_inserter(nearbyPoints));
-    
-    map<string,bool> check;
-    double currentBest = distance;
-    int index = 0;
-    
-    for(int i = 0; i < nearbyPoints.size(); i++){
-        for(auto it = nearbyPoints[i].keywords.begin(); it != nearbyPoints[i].keywords.end(); it++){
-            if(check.find(*it) == check.end()){ // unconsidered before
-                index = keywordMapForDataset[*it];
-                distance = ExactHausdorff::PAMI2015(ref, dataset[index], true, currentBest);
-                if(distance == -1){
-                    continue;
-                }
-                if(distance < currentBest){
-                    currentBest = distance;
-                }
-                check[*it] = true;
-            }
-        }
-    }
-    
-    stop = clock();
-    cout << "using only points method" << " time usage: " << stop-start << endl;
-    cout << "distance " << currentBest << endl;
-}
 
-bool cmp_nearbyPoints(Point &p1, Point &p2){
-    return p1.distance < p2.distance;
-}
-
-// prerequest:
-// 1. sort dataset according to its size
-// 2. collect all points
-// 3. build Rtree for points
-// 4. build index from keyword to pointcloud-id
-// 5. generateKeywordCheck()
-void KNNSearch::KNN_UsingPoint_Efficient(PointCloud &ref){
-    
-    clock_t start, stop;
-    start = clock();
-    
-    // calculated upperbound using top 5% of dataset, make sure dataset already sorted
-    int top5 = 0.05*dataset.size();
-    double minupperbound = std::numeric_limits<double>::infinity();
+    // here we should use k upper bound and choose the max
+    double maxupperbound = 0;
     double upperbound = 0;
-    for(int i = 0; i < top5; i++){
-        upperbound = ExactHausdorff::PAMI2015(ref, dataset[i]);
-        if(upperbound < minupperbound){
-            minupperbound = upperbound;
+    for(int i = 0; i < k; i++){
+        upperbound = ExactHausdorff::PAMI2015(ref, dataset[dataset.size()-50-i]); // from the end
+        if(upperbound > maxupperbound){
+            maxupperbound = upperbound;
         }
     }
-    
+
     // randomly choose a point for query
     long size = ref.pointcloud.size();
     int randomIndex = 0;
     srand((unsigned)time(NULL));
     randomIndex = rand()%size;
-    
+
     double px = ref.pointcloud[randomIndex].x;
     double py = ref.pointcloud[randomIndex].y;
-    
+
     vector<Point> nearbyPoints;
-    box box_region(Point(px-minupperbound,py-minupperbound), Point(px+minupperbound,py+minupperbound));
+    box box_region(Point(px-maxupperbound,py-maxupperbound), Point(px+maxupperbound,py+maxupperbound));
     bgi::query(refRTree, bgi::intersects(box_region), std::back_inserter(nearbyPoints));
     for(int i = 0; i < nearbyPoints.size(); i++){
         nearbyPoints[i].distance = nearbyPoints[i].distanceTo(ref.pointcloud[randomIndex]);
     }
     // sort points
     sort(nearbyPoints.begin(), nearbyPoints.end(), cmp_nearbyPoints); // ascending order
-    
-    
+
+
     // clear bool array
     std::fill(keywordCheck, keywordCheck+dataset.size(), false);
-    
+
     double distance = 0;
-    double currentBest = minupperbound;
+    double kthValue = maxupperbound;
     int pointcloudindex = 0;
-    
+
     for(int i = 0; i < nearbyPoints.size(); i++){
-        if(nearbyPoints[i].distance >= currentBest){
+        if(nearbyPoints[i].distance >= kthValue){
             break;
         }
-        for(auto it = nearbyPoints[i].keywordIds.begin(); it != nearbyPoints[i].keywordIds.end(); it++){
+        for(auto it = pidKeywordIdsMap[nearbyPoints[i].pid].begin(); it != pidKeywordIdsMap[nearbyPoints[i].pid].end(); it++){
             if(!keywordCheck[*it]){ // unconsidered before
+                keywordCheck[*it] = true;
                 pointcloudindex = keywordIdMapForDataset[*it]; // from keyword-id to point cloud index
-                distance = ExactHausdorff::PAMI2015(ref, dataset[pointcloudindex], true, currentBest);
+                distance = ExactHausdorff::PAMI2015(ref, dataset[pointcloudindex], true, kthValue);
                 if(distance == -1){
                     continue;
                 }
-                if(distance < currentBest){
-                    currentBest = distance;
+                if(prqueue.size() < k){
+                    prqueue.push(pair<double, int>(distance, *it));
+                } else if(distance < prqueue.top().first){
+                    prqueue.pop();
+                    prqueue.push(pair<double, int>(distance, *it));
+                    kthValue = prqueue.top().first;
                 }
-                keywordCheck[*it] = true;
             }
         }
     }
-    
+
     stop = clock();
     cout << "using only points method" << " time usage: " << stop-start << endl;
-    cout << "distance " << currentBest << endl;
+    for(int i = 0; i < k; i++){
+        cout << prqueue.top().first << endl;
+        prqueue.pop();
+    }
 }
 
 #endif /* KNNSearch_hpp */

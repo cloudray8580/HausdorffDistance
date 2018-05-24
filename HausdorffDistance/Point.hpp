@@ -23,14 +23,16 @@ public:
     double x;
     double y;
     double z;
+    int pid;
     int index;
     int dimension;
     bool isAvailable = true;
     bool isCenter = false;
     uint64_t zorder;
-    set<string> keywords;
-    set<int> keywordIds;
+//    set<string> keywords;
+//    vector<int> keywordIds;
     double distance = 0;
+    int keywordsize = 0;
     
     double distanceTo(const Point &point);
     double getX() const {return x;};
@@ -40,9 +42,9 @@ public:
     double getZ() const {return z;};
     void setZ(double z){this->z = z;};
     
-    double zvalue = 0;
-    double hilbertValue = 0;
-    double getZValue();
+//    double zvalue = 0;
+//    double hilbertValue = 0;
+//    double getZValue();
 };
 
 Point::Point(double x, double y, double z, int index, int dimension, bool isAvailable, bool isCenter, uint64_t zorder){
@@ -75,7 +77,7 @@ double Point::distanceTo(const Point &point){
     return distance;
 }
 
-double Point::getZValue(){
-    return zvalue;
-}
+//double Point::getZValue(){
+//    return zvalue;
+//}
 #endif /* Point_hpp */

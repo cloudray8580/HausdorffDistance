@@ -63,20 +63,21 @@ public:
     PointCloud(int size, double minx, double maxx, double miny, double maxy); // random generate points
     PointCloud(PointCloud &pc, int size);
     
-    vector<Point> getPoints_1();
-    vector<vector<double>> getPoints_2();
+//    vector<Point> getPoints_1();
+//    vector<vector<double>> getPoints_2();
     
     vector<Point> pointcloud;
-    vector<Point> z_pointcloud;
+//    vector<Point> z_pointcloud;
     pair<Point, Point> bound;
     vector<pair<Point,Point>> FirstLevelMBRs; // actually more than first, if none, there will be bound in it
     
     bool isAvailable = true;
     int dimension = 2;
-    string keyword;
+//    string keyword;
     int keywordId;
-    Point center;
-    
+//    Point center;
+//    double distance = 0;
+    int size = 0;
     void calculateCenterPoint();
     
     void randomize();
