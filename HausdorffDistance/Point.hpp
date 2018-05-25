@@ -42,9 +42,9 @@ public:
     double getZ() const {return z;};
     void setZ(double z){this->z = z;};
     
-//    double zvalue = 0;
-//    double hilbertValue = 0;
-//    double getZValue();
+    double zvalue = 0;
+    double hilbertValue = 0;
+    double getZValue();
 };
 
 Point::Point(double x, double y, double z, int index, int dimension, bool isAvailable, bool isCenter, uint64_t zorder){

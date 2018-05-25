@@ -62,67 +62,67 @@ void compareExactHausdorffDistance(PointCloud pc1, PointCloud pc2, bool definiti
 }
 
 void KNNTest(int querySetSize, vector<PointCloud> &dataset, int k){
-    KNNSearch knn = KNNSearch();
-    srand((unsigned)time(NULL));
-    int randomIndex = 0;
-    long size;
-    vector<PointCloud> querySet;
-    for(int i = 0; i < querySetSize;){
-        size = dataset.size();
-        randomIndex = rand()%size;
-        if(dataset[randomIndex].pointcloud.size() < 10){
-            continue;
-        }
-        querySet.push_back(dataset[randomIndex]);
-        
-        // quick removed
-        dataset[randomIndex] = dataset.back();
-        dataset.pop_back();
-        i++;
-    }
-    
-    for(int i = 0; i < querySetSize; i++){
-        cout << "query set size : " << querySet[i].pointcloud.size() << endl;
-    }
-    
-    knn.dataset = dataset;
-    clock_t start1, stop1, start2, stop2, start3, stop3, start4, stop4, total1, total2, total3, total4;
-    total1 = 0;
-    total2 = 0;
-    total3 = 0;
-    total4 = 0;
-    vector<vector<clock_t>> records;
-    vector<clock_t> subrecord;
-    for (int i = 0; i < querySetSize; i++){
-//        start1 = clock();
-//        knn.KNN_PAMI2015(querySet[i], k);
-//        stop1 = clock();
-//        start2 = clock();
-//        knn.KNN_PR2017(querySet[i], k);
-//        stop2 = clock();
-//        start3 = clock();
-//        knn.KNN_PAMI2015_Pruning(querySet[i],k);
-//        stop3 = clock();
-        start4 = clock();
-//        knn.KNN_PR2017_Pruning(querySet[i],k);
-        knn.Test_Time_KNN_PAMI2015_Pruning(querySet[i],k);
-        stop4 = clock();
-//        total1 += stop1-start1;
-//        total2 += stop2-start2;
-//        total3 += stop3-start3;
-        total4 += stop4-start4;
-        subrecord.clear();
-//        subrecord.push_back(stop1-start1);
-//        subrecord.push_back(stop2-start2);
-//        subrecord.push_back(stop3-start3);
-        subrecord.push_back(stop4-start4);
-        records.push_back(subrecord);
-//        cout << stop1-start1 << " " << stop2-start2 << " " << start3-stop3 << endl;
-    }
-//    for(int i = 0; i < records.size(); i++){
-//        cout << records[i][0] << " " << records[i][1] << " " << records[i][2] << " " << records[i][3] << endl;
+//    KNNSearch knn = KNNSearch();
+//    srand((unsigned)time(NULL));
+//    int randomIndex = 0;
+//    long size;
+//    vector<PointCloud> querySet;
+//    for(int i = 0; i < querySetSize;){
+//        size = dataset.size();
+//        randomIndex = rand()%size;
+//        if(dataset[randomIndex].pointcloud.size() < 10){
+//            continue;
+//        }
+//        querySet.push_back(dataset[randomIndex]);
+//
+//        // quick removed
+//        dataset[randomIndex] = dataset.back();
+//        dataset.pop_back();
+//        i++;
 //    }
-    cout << "average: " << total1/querySetSize << " " << total2/querySetSize << " " << total3/querySetSize << " " << total4/querySetSize << endl;
+//
+//    for(int i = 0; i < querySetSize; i++){
+//        cout << "query set size : " << querySet[i].pointcloud.size() << endl;
+//    }
+//
+//    knn.dataset = dataset;
+//    clock_t start1, stop1, start2, stop2, start3, stop3, start4, stop4, total1, total2, total3, total4;
+//    total1 = 0;
+//    total2 = 0;
+//    total3 = 0;
+//    total4 = 0;
+//    vector<vector<clock_t>> records;
+//    vector<clock_t> subrecord;
+//    for (int i = 0; i < querySetSize; i++){
+////        start1 = clock();
+////        knn.KNN_PAMI2015(querySet[i], k);
+////        stop1 = clock();
+////        start2 = clock();
+////        knn.KNN_PR2017(querySet[i], k);
+////        stop2 = clock();
+////        start3 = clock();
+////        knn.KNN_PAMI2015_Pruning(querySet[i],k);
+////        stop3 = clock();
+//        start4 = clock();
+////        knn.KNN_PR2017_Pruning(querySet[i],k);
+//        knn.Test_Time_KNN_PAMI2015_Pruning(querySet[i],k);
+//        stop4 = clock();
+////        total1 += stop1-start1;
+////        total2 += stop2-start2;
+////        total3 += stop3-start3;
+//        total4 += stop4-start4;
+//        subrecord.clear();
+////        subrecord.push_back(stop1-start1);
+////        subrecord.push_back(stop2-start2);
+////        subrecord.push_back(stop3-start3);
+//        subrecord.push_back(stop4-start4);
+//        records.push_back(subrecord);
+////        cout << stop1-start1 << " " << stop2-start2 << " " << start3-stop3 << endl;
+//    }
+////    for(int i = 0; i < records.size(); i++){
+////        cout << records[i][0] << " " << records[i][1] << " " << records[i][2] << " " << records[i][3] << endl;
+////    }
+//    cout << "average: " << total1/querySetSize << " " << total2/querySetSize << " " << total3/querySetSize << " " << total4/querySetSize << endl;
 }
 
 void calculateResult(string resultFilePath1, string resultFilePath2, string outputFilePath){
@@ -184,52 +184,52 @@ void calculateResult(string resultFilePath1, string resultFilePath2, string outp
 }
 
 void TestForSingleQueryPointTime(vector<PointCloud> &dataset){
-    Point p1(0, 0);
-    Point p2(1, 1);
-    Point p3(10, 10);
-    Point p4(100, 100);
-    Point p5(1000, 1000);
-    Point p6(1.1, 1.1);
-    Point p7(10.1, 10.1);
-    Point p8(100.1, 100.1);
-    Point p9(1000.1, 1000.1);
-    Point p10(99, 88);
-    
-    vector<Point> ps1, ps2, ps3, ps4, ps5, ps6, ps7, ps8, ps9, ps10;
-    ps1.push_back(p1);
-    ps2.push_back(p2);
-    ps3.push_back(p3);
-    ps4.push_back(p4);
-    ps5.push_back(p5);
-    ps6.push_back(p6);
-    ps7.push_back(p7);
-    ps8.push_back(p8);
-    ps9.push_back(p9);
-    ps10.push_back(p10);
-    
-    PointCloud pc1(ps1), pc2(ps2), pc3(ps3), pc4(ps4), pc5(ps5), pc6(ps6), pc7(ps7), pc8(ps8), pc9(ps9), pc10(ps10);
-    vector<PointCloud> qset;
-    qset.push_back(pc1);
-    qset.push_back(pc2);
-    qset.push_back(pc3);
-    qset.push_back(pc4);
-    qset.push_back(pc5);
-    qset.push_back(pc6);
-    qset.push_back(pc7);
-    qset.push_back(pc8);
-    qset.push_back(pc9);
-    qset.push_back(pc10);
-    
-    KNNSearch knn = KNNSearch();
-    knn.dataset = dataset;
-    
-    clock_t start, stop;
-    start = clock();
-    for(int i = 0; i < 10; i++){
-        knn.KNN_PR2017_Pruning(qset[i],10);
-    }
-    stop = clock();
-    cout << "average time for single point point cloud: " << (stop-start)/10 << endl;
+//    Point p1(0, 0);
+//    Point p2(1, 1);
+//    Point p3(10, 10);
+//    Point p4(100, 100);
+//    Point p5(1000, 1000);
+//    Point p6(1.1, 1.1);
+//    Point p7(10.1, 10.1);
+//    Point p8(100.1, 100.1);
+//    Point p9(1000.1, 1000.1);
+//    Point p10(99, 88);
+//
+//    vector<Point> ps1, ps2, ps3, ps4, ps5, ps6, ps7, ps8, ps9, ps10;
+//    ps1.push_back(p1);
+//    ps2.push_back(p2);
+//    ps3.push_back(p3);
+//    ps4.push_back(p4);
+//    ps5.push_back(p5);
+//    ps6.push_back(p6);
+//    ps7.push_back(p7);
+//    ps8.push_back(p8);
+//    ps9.push_back(p9);
+//    ps10.push_back(p10);
+//
+//    PointCloud pc1(ps1), pc2(ps2), pc3(ps3), pc4(ps4), pc5(ps5), pc6(ps6), pc7(ps7), pc8(ps8), pc9(ps9), pc10(ps10);
+//    vector<PointCloud> qset;
+//    qset.push_back(pc1);
+//    qset.push_back(pc2);
+//    qset.push_back(pc3);
+//    qset.push_back(pc4);
+//    qset.push_back(pc5);
+//    qset.push_back(pc6);
+//    qset.push_back(pc7);
+//    qset.push_back(pc8);
+//    qset.push_back(pc9);
+//    qset.push_back(pc10);
+//
+//    KNNSearch knn = KNNSearch();
+//    knn.dataset = dataset;
+//
+//    clock_t start, stop;
+//    start = clock();
+//    for(int i = 0; i < 10; i++){
+//        knn.KNN_PR2017_Pruning(qset[i],10);
+//    }
+//    stop = clock();
+//    cout << "average time for single point point cloud: " << (stop-start)/10 << endl;
 }
 
 void TestTime(vector<PointCloud> &dataset){
@@ -458,64 +458,65 @@ void TEST5(){
 }
 
 void compareGIS2011andPAMI2015(int querySetSize, int k){
-    KNNSearch knn = KNNSearch();
-    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/Tweets.pts");
-//    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/POIs.pts");
-    
-    srand((unsigned)time(NULL));
-    int randomIndex = 0;
-    long size = dataset.size();
-    vector<PointCloud> querySet;
-    for(int i = 0; i < querySetSize;){
-        size = dataset.size();
-        randomIndex = rand()%size;
-        if(dataset[randomIndex].pointcloud.size() < 100){
-            continue;
-        }
-        querySet.push_back(dataset[randomIndex]);
-        
-        // quick removed
-//        dataset[randomIndex] = dataset.back();
-//        dataset.pop_back();
-        i++;
-    }
-    
-    knn.dataset = dataset;
-    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/Tweets-MBRs-100", "/Users/lizhe/Downloads/ICDE15data/Tweets-Bound");
-//    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/Tweets-MBRs-10", "/Users/lizhe/Downloads/ICDE15data/Tweets-Bound");
-//    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/POIs-MBRs-10", "/Users/lizhe/Downloads/ICDE15data/POIs-Bound");
-    
-    for(int i = 0; i < querySetSize; i++){
-        cout << querySet[i].pointcloud.size() << endl;
-    }
-    
-    clock_t start,stop;
-    start = clock();
-    for(int i = 0; i < querySetSize; i++){
-        knn.KNN_GIS2011(querySet[i], k);
-    }
-    stop = clock();
-    cout << "average GIS2011:" << (stop-start)/querySetSize << endl;
-    
-    
-    for(int i = 0; i < querySetSize; i++){
-        querySet[i].randomize();
-    }
-    
-    for(int i = 0; i < dataset.size(); i++){
-        dataset[i].randomize();
-    }
-//
-    start = clock();
-    for(int i = 0; i < querySetSize; i++){
-        knn.KNN_PAMI2015_Pruning(querySet[i], k);
-    }
-    stop = clock();
-    cout << "average PAMI2015:" << (stop-start)/querySetSize << endl;
+//    KNNSearch knn = KNNSearch();
+//    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/Tweets.pts");
+////    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/POIs.pts");
+//    
+//    srand((unsigned)time(NULL));
+//    int randomIndex = 0;
+//    long size = dataset.size();
+//    vector<PointCloud> querySet;
+//    for(int i = 0; i < querySetSize;){
+//        size = dataset.size();
+//        randomIndex = rand()%size;
+//        if(dataset[randomIndex].pointcloud.size() < 100){
+//            continue;
+//        }
+//        querySet.push_back(dataset[randomIndex]);
+//        
+//        // quick removed
+////        dataset[randomIndex] = dataset.back();
+////        dataset.pop_back();
+//        i++;
+//    }
+//    
+//    knn.dataset = dataset;
+//    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/Tweets-MBRs-100", "/Users/lizhe/Downloads/ICDE15data/Tweets-Bound");
+////    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/Tweets-MBRs-10", "/Users/lizhe/Downloads/ICDE15data/Tweets-Bound");
+////    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/POIs-MBRs-10", "/Users/lizhe/Downloads/ICDE15data/POIs-Bound");
+//    
+//    for(int i = 0; i < querySetSize; i++){
+//        cout << querySet[i].pointcloud.size() << endl;
+//    }
+//    
+//    clock_t start,stop;
+//    start = clock();
+//    for(int i = 0; i < querySetSize; i++){
+//        knn.KNN_GIS2011(querySet[i], k);
+//    }
+//    stop = clock();
+//    cout << "average GIS2011:" << (stop-start)/querySetSize << endl;
+//    
+//    
+//    for(int i = 0; i < querySetSize; i++){
+//        querySet[i].randomize();
+//    }
+//    
+//    for(int i = 0; i < dataset.size(); i++){
+//        dataset[i].randomize();
+//    }
+////
+//    start = clock();
+//    for(int i = 0; i < querySetSize; i++){
+//        knn.KNN_PAMI2015_Pruning(querySet[i], k);
+//    }
+//    stop = clock();
+//    cout << "average PAMI2015:" << (stop-start)/querySetSize << endl;
 }
 
 
 void testGIS2011(){
+    /*
     PointCloud pc1("/Users/lizhe/Downloads/ICDE15data/TweetExtract1.pts");
     PointCloud pc2("/Users/lizhe/Downloads/ICDE15data/TweetExtract2.pts");
     PointCloud pc3("/Users/lizhe/Downloads/ICDE15data/TweetExtract3.pts");
@@ -548,7 +549,11 @@ void testGIS2011(){
 //    stop = clock();
 //    cout << "kcenter 1 time: " << stop-start << endl;
     
-    
+     vector<Point> points;
+     map<int, vector<int>> pidMap;
+     Dataset::Binary_RestoreKeywordIdPointsFromFile_Seperate("/Users/lizhe/Desktop/dataset/points-binary", points, pidMap);
+     vector<PointCloud> dataset = Dataset::Binary_RestoreKeywordIdDatasetFromFile("/Users/lizhe/Desktop/dataset/pointclouds-binary");
+     
     KNNSearch knn = KNNSearch();
 //    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/POIs.pts");
 //    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/Tweets-KCenter.pts");
@@ -1142,76 +1147,78 @@ void testGIS2011(){
 //    knn.KNN_MINE7_3(pc3, 10, 20, 10, 0.05, 20, 100, 100000);
 //    knn.KNN_MINE7_3(pc4, 10, 20, 10, 0.05, 20, 100, 100000);
 //    knn.KNN_MINE7_3(pc5, 10, 20, 10, 0.05, 20, 100, 100000);
+     
+     */
 }
 
 
 void testGIS2011_2(){
     
-    PointCloud pc21("/Users/lizhe/Downloads/ICDE15data/TweetExtract2-1.pts");
-    PointCloud pc22("/Users/lizhe/Downloads/ICDE15data/TweetExtract2-2.pts");
-    PointCloud pc23("/Users/lizhe/Downloads/ICDE15data/TweetExtract2-3.pts");
-    PointCloud pc24("/Users/lizhe/Downloads/ICDE15data/TweetExtract2-4.pts");
-    PointCloud pc25("/Users/lizhe/Downloads/ICDE15data/TweetExtract2-5.pts");
-    
-    PointCloud pc51("/Users/lizhe/Downloads/ICDE15data/TweetExtract5-1.pts");
-    PointCloud pc52("/Users/lizhe/Downloads/ICDE15data/TweetExtract5-2.pts");
-    PointCloud pc53("/Users/lizhe/Downloads/ICDE15data/TweetExtract5-3.pts");
-    PointCloud pc54("/Users/lizhe/Downloads/ICDE15data/TweetExtract5-4.pts");
-    PointCloud pc55("/Users/lizhe/Downloads/ICDE15data/TweetExtract5-5.pts");
-    
-    KNNSearch knn = KNNSearch();
-    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/Tweets.pts");
-    knn.dataset = dataset;
-    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/Tweets-MBRs-10", "/Users/lizhe/Downloads/ICDE15data/Tweets-Bound");
-    
-    knn.KNN_GIS2011(pc21, 10);
-    knn.KNN_GIS2011(pc22, 10);
-    knn.KNN_GIS2011(pc23, 10);
-    knn.KNN_GIS2011(pc24, 10);
-    knn.KNN_GIS2011(pc25, 10);
-    
-    knn.KNN_GIS2011(pc51, 10);
-    knn.KNN_GIS2011(pc52, 10);
-    knn.KNN_GIS2011(pc53, 10);
-    knn.KNN_GIS2011(pc54, 10);
-    knn.KNN_GIS2011(pc55, 10);
-}
-
-void testGIS2011_3(){
-    PointCloud pc3("/Users/lizhe/Downloads/ICDE15data/TweetExtract3.pts");
-    KNNSearch knn = KNNSearch();
-    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/Tweets.pts");
-    knn.dataset = dataset;
-    
-    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/Tweets-MBRs-Dynamic-10", "/Users/lizhe/Downloads/ICDE15data/Tweets-Bound");
-    knn.KNN_GIS2011(pc3, 10);
-    
-    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/Tweets-MBRs-Dynamic-20", "/Users/lizhe/Downloads/ICDE15data/Tweets-Bound");
-    knn.KNN_GIS2011(pc3, 10);
-
-    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/Tweets-MBRs-Dynamic-50", "/Users/lizhe/Downloads/ICDE15data/Tweets-Bound");
-    knn.KNN_GIS2011(pc3, 10);
-
-    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/Tweets-MBRs-Dynamic-100", "/Users/lizhe/Downloads/ICDE15data/Tweets-Bound");
-    knn.KNN_GIS2011(pc3, 10);
+//    PointCloud pc21("/Users/lizhe/Downloads/ICDE15data/TweetExtract2-1.pts");
+//    PointCloud pc22("/Users/lizhe/Downloads/ICDE15data/TweetExtract2-2.pts");
+//    PointCloud pc23("/Users/lizhe/Downloads/ICDE15data/TweetExtract2-3.pts");
+//    PointCloud pc24("/Users/lizhe/Downloads/ICDE15data/TweetExtract2-4.pts");
+//    PointCloud pc25("/Users/lizhe/Downloads/ICDE15data/TweetExtract2-5.pts");
+//
+//    PointCloud pc51("/Users/lizhe/Downloads/ICDE15data/TweetExtract5-1.pts");
+//    PointCloud pc52("/Users/lizhe/Downloads/ICDE15data/TweetExtract5-2.pts");
+//    PointCloud pc53("/Users/lizhe/Downloads/ICDE15data/TweetExtract5-3.pts");
+//    PointCloud pc54("/Users/lizhe/Downloads/ICDE15data/TweetExtract5-4.pts");
+//    PointCloud pc55("/Users/lizhe/Downloads/ICDE15data/TweetExtract5-5.pts");
+//
+//    KNNSearch knn = KNNSearch();
+//    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/Tweets.pts");
+//    knn.dataset = dataset;
+//    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/Tweets-MBRs-10", "/Users/lizhe/Downloads/ICDE15data/Tweets-Bound");
+//
+//    knn.KNN_GIS2011(pc21, 10);
+//    knn.KNN_GIS2011(pc22, 10);
+//    knn.KNN_GIS2011(pc23, 10);
+//    knn.KNN_GIS2011(pc24, 10);
+//    knn.KNN_GIS2011(pc25, 10);
+//
+//    knn.KNN_GIS2011(pc51, 10);
+//    knn.KNN_GIS2011(pc52, 10);
+//    knn.KNN_GIS2011(pc53, 10);
+//    knn.KNN_GIS2011(pc54, 10);
+//    knn.KNN_GIS2011(pc55, 10);
+//}
+//
+//void testGIS2011_3(){
+//    PointCloud pc3("/Users/lizhe/Downloads/ICDE15data/TweetExtract3.pts");
+//    KNNSearch knn = KNNSearch();
+//    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/Tweets.pts");
+//    knn.dataset = dataset;
+//
+//    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/Tweets-MBRs-Dynamic-10", "/Users/lizhe/Downloads/ICDE15data/Tweets-Bound");
+//    knn.KNN_GIS2011(pc3, 10);
+//
+//    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/Tweets-MBRs-Dynamic-20", "/Users/lizhe/Downloads/ICDE15data/Tweets-Bound");
+//    knn.KNN_GIS2011(pc3, 10);
+//
+//    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/Tweets-MBRs-Dynamic-50", "/Users/lizhe/Downloads/ICDE15data/Tweets-Bound");
+//    knn.KNN_GIS2011(pc3, 10);
+//
+//    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/Tweets-MBRs-Dynamic-100", "/Users/lizhe/Downloads/ICDE15data/Tweets-Bound");
+//    knn.KNN_GIS2011(pc3, 10);
 }
 
 void testGIS2011_4(){
-    PointCloud pc3("/Users/lizhe/Downloads/ICDE15data/TweetExtract3.pts");
-    KNNSearch knn = KNNSearch();
-    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/POIs.pts");
-    knn.dataset = dataset;
-    
-//    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/POIs-MBRs-10", "/Users/lizhe/Downloads/ICDE15data/POIs-Bound");
+//    PointCloud pc3("/Users/lizhe/Downloads/ICDE15data/TweetExtract3.pts");
+//    KNNSearch knn = KNNSearch();
+//    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/POIs.pts");
+//    knn.dataset = dataset;
+//
+////    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/POIs-MBRs-10", "/Users/lizhe/Downloads/ICDE15data/POIs-Bound");
+////    knn.KNN_GIS2011(pc3, 10);
+//
+//    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/POIs-MBRs-Dynamic-10", "/Users/lizhe/Downloads/ICDE15data/POIs-Bound");
 //    knn.KNN_GIS2011(pc3, 10);
-    
-    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/POIs-MBRs-Dynamic-10", "/Users/lizhe/Downloads/ICDE15data/POIs-Bound");
-    knn.KNN_GIS2011(pc3, 10);
-    knn.KNN_COMBINED(pc3,10);
-    knn.KNN_PAMI2015_Pruning(pc3,10);
-    knn.KNN_MINE3(pc3, 10, 0.05, 20, 1000, 10);
-//    knn.KNN_MINE2(pc3, 10, 20);
-    knn.KNN_PAMI2015(pc3, 10);
+//    knn.KNN_COMBINED(pc3,10);
+//    knn.KNN_PAMI2015_Pruning(pc3,10);
+//    knn.KNN_MINE3(pc3, 10, 0.05, 20, 1000, 10);
+////    knn.KNN_MINE2(pc3, 10, 20);
+//    knn.KNN_PAMI2015(pc3, 10);
 }
 
 void testConvergence(){
@@ -1249,6 +1256,7 @@ void testConvergence(){
     ExactHausdorff::PAMI2015_recordMax(pc5, data3, "/Users/lizhe/Desktop/reports/KNN7/convergence5-3");
     ExactHausdorff::PAMI2015_recordMax(pc5, data4, "/Users/lizhe/Desktop/reports/KNN7/convergence5-4");
     ExactHausdorff::PAMI2015_recordMax(pc5, data5, "/Users/lizhe/Desktop/reports/KNN7/convergence5-5");
+    
 }
 
 
@@ -1282,18 +1290,18 @@ void computeRandom(){
 }
 
 void AnalyseLowerBound(){
-    KNNSearch knn = KNNSearch();
-    
-    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/Tweets.pts");
-    knn.dataset = dataset;
-    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/Tweets-MBRs-10", "/Users/lizhe/Downloads/ICDE15data/Tweets-Bound");
-    
-//    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/POIs.pts");
+//    KNNSearch knn = KNNSearch();
+//    
+//    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/Tweets.pts");
 //    knn.dataset = dataset;
-//    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/POIs-MBRs-10", "/Users/lizhe/Downloads/ICDE15data/POIs-Bound");
-    
-    PointCloud pc5("/Users/lizhe/Downloads/ICDE15data/TweetExtract5.pts");
-    knn.AnalyseLBs(pc5);
+//    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/Tweets-MBRs-10", "/Users/lizhe/Downloads/ICDE15data/Tweets-Bound");
+//    
+////    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/POIs.pts");
+////    knn.dataset = dataset;
+////    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/POIs-MBRs-10", "/Users/lizhe/Downloads/ICDE15data/POIs-Bound");
+//    
+//    PointCloud pc5("/Users/lizhe/Downloads/ICDE15data/TweetExtract5.pts");
+//    knn.AnalyseLBs(pc5);
 }
 
 void Sampling(){

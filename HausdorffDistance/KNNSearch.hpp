@@ -16,16 +16,27 @@
 
 class KNNSearch{
 public:
-    KNNSearch(){this->dataset.clear();};
-    KNNSearch(vector<PointCloud> &dataset){
-        this->dataset = dataset;
-    }
+    
+    KNNSearch(vector<PointCloud> &dataset, vector<Point> &points):dataset(dataset), allPoints(points){}
+    
+//    KNNSearch(){
+//        vector<PointCloud> pcs;
+//        this->dataset = pcs;
+//        vector<Point> ps;
+//        this->allPoints = ps;
+//    }
+//
+//    KNNSearch(vector<PointCloud> &dataset, vector<Point> &points){
+//        this->dataset = dataset;
+//        this->allPoints = points;
+//    }
+    
 //    KNNSearch(string directory);
     
-    vector<PointCloud>dataset;
+    vector<PointCloud> &dataset;
+    vector<Point> &allPoints;
     map<string, int> keywordMapForDataset;
     map<int, int> keywordIdMapForDataset; // first keywordId, second point cloud index
-    vector<Point> allPoints;
     rtree refRTree;
     bool* keywordCheck; // should have size of dataset
     
@@ -3590,9 +3601,9 @@ void KNNSearch::KNN_HDLog(PointCloud &ref, int k){
 //    cout << "distance " << currentBest << endl;
 //}
 //
-//bool cmp_nearbyPoints(Point &p1, Point &p2){
-//    return p1.distance < p2.distance;
-//}
+bool cmp_nearbyPoints(Point &p1, Point &p2){
+    return p1.distance < p2.distance;
+}
 //
 //// prerequest:
 //// 1. sort dataset according to its size
@@ -3760,7 +3771,7 @@ void KNNSearch::KNN_HDLog(PointCloud &ref, int k){
 ////    }
 //}
 
-void KNN_UsingPoint_Efficient(PointCloud &ref, int k, map<int, vector<int>> &pidKeywordIdsMap){
+void KNNSearch::KNN_UsingPoint_Efficient(PointCloud &ref, int k, map<int, vector<int>> &pidKeywordIdsMap){
     priority_queue<pair<double, int>, vector<pair<double, int>>, cmp_pair> prqueue;
     ref.sortByKcenter();
 
@@ -3776,7 +3787,7 @@ void KNN_UsingPoint_Efficient(PointCloud &ref, int k, map<int, vector<int>> &pid
             maxupperbound = upperbound;
         }
     }
-
+    cout << "max upper bound : " << maxupperbound << endl;
     // randomly choose a point for query
     long size = ref.pointcloud.size();
     int randomIndex = 0;
@@ -3789,6 +3800,7 @@ void KNN_UsingPoint_Efficient(PointCloud &ref, int k, map<int, vector<int>> &pid
     vector<Point> nearbyPoints;
     box box_region(Point(px-maxupperbound,py-maxupperbound), Point(px+maxupperbound,py+maxupperbound));
     bgi::query(refRTree, bgi::intersects(box_region), std::back_inserter(nearbyPoints));
+    cout << "nearby points: " << nearbyPoints.size() << endl;
     for(int i = 0; i < nearbyPoints.size(); i++){
         nearbyPoints[i].distance = nearbyPoints[i].distanceTo(ref.pointcloud[randomIndex]);
     }

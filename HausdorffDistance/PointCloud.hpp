@@ -63,20 +63,20 @@ public:
     PointCloud(int size, double minx, double maxx, double miny, double maxy); // random generate points
     PointCloud(PointCloud &pc, int size);
     
-//    vector<Point> getPoints_1();
-//    vector<vector<double>> getPoints_2();
+    vector<Point> getPoints_1();
+    vector<vector<double>> getPoints_2();
     
     vector<Point> pointcloud;
-//    vector<Point> z_pointcloud;
+    vector<Point> z_pointcloud;
     pair<Point, Point> bound;
     vector<pair<Point,Point>> FirstLevelMBRs; // actually more than first, if none, there will be bound in it
     
     bool isAvailable = true;
     int dimension = 2;
-//    string keyword;
+    string keyword;
     int keywordId;
-//    Point center;
-//    double distance = 0;
+    Point center;
+    double distance = 0;
     int size = 0;
     void calculateCenterPoint();
     
@@ -263,55 +263,55 @@ void PointCloud::randomize(){
 }
 
 void PointCloud::prezorder(int magnitude){
-    
-    z_pointcloud = pointcloud;
-    
-    // change the following to z_pointcloud
-    
-    // find the shift value
-    long size = this->z_pointcloud.size();
-    double minx = std::numeric_limits<double>::infinity();
-    double miny = std::numeric_limits<double>::infinity();
-    double minz;
-    if(dimension == 3){
-        minz = std::numeric_limits<double>::infinity();
-    }
-    for(int i = 0; i < size; i++){
-        if(z_pointcloud[i].x < minx){
-            minx = z_pointcloud[i].x;
-        }
-        if(z_pointcloud[i].y < miny){
-            miny = z_pointcloud[i].y;
-        }
-        if(dimension == 3 & z_pointcloud[i].z < minz){
-            minz = z_pointcloud[i].z;
-        }
-    }
-    
-    // turn to positive
-    minx = fabs(minx);
-    miny = fabs(miny);
-    if(dimension == 3)
-        minz = fabs(minz);
-    
-    // add shift value to each point
-    for(int i = 0; i < size; i++){
-        z_pointcloud[i].x += minx;
-        z_pointcloud[i].y += miny;
-        if(dimension == 3)
-            z_pointcloud[i].z += minz;
-        
-        // multiply by 10^magnitude and only keep the integer part
-        z_pointcloud[i].x *= pow(10, magnitude);
-        z_pointcloud[i].y *= pow(10, magnitude);
-        if(dimension == 3)
-            z_pointcloud[i].z *= pow(10, magnitude);
-        
-        z_pointcloud[i].x = floor(z_pointcloud[i].x);
-        z_pointcloud[i].y = floor(z_pointcloud[i].y);
-        if(dimension == 3)
-            z_pointcloud[i].z = floor(z_pointcloud[i].z);
-    }
+//
+//    z_pointcloud = pointcloud;
+//
+//    // change the following to z_pointcloud
+//
+//    // find the shift value
+//    long size = this->z_pointcloud.size();
+//    double minx = std::numeric_limits<double>::infinity();
+//    double miny = std::numeric_limits<double>::infinity();
+//    double minz;
+//    if(dimension == 3){
+//        minz = std::numeric_limits<double>::infinity();
+//    }
+//    for(int i = 0; i < size; i++){
+//        if(z_pointcloud[i].x < minx){
+//            minx = z_pointcloud[i].x;
+//        }
+//        if(z_pointcloud[i].y < miny){
+//            miny = z_pointcloud[i].y;
+//        }
+//        if(dimension == 3 & z_pointcloud[i].z < minz){
+//            minz = z_pointcloud[i].z;
+//        }
+//    }
+//
+//    // turn to positive
+//    minx = fabs(minx);
+//    miny = fabs(miny);
+//    if(dimension == 3)
+//        minz = fabs(minz);
+//
+//    // add shift value to each point
+//    for(int i = 0; i < size; i++){
+//        z_pointcloud[i].x += minx;
+//        z_pointcloud[i].y += miny;
+//        if(dimension == 3)
+//            z_pointcloud[i].z += minz;
+//
+//        // multiply by 10^magnitude and only keep the integer part
+//        z_pointcloud[i].x *= pow(10, magnitude);
+//        z_pointcloud[i].y *= pow(10, magnitude);
+//        if(dimension == 3)
+//            z_pointcloud[i].z *= pow(10, magnitude);
+//
+//        z_pointcloud[i].x = floor(z_pointcloud[i].x);
+//        z_pointcloud[i].y = floor(z_pointcloud[i].y);
+//        if(dimension == 3)
+//            z_pointcloud[i].z = floor(z_pointcloud[i].z);
+//    }
 }
 
 // ascending order
@@ -322,62 +322,62 @@ bool cmp_zorder(Point &p1, Point &p2){
 // according the zordered z_pointcloud, adjust the pointcloud order
 // after prezorder, each coordinate should be less than 2^21, about 2*10^6
 void PointCloud::zorder(){
-    
-    // need to do prezorder() for dataset containing negative or float value
-    
-    // compute zorder
-    if(dimension == 3){
-        long size = this->z_pointcloud.size();
-        unsigned int _x;
-        unsigned int _y;
-        unsigned int _z;
-        uint64_t zorderValue = 0;
-        for(int i = 0; i < size; i++){
-            zorderValue = 0;
-            for(uint64_t j = 0; j < (sizeof(uint64_t)*CHAR_BIT)/3; j++){
-                _x = z_pointcloud[i].x;
-                _y = z_pointcloud[i].y;
-                _z = z_pointcloud[i].z;
-                // about priority :  */+-  higher than  << >>  higher than | &
-                zorderValue |= ((_x & ((uint64_t)1 << j)) << 2*j) | ((_y & ((uint64_t)1 << j)) << (2*j+1)) | ((_z & ((uint64_t)1 << j)) << (2*j+2));
-            }
-            pointcloud[i].zorder = zorderValue;
-        }
-    } else if(dimension == 2){
-        long size = this->z_pointcloud.size();
-        unsigned int _x;
-        unsigned int _y;
-        uint64_t zorderValue = 0;
-        for(int i = 0; i < size; i++){
-            zorderValue = 0;
-            for(uint64_t j = 0; j < (sizeof(uint64_t)*CHAR_BIT)/2; j++){
-                _x = z_pointcloud[i].x;
-                _y = z_pointcloud[i].y;
-                // about priority :  */+-  higher than  << >>  higher than | &
-                zorderValue |= ((_x & ((uint64_t)1 << j)) << 2*j) | ((_y & ((uint64_t)1 << j)) << (2*j+1));
-            }
-            pointcloud[i].zorder = zorderValue;
-        }
-    }
-    // sort the pointcloud according to zorder
-    sort(this->pointcloud.begin(), this->pointcloud.end(), cmp_zorder);
+//
+//    // need to do prezorder() for dataset containing negative or float value
+//
+//    // compute zorder
+//    if(dimension == 3){
+//        long size = this->z_pointcloud.size();
+//        unsigned int _x;
+//        unsigned int _y;
+//        unsigned int _z;
+//        uint64_t zorderValue = 0;
+//        for(int i = 0; i < size; i++){
+//            zorderValue = 0;
+//            for(uint64_t j = 0; j < (sizeof(uint64_t)*CHAR_BIT)/3; j++){
+//                _x = z_pointcloud[i].x;
+//                _y = z_pointcloud[i].y;
+//                _z = z_pointcloud[i].z;
+//                // about priority :  */+-  higher than  << >>  higher than | &
+//                zorderValue |= ((_x & ((uint64_t)1 << j)) << 2*j) | ((_y & ((uint64_t)1 << j)) << (2*j+1)) | ((_z & ((uint64_t)1 << j)) << (2*j+2));
+//            }
+//            pointcloud[i].zorder = zorderValue;
+//        }
+//    } else if(dimension == 2){
+//        long size = this->z_pointcloud.size();
+//        unsigned int _x;
+//        unsigned int _y;
+//        uint64_t zorderValue = 0;
+//        for(int i = 0; i < size; i++){
+//            zorderValue = 0;
+//            for(uint64_t j = 0; j < (sizeof(uint64_t)*CHAR_BIT)/2; j++){
+//                _x = z_pointcloud[i].x;
+//                _y = z_pointcloud[i].y;
+//                // about priority :  */+-  higher than  << >>  higher than | &
+//                zorderValue |= ((_x & ((uint64_t)1 << j)) << 2*j) | ((_y & ((uint64_t)1 << j)) << (2*j+1));
+//            }
+//            pointcloud[i].zorder = zorderValue;
+//        }
+//    }
+//    // sort the pointcloud according to zorder
+//    sort(this->pointcloud.begin(), this->pointcloud.end(), cmp_zorder);
 }
 
 void PointCloud::calculateHilbertValue(){
     // x stands for latitude
     // y stands for longitude
-    
-    // increase x by 90, increase y by 180
-    for (int i = 0; i < pointcloud.size(); i++){
-        int map_x = (pointcloud[i].x + 90) * 10000; // ignore the part after 4 decimal point
-        int map_y = (pointcloud[i].y + 180) * 10000;
-//        int map_x = (pointcloud[i].x + 180);
-//        int map_y = (pointcloud[i].y + 180);
-//        int map_x = (pointcloud[i].x);
-//        int map_y = (pointcloud[i].y);
-        double _hilbertValue = xy2d(HILBERT_N, map_x, map_y);
-        pointcloud[i].hilbertValue = _hilbertValue;
-    }
+//
+//    // increase x by 90, increase y by 180
+//    for (int i = 0; i < pointcloud.size(); i++){
+//        int map_x = (pointcloud[i].x + 90) * 10000; // ignore the part after 4 decimal point
+//        int map_y = (pointcloud[i].y + 180) * 10000;
+////        int map_x = (pointcloud[i].x + 180);
+////        int map_y = (pointcloud[i].y + 180);
+////        int map_x = (pointcloud[i].x);
+////        int map_y = (pointcloud[i].y);
+//        double _hilbertValue = xy2d(HILBERT_N, map_x, map_y);
+//        pointcloud[i].hilbertValue = _hilbertValue;
+//    }
 }
 
 bool cmp_hilbertValue(Point &p1, Point& p2){

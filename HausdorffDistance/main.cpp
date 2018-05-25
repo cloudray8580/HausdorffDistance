@@ -20,7 +20,7 @@ bool cmp_hilbert(pair<Point, int>& hilbertpoint1, pair<Point, int>& hilbertpoint
 
 int main(int argc, const char * argv[]) {
     
-    testGIS2011();
+//    testGIS2011();
 //    map<string, int> keywordIdMap = Dataset::GenerateKeywordIdMapFromOriginal("/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase", "/Users/lizhe/Desktop/dataset/keywordIdMap");
 //    Dataset::mapKeywordIntoId("/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase", "/Users/lizhe/Desktop/dataset/original", keywordIdMap);
 //    vector<Point> points = Dataset::RestorePointFromFileWithKeywordId("/Users/lizhe/Desktop/dataset/original");
@@ -29,57 +29,76 @@ int main(int argc, const char * argv[]) {
 //    Dataset::Binary_StoreKeywordIdDatasetToFile("/Users/lizhe/Desktop/dataset/pointclouds-binary", pointclouds);
 //    Dataset::Binary_StoreKeywordIdPointsToFile("/Users/lizhe/Desktop/dataset/points-binary", points);
     
-//    vector<Point> points = Dataset::Binary_RestoreKeywordIdPointsFromFile("/Users/lizhe/Desktop/dataset/points-binary");
-//    vector<PointCloud> dataset = Dataset::Binary_RestoreKeywordIdDatasetFromFile("/Users/lizhe/Desktop/dataset/pointclouds-binary");
+//    vector<Point> points = Dataset::Binary_RestoreKeywordIdPointsFromFile("/Users/lizhe/Desktop/dataset/points-binary")
+    
     vector<Point> points;
     map<int, vector<int>> pidMap;
     Dataset::Binary_RestoreKeywordIdPointsFromFile_Seperate("/Users/lizhe/Desktop/dataset/points-binary", points, pidMap);
-//    KNNSearch knn(dataset);
-//    knn.dataset = dataset;
-//    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/Tweets-keyword-lowercase-MBRs", "/Users/lizhe/Downloads/ICDE15data/Tweets-keyword-lowercase-Bound");
-//    knn.allPoints = points;
-//    PointCloud pc1("/Users/lizhe/Downloads/ICDE15data/TweetExtract1.pts");
-//    PointCloud pc2("/Users/lizhe/Downloads/ICDE15data/TweetExtract2.pts");
-//    PointCloud pc3("/Users/lizhe/Downloads/ICDE15data/TweetExtract3.pts");
-//    PointCloud pc4("/Users/lizhe/Downloads/ICDE15data/TweetExtract4.pts");
-//    PointCloud pc5("/Users/lizhe/Downloads/ICDE15data/TweetExtract5.pts");
-//    PointCloud pc1("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/food.pts");
-//    PointCloud pc2("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/sandwich.pts");
-//    PointCloud pc3("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/dog.pts");
-//    PointCloud pc4("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/kid.pts");
-//    PointCloud pc5("/Users/lizhe/Downloads/ICDE15data/Tweets-RealExample/flower.pts");
+    
+    vector<PointCloud> dataset = Dataset::Binary_RestoreKeywordIdDatasetFromFile("/Users/lizhe/Desktop/dataset/pointclouds-binary");
+//    vector<PointCloud> dataset = Dataset::RestorePointCloudFromFile("/Users/lizhe/Downloads/ICDE15data/Tweets.pts");
+    
+    cout << "dataset size" << dataset.size() << endl;
+    
+    KNNSearch knn(dataset, points);
+//    knn.associateMBRs("/Users/lizhe/Desktop/dataset/MBRs", "/Users/lizhe/Desktop/dataset/bounds");
+//    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/Tweets-MBRs-10", "/Users/lizhe/Downloads/ICDE15data/Tweets-Bound");
+    
+    PointCloud pc1("/Users/lizhe/Downloads/ICDE15data/TweetExtract1.pts");
+    PointCloud pc2("/Users/lizhe/Downloads/ICDE15data/TweetExtract2.pts");
+    PointCloud pc3("/Users/lizhe/Downloads/ICDE15data/TweetExtract3.pts");
+    PointCloud pc4("/Users/lizhe/Downloads/ICDE15data/TweetExtract4.pts");
+    PointCloud pc5("/Users/lizhe/Downloads/ICDE15data/TweetExtract5.pts");
 
-//    knn.orderDatasetWithSize(); // 20s
-//    knn.buildRtreeForAllPoints(); // 60s
-//    knn.generateKeywordIdMap(); // 1s
-//    knn.generateKeywordCheck(); // 1s
+    knn.orderDatasetWithSize(); // 20s
+    knn.buildRtreeForAllPoints(); // 60s
+    knn.generateKeywordIdMap(); // 1s
+    knn.generateKeywordCheck(); // 1s
 
-//    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc1, 10);
+    cout << "test for Q1" << endl;
+//
+//    knn.KNN_GIS2011(pc1, 10);
+//    knn.KNN_PAMI2015_Pruning(pc1, 10);
 //    knn.KNN_PAMI2015_Pruning_KCenter(pc1, 10);
-//    knn.NN_UsingPoint_Efficient(pc1);
-//    knn.KNN_UsingPoint_Efficient(pc1, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc1, 10);
+    knn.KNN_UsingPoint_Efficient(pc1, 1, pidMap);
+    
+    cout << "test for Q2" << endl;
+    
+//    knn.KNN_GIS2011(pc2, 10);
+//    knn.KNN_PAMI2015_Pruning(pc2, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc2, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc2, 10);
+    knn.KNN_UsingPoint_Efficient(pc2, 1, pidMap);
 
-////    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc2, 10);
-////    knn.KNN_PAMI2015_Pruning_KCenter(pc2, 10);
-//    knn.NN_UsingPoint_Efficient(pc2);
-//    knn.KNN_UsingPoint_Efficient(pc2, 10);
-//
-////    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc3, 10);
-////    knn.KNN_PAMI2015_Pruning_KCenter(pc3, 10);
-//    knn.NN_UsingPoint_Efficient(pc3);
-//    knn.KNN_UsingPoint_Efficient(pc3, 10);
-//
-////    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc4, 10);
-////    knn.KNN_PAMI2015_Pruning_KCenter(pc4, 10);
-//    knn.NN_UsingPoint_Efficient(pc4);
-//    knn.KNN_UsingPoint_Efficient(pc4, 10);
-//
-////    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc5, 10);
-////    knn.KNN_PAMI2015_Pruning_KCenter(pc5, 10);
-//    knn.NN_UsingPoint_Efficient(pc5);
-//    knn.KNN_UsingPoint_Efficient(pc5, 10);
+    cout << "test for Q3" << endl;
     
+//    knn.KNN_GIS2011(pc3, 10);
+//    knn.KNN_PAMI2015_Pruning(pc3, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc3, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc3, 10);
+    knn.KNN_UsingPoint_Efficient(pc3, 1, pidMap);
+
+    cout << "test for Q4" << endl;
     
+//    knn.KNN_GIS2011(pc4, 10);
+//    knn.KNN_PAMI2015_Pruning(pc4, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc4, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc4, 10);
+    knn.KNN_UsingPoint_Efficient(pc4, 1, pidMap);
+
+    cout << "test for Q5" << endl;
+    
+//    knn.KNN_GIS2011(pc5, 10);
+//    knn.KNN_PAMI2015_Pruning(pc5, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc5, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10);
+//    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc5, 10);
+    knn.KNN_UsingPoint_Efficient(pc5, 1, pidMap);
     
     
 //    vector<PointCloud> data = Dataset::RestorePointCloudFromFileWithKeywordId("/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase-OnlyKeywordId-PointClouds");

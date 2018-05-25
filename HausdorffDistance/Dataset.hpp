@@ -24,15 +24,15 @@ public:
     static vector<PointCloud> GeneratePointCloudFromTwitterFileWithKeyword2(string filepath);
     
     // get all points
-    static vector<Point> GetAllPoints(string filepath);
+//    static vector<Point> GetAllPoints(string filepath);
     
     // don't use this method
-    static void GenerateTweetPointCloudsAndAllPoints(string filepath, vector<PointCloud> &pcs, vector<Point> &ps);
+//    static void GenerateTweetPointCloudsAndAllPoints(string filepath, vector<PointCloud> &pcs, vector<Point> &ps);
     
     // change keyword into id
     static map<string, int> GenerateKeywordIdMapFromOriginal(string input, string output);
     static void mapKeywordIntoId(string input, string output, map<string,int> keywordIdMap); // based on original file
-    static vector<Point> RestorePointFromFileWithKeywordId(string input); // based on original file with keyword Id
+//    static vector<Point> RestorePointFromFileWithKeywordId(string input); // based on original file with keyword Id
     static vector<PointCloud> GeneratePointCloudFromTwitterFileWithKeywordId(string filepath);
     static bool StorePointCloudIntoFileWithKeywordId(string filepath, vector<PointCloud> pcs);
     static vector<PointCloud> RestorePointCloudFromFileWithKeywordId(string filepath); // point clouds file
@@ -40,8 +40,8 @@ public:
     // binary read write
     static void Binary_StoreKeywordIdDatasetToFile(string filepath, vector<PointCloud> dataset);
     static vector<PointCloud> Binary_RestoreKeywordIdDatasetFromFile(string filepath);
-    static void Binary_StoreKeywordIdPointsToFile(string filepath, vector<Point> dataset);
-    static vector<Point> Binary_RestoreKeywordIdPointsFromFile(string filepath);
+//    static void Binary_StoreKeywordIdPointsToFile(string filepath, vector<Point> dataset);
+//    static vector<Point> Binary_RestoreKeywordIdPointsFromFile(string filepath);
     static void Binary_RestoreKeywordIdPointsFromFile_Seperate(string filepath, vector<Point> &points, map<int, vector<int>> &pidMap);
     
     // about USA
@@ -477,121 +477,121 @@ vector<PointCloud> Dataset::GeneratePointCloudFromTwitterFileWithKeyword2(string
     return dataset;
 }
 
-vector<Point> Dataset::GetAllPoints(string filepath){
-    vector<Point> points;
-    
-    ifstream infile;
-    infile.open(filepath);
-    vector<string> fields;
-    string str;
-    
-    string coordinate;
-    string feature;
-    vector<string> features;
-    string latitude_str;
-    string longitude_str;
-    double latitude;
-    double longitude;
-    int lines = 0;
-    
-    bool contains_only_character = true;
-    
-    while(getline(infile,str)){
-        lines++;
-        fields.clear();
-        split(fields, str, boost::is_any_of("\t"));
-        feature = fields[1];
-        latitude_str = fields[2];
-        longitude_str = fields[3];
-        latitude = stod(latitude_str);
-        longitude = stod(longitude_str);
-        split(features, feature, boost::is_any_of(","));
-        
-        Point point = Point(latitude, longitude);
-        point.dimension = 2;
-        point.keywords = set<string>(std::make_move_iterator(features.begin()), std::make_move_iterator(features.end()));
-        points.push_back(point);
-  
-        if(lines%10000 == 0){
-            cout << lines << endl;
-        }
-    }
-    return points;
-}
+//vector<Point> Dataset::GetAllPoints(string filepath){
+//    vector<Point> points;
+//
+//    ifstream infile;
+//    infile.open(filepath);
+//    vector<string> fields;
+//    string str;
+//
+//    string coordinate;
+//    string feature;
+//    vector<string> features;
+//    string latitude_str;
+//    string longitude_str;
+//    double latitude;
+//    double longitude;
+//    int lines = 0;
+//
+//    bool contains_only_character = true;
+//
+//    while(getline(infile,str)){
+//        lines++;
+//        fields.clear();
+//        split(fields, str, boost::is_any_of("\t"));
+//        feature = fields[1];
+//        latitude_str = fields[2];
+//        longitude_str = fields[3];
+//        latitude = stod(latitude_str);
+//        longitude = stod(longitude_str);
+//        split(features, feature, boost::is_any_of(","));
+//
+//        Point point = Point(latitude, longitude);
+//        point.dimension = 2;
+//        point.keywords = set<string>(std::make_move_iterator(features.begin()), std::make_move_iterator(features.end()));
+//        points.push_back(point);
+//
+//        if(lines%10000 == 0){
+//            cout << lines << endl;
+//        }
+//    }
+//    return points;
+//}
 
-void Dataset::GenerateTweetPointCloudsAndAllPoints(string filepath, vector<PointCloud> &pcs, vector<Point> &ps){
-    
-    ifstream infile;
-    infile.open(filepath);
-    vector<string> fields;
-    string str;
-    
-    string coordinate;
-    string feature;
-    vector<string> features;
-    string latitude_str;
-    string longitude_str;
-    double latitude;
-    double longitude;
-    map<string, PointCloud> dataset_feature;
-    int lines = 0;
-    
-    bool contains_only_character = true;
-    int featureId = 0;
-    ps.clear();
-    while(getline(infile,str)){
-        lines++;
-        fields.clear();
-        split(fields, str, boost::is_any_of("\t"));
-        feature = fields[1];
-        latitude_str = fields[2];
-        longitude_str = fields[3];
-        latitude = stod(latitude_str);
-        longitude = stod(longitude_str);
-        split(features, feature, boost::is_any_of(","));
-        
-        Point point = Point(latitude, longitude);
-        point.dimension = 2;
-        for (int i = 0; i < features.size(); i++){
-            feature = features[i];
-//            contains_only_character = std::regex_match(feature, std::regex("^[A-Za-z]+$"));
-//            if (!contains_only_character){
-//                continue;
+//void Dataset::GenerateTweetPointCloudsAndAllPoints(string filepath, vector<PointCloud> &pcs, vector<Point> &ps){
+//
+//    ifstream infile;
+//    infile.open(filepath);
+//    vector<string> fields;
+//    string str;
+//
+//    string coordinate;
+//    string feature;
+//    vector<string> features;
+//    string latitude_str;
+//    string longitude_str;
+//    double latitude;
+//    double longitude;
+//    map<string, PointCloud> dataset_feature;
+//    int lines = 0;
+//
+//    bool contains_only_character = true;
+//    int featureId = 0;
+//    ps.clear();
+//    while(getline(infile,str)){
+//        lines++;
+//        fields.clear();
+//        split(fields, str, boost::is_any_of("\t"));
+//        feature = fields[1];
+//        latitude_str = fields[2];
+//        longitude_str = fields[3];
+//        latitude = stod(latitude_str);
+//        longitude = stod(longitude_str);
+//        split(features, feature, boost::is_any_of(","));
+//
+//        Point point = Point(latitude, longitude);
+//        point.dimension = 2;
+//        for (int i = 0; i < features.size(); i++){
+//            feature = features[i];
+////            contains_only_character = std::regex_match(feature, std::regex("^[A-Za-z]+$"));
+////            if (!contains_only_character){
+////                continue;
+////            }
+//            if(dataset_feature.find(feature) == dataset_feature.end()){
+//                PointCloud pc = PointCloud();
+//                pc.keyword = feature;
+//                pc.keywordId = featureId;
+//                featureId++;
+//                pc.dimension = 2;
+//                pc.pointcloud.push_back(point);
+//                dataset_feature.insert(pair<string, PointCloud>(feature, pc));
+////                point.keywordIds.insert(pc.keywordId);
+//                point.keywordIds.push_back(pc.keywordId);
+//            } else {
+//                dataset_feature[feature].pointcloud.push_back(point);
+////                point.keywordIds.insert(dataset_feature[feature].keywordId);
+//                 point.keywordIds.push_back(dataset_feature[feature].keywordId);
 //            }
-            if(dataset_feature.find(feature) == dataset_feature.end()){
-                PointCloud pc = PointCloud();
-                pc.keyword = feature;
-                pc.keywordId = featureId;
-                featureId++;
-                pc.dimension = 2;
-                pc.pointcloud.push_back(point);
-                dataset_feature.insert(pair<string, PointCloud>(feature, pc));
-//                point.keywordIds.insert(pc.keywordId);
-                point.keywordIds.push_back(pc.keywordId);
-            } else {
-                dataset_feature[feature].pointcloud.push_back(point);
-//                point.keywordIds.insert(dataset_feature[feature].keywordId);
-                 point.keywordIds.push_back(dataset_feature[feature].keywordId);
-            }
-        }
-        ps.push_back(point);
-        
-        if(lines%10000 == 0){
-            cout << lines << endl;
-        }
-    }
-    
-    long min = 100000000;
-    long max = 0;
-    long totalpoints = 0;
-    long totalpointclouds = 0;
-    
-    pcs.clear();
-    for(auto it = dataset_feature.begin(); it != dataset_feature.end(); it++){
-        pcs.push_back(it->second);
-    }
-
-}
+//        }
+//        ps.push_back(point);
+//
+//        if(lines%10000 == 0){
+//            cout << lines << endl;
+//        }
+//    }
+//
+//    long min = 100000000;
+//    long max = 0;
+//    long totalpoints = 0;
+//    long totalpointclouds = 0;
+//
+//    pcs.clear();
+//    for(auto it = dataset_feature.begin(); it != dataset_feature.end(); it++){
+//        pcs.push_back(it->second);
+//    }
+//
+//}
 
 map<string, int> Dataset::GenerateKeywordIdMapFromOriginal(string input, string output){
     
@@ -684,54 +684,54 @@ void Dataset::mapKeywordIntoId(string input, string output, map<string,int> keyw
     }
 }
 
-vector<Point> Dataset::RestorePointFromFileWithKeywordId(string input){
-    vector<Point> points;
-    
-    ifstream infile;
-    infile.open(input);
-    vector<string> fields;
-    string str;
-    
-    string coordinate;
-    string feature;
-    vector<string> features;
-    string latitude_str;
-    string longitude_str;
-    double latitude;
-    double longitude;
-    int lines = 0;
-    
-    bool contains_only_character = true;
-    vector<int> featureIds;
-    
-    while(getline(infile,str)){
-        lines++;
-        fields.clear();
-        split(fields, str, boost::is_any_of("\t"));
-        feature = fields[1];
-        latitude_str = fields[2];
-        longitude_str = fields[3];
-        latitude = stod(latitude_str);
-        longitude = stod(longitude_str);
-        split(features, feature, boost::is_any_of(","));
-        featureIds.clear();
-        for (int i = 0; i < features.size(); i++){
-            feature = features[i];
-            featureIds.push_back(stoi(feature));
-        }
-        Point point = Point(latitude, longitude);
-        point.dimension = 2;
-        point.keywordIds = featureIds;
-        point.keywordsize = featureIds.size();
-//        point.keywordIds = set<int>(std::make_move_iterator(featureIds.begin()), std::make_move_iterator(featureIds.end()));
-        points.push_back(point);
-        
-        if(lines%10000 == 0){
-            cout << lines << endl;
-        }
-    }
-    return points;
-}
+//vector<Point> Dataset::RestorePointFromFileWithKeywordId(string input){
+//    vector<Point> points;
+//
+//    ifstream infile;
+//    infile.open(input);
+//    vector<string> fields;
+//    string str;
+//
+//    string coordinate;
+//    string feature;
+//    vector<string> features;
+//    string latitude_str;
+//    string longitude_str;
+//    double latitude;
+//    double longitude;
+//    int lines = 0;
+//
+//    bool contains_only_character = true;
+//    vector<int> featureIds;
+//
+//    while(getline(infile,str)){
+//        lines++;
+//        fields.clear();
+//        split(fields, str, boost::is_any_of("\t"));
+//        feature = fields[1];
+//        latitude_str = fields[2];
+//        longitude_str = fields[3];
+//        latitude = stod(latitude_str);
+//        longitude = stod(longitude_str);
+//        split(features, feature, boost::is_any_of(","));
+//        featureIds.clear();
+//        for (int i = 0; i < features.size(); i++){
+//            feature = features[i];
+//            featureIds.push_back(stoi(feature));
+//        }
+//        Point point = Point(latitude, longitude);
+//        point.dimension = 2;
+//        point.keywordIds = featureIds;
+//        point.keywordsize = featureIds.size();
+////        point.keywordIds = set<int>(std::make_move_iterator(featureIds.begin()), std::make_move_iterator(featureIds.end()));
+//        points.push_back(point);
+//
+//        if(lines%10000 == 0){
+//            cout << lines << endl;
+//        }
+//    }
+//    return points;
+//}
 
 vector<PointCloud> Dataset::GeneratePointCloudFromTwitterFileWithKeywordId(string filepath){
     vector<PointCloud> dataset;
@@ -901,48 +901,48 @@ vector<PointCloud> Dataset::Binary_RestoreKeywordIdDatasetFromFile(string filepa
     return dataset;
 }
 
-void Dataset::Binary_StoreKeywordIdPointsToFile(string filepath, vector<Point> dataset){
-    ofstream outfile;
-    outfile.open(filepath, ios::binary);
-    for(int i = 0; i < dataset.size(); i++){
-        outfile.write((char*)&dataset[i].x, sizeof(double));
-        outfile.write((char*)&dataset[i].y, sizeof(double));
-        outfile.write((char*)&dataset[i].keywordsize, sizeof(int));
-        for(int j = 0; j < dataset[i].keywordsize; j++){
-            outfile.write((char*)&dataset[i].keywordIds[j], sizeof(int));
-        }
-    }
-}
+//void Dataset::Binary_StoreKeywordIdPointsToFile(string filepath, vector<Point> dataset){
+//    ofstream outfile;
+//    outfile.open(filepath, ios::binary);
+//    for(int i = 0; i < dataset.size(); i++){
+//        outfile.write((char*)&dataset[i].x, sizeof(double));
+//        outfile.write((char*)&dataset[i].y, sizeof(double));
+//        outfile.write((char*)&dataset[i].keywordsize, sizeof(int));
+//        for(int j = 0; j < dataset[i].keywordsize; j++){
+//            outfile.write((char*)&dataset[i].keywordIds[j], sizeof(int));
+//        }
+//    }
+//}
 
-vector<Point> Dataset::Binary_RestoreKeywordIdPointsFromFile(string filepath){
-    vector<Point> dataset;
-    
-    ifstream infile;
-    infile.open(filepath, ios::binary);
-    Point p(0, 0);
-    int count = 0;
-    while(true){
-        if(!infile){
-            break;
-        }
-        infile.read((char*)&p.x, sizeof(double));
-        infile.read((char*)&p.y, sizeof(double));
-        infile.read((char*)&p.keywordsize, sizeof(int));
-        p.keywordIds.clear();
-        for(int i = 0; i < p.keywordsize; i++){
-            p.keywordIds.push_back(0);
-            infile.read((char*)&p.keywordIds[i], sizeof(int));
-        }
-        dataset.push_back(p);
-        count++;
-        if(count % 10000 == 0){
-            cout << count << endl;
-        }
-    }
-    return dataset;
-}
+//vector<Point> Dataset::Binary_RestoreKeywordIdPointsFromFile(string filepath){
+//    vector<Point> dataset;
+//
+//    ifstream infile;
+//    infile.open(filepath, ios::binary);
+//    Point p(0, 0);
+//    int count = 0;
+//    while(true){
+//        if(!infile){
+//            break;
+//        }
+//        infile.read((char*)&p.x, sizeof(double));
+//        infile.read((char*)&p.y, sizeof(double));
+//        infile.read((char*)&p.keywordsize, sizeof(int));
+//        p.keywordIds.clear();
+//        for(int i = 0; i < p.keywordsize; i++){
+//            p.keywordIds.push_back(0);
+//            infile.read((char*)&p.keywordIds[i], sizeof(int));
+//        }
+//        dataset.push_back(p);
+//        count++;
+//        if(count % 10000 == 0){
+//            cout << count << endl;
+//        }
+//    }
+//    return dataset;
+//}
 
-void Dataset::Binary_RestoreKeywordIdPointsFromFile_Seperate(string filepath, vector<Point> points, map<int, vector<int>> pidMap){
+void Dataset::Binary_RestoreKeywordIdPointsFromFile_Seperate(string filepath, vector<Point> &points, map<int, vector<int>> &pidMap){
     
     ifstream infile;
     infile.open(filepath, ios::binary);
@@ -958,11 +958,11 @@ void Dataset::Binary_RestoreKeywordIdPointsFromFile_Seperate(string filepath, ve
         infile.read((char*)&p.keywordsize, sizeof(int));
         p.pid = count;
         keywordIds.clear();
-        pidMap.insert(pair<int, vector<int>>(count,keywordIds));
         for(int i = 0; i < p.keywordsize; i++){
             keywordIds.push_back(0);
             infile.read((char*)&keywordIds[i], sizeof(int));
         }
+        pidMap.insert(pair<int, vector<int>>(count,keywordIds));
         points.push_back(p);
         count++;
         if(count % 10000 == 0){
