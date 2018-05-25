@@ -3789,26 +3789,26 @@ void KNNSearch::KNN_UsingPoint_Efficient(PointCloud &ref, int k, map<int, vector
     // here we should use k upper bound and choose the max
     double maxupperbound = 0;
     double upperbound = 0;
-    for(int i = 0; i < k; i++){
-        upperbound = ExactHausdorff::PAMI2015(ref, dataset[dataset.size()-50-i]); // from the end
-        if(upperbound > maxupperbound){
-            maxupperbound = upperbound;
-        }
-    }
-//    int top = dataset.size()*0.05;
-//    priority_queue<double> krecord;
-//    int randomDatasetIndex = 0;
-//    for(int i = 0; i < top; i++){
-//        randomDatasetIndex = rand()%dataset.size();
-//        upperbound = ExactHausdorff::PAMI2015(ref, dataset[randomDatasetIndex]);
-//        if(krecord.size() < k){
-//            krecord.push(upperbound);
-//        } else if(upperbound < krecord.top()){
-//            krecord.pop();
-//            krecord.push(upperbound);
+//    for(int i = 0; i < k; i++){
+//        upperbound = ExactHausdorff::PAMI2015(ref, dataset[dataset.size()-50-i]); // from the end
+//        if(upperbound > maxupperbound){
+//            maxupperbound = upperbound;
 //        }
 //    }
-//    maxupperbound = krecord.top();
+    int top = dataset.size()*0.01;
+    priority_queue<double> krecord;
+    int randomDatasetIndex = 0;
+    for(int i = 0; i < top; i++){
+        randomDatasetIndex = rand()%dataset.size();
+        upperbound = ExactHausdorff::PAMI2015(ref, dataset[randomDatasetIndex]);
+        if(krecord.size() < k){
+            krecord.push(upperbound);
+        } else if(upperbound < krecord.top()){
+            krecord.pop();
+            krecord.push(upperbound);
+        }
+    }
+    maxupperbound = krecord.top();
     
     upperboundEnd = clock();
     cout << "max upper bound : " << maxupperbound << endl;
