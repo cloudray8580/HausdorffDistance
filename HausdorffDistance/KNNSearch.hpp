@@ -112,7 +112,9 @@ public:
 //    void NN_UsingPoint(PointCloud &ref); // currently do not support K, // need to bind call generateKeywordMap() AND buildRtreeForAllPoints() FIRST
 //    void NN_UsingPoint_Efficient(PointCloud &ref); // 1.first sort dataset, then call build Rtree then generateBitmap
 //    void KNN_UsingPoint_Efficient(PointCloud &ref, int k); // 1.first sort dataset, then call build Rtree then generateBitmap
-    void KNN_UsingPoint_Efficient(PointCloud &ref, int k, map<int, vector<int>> &pidKeywordIdsMap);
+    void KNN_UsingPoint_Efficient(PointCloud &ref, int k, map<int, vector<int>> &pidKeywordIdsMap, int randomNum = 1);
+    
+    void doIntersection(vector<vector<Point>> &candidateSets, vector<Point> &candidateSet);
 };
 
 bool cmp_pointcloudsize(PointCloud &pc1, PointCloud &pc2){
@@ -3771,13 +3773,19 @@ bool cmp_nearbyPoints(Point &p1, Point &p2){
 ////    }
 //}
 
-void KNNSearch::KNN_UsingPoint_Efficient(PointCloud &ref, int k, map<int, vector<int>> &pidKeywordIdsMap){
+void KNNSearch::KNN_UsingPoint_Efficient(PointCloud &ref, int k, map<int, vector<int>> &pidKeywordIdsMap, int randomNum){
     priority_queue<pair<double, int>, vector<pair<double, int>>, cmp_pair> prqueue;
     ref.sortByKcenter();
-
+    for(int i = 0; i < dataset.size(); i++){
+        dataset[i].randomize();
+    }
+    srand((unsigned)time(NULL));
+    
     clock_t start, stop;
     start = clock();
 
+    clock_t upperboundStart, upperboundEnd;
+    upperboundStart = clock();
     // here we should use k upper bound and choose the max
     double maxupperbound = 0;
     double upperbound = 0;
@@ -3787,43 +3795,101 @@ void KNNSearch::KNN_UsingPoint_Efficient(PointCloud &ref, int k, map<int, vector
             maxupperbound = upperbound;
         }
     }
+//    int top = dataset.size()*0.05;
+//    priority_queue<double> krecord;
+//    int randomDatasetIndex = 0;
+//    for(int i = 0; i < top; i++){
+//        randomDatasetIndex = rand()%dataset.size();
+//        upperbound = ExactHausdorff::PAMI2015(ref, dataset[randomDatasetIndex]);
+//        if(krecord.size() < k){
+//            krecord.push(upperbound);
+//        } else if(upperbound < krecord.top()){
+//            krecord.pop();
+//            krecord.push(upperbound);
+//        }
+//    }
+//    maxupperbound = krecord.top();
+    
+    upperboundEnd = clock();
     cout << "max upper bound : " << maxupperbound << endl;
-    // randomly choose a point for query
+    
+    
+    // randomly choose some points for query
+    
+    clock_t queryStart, queryEnd;
+    queryStart = clock();
+    
+    vector<int> randomPositions;
     long size = ref.pointcloud.size();
     int randomIndex = 0;
-    srand((unsigned)time(NULL));
-    randomIndex = rand()%size;
-
-    double px = ref.pointcloud[randomIndex].x;
-    double py = ref.pointcloud[randomIndex].y;
-
-    vector<Point> nearbyPoints;
-    box box_region(Point(px-maxupperbound,py-maxupperbound), Point(px+maxupperbound,py+maxupperbound));
-    bgi::query(refRTree, bgi::intersects(box_region), std::back_inserter(nearbyPoints));
-    cout << "nearby points: " << nearbyPoints.size() << endl;
-    for(int i = 0; i < nearbyPoints.size(); i++){
-        nearbyPoints[i].distance = nearbyPoints[i].distanceTo(ref.pointcloud[randomIndex]);
+    for(int i = 0; i < randomNum; i++){
+        randomIndex = rand()%size;
+        randomPositions.push_back(randomIndex);
     }
+    
+    // query the nearby points
+//    vector<Point> nearbyPoints;
+//    vector<Point> minNearbyPoints;
+//    double minsize = std::numeric_limits<double>::infinity();
+//    double minRandomIndex = 0;
+//    for(int i = 0; i < randomNum; i++){
+//        double px = ref.pointcloud[randomPositions[i]].x;
+//        double py = ref.pointcloud[randomPositions[i]].y;
+//        nearbyPoints.clear();
+//        box box_region(Point(px-maxupperbound,py-maxupperbound), Point(px+maxupperbound,py+maxupperbound));
+//        bgi::query(refRTree, bgi::intersects(box_region), std::back_inserter(nearbyPoints));
+//        cout << "nearby points: " << nearbyPoints.size() << endl;
+//        if(nearbyPoints.size() < minsize){
+//            minsize = nearbyPoints.size();
+//            minNearbyPoints = nearbyPoints;
+//            minRandomIndex = i;
+//        }
+//    }
+//    for(int i = 0; i < minNearbyPoints.size(); i++){
+//        minNearbyPoints[i].distance = minNearbyPoints[i].distanceTo(ref.pointcloud[randomPositions[minRandomIndex]]);
+//    }
+    
+    vector<Point> minNearbyPoints;
+    vector<vector<Point>> candidateSets;
+    for(int i = 0; i < randomNum; i++){
+        double px = ref.pointcloud[randomPositions[i]].x;
+        double py = ref.pointcloud[randomPositions[i]].y;
+        box box_region(Point(px-maxupperbound,py-maxupperbound), Point(px+maxupperbound,py+maxupperbound));
+        bgi::query(refRTree, bgi::intersects(box_region), std::back_inserter(minNearbyPoints));
+        cout << "nearby points: " << minNearbyPoints.size() << endl;
+        candidateSets.push_back(minNearbyPoints);
+    }
+    minNearbyPoints.clear();
+    doIntersection(candidateSets, minNearbyPoints);
+    queryEnd = clock();
+    
     // sort points
-    sort(nearbyPoints.begin(), nearbyPoints.end(), cmp_nearbyPoints); // ascending order
-
-
+    sort(minNearbyPoints.begin(), minNearbyPoints.end(), cmp_nearbyPoints); // ascending order
     // clear bool array
     std::fill(keywordCheck, keywordCheck+dataset.size(), false);
 
+    clock_t calculationStart, calculationEnd;
+    calculationStart = clock();
+    
     double distance = 0;
     double kthValue = maxupperbound;
     int pointcloudindex = 0;
+    
+    int totalPointClouds = 0;
+    int totalPoints = 0;
 
-    for(int i = 0; i < nearbyPoints.size(); i++){
-        if(nearbyPoints[i].distance >= kthValue){
+    for(int i = 0; i < minNearbyPoints.size(); i++){
+        if(minNearbyPoints[i].distance >= kthValue){
+            cout << "break position: " << i << endl;
             break;
         }
-        for(auto it = pidKeywordIdsMap[nearbyPoints[i].pid].begin(); it != pidKeywordIdsMap[nearbyPoints[i].pid].end(); it++){
+        for(auto it = pidKeywordIdsMap[minNearbyPoints[i].pid].begin(); it != pidKeywordIdsMap[minNearbyPoints[i].pid].end(); it++){
             if(!keywordCheck[*it]){ // unconsidered before
                 keywordCheck[*it] = true;
                 pointcloudindex = keywordIdMapForDataset[*it]; // from keyword-id to point cloud index
                 distance = ExactHausdorff::PAMI2015(ref, dataset[pointcloudindex], true, kthValue);
+                totalPointClouds++;
+                totalPoints += dataset[pointcloudindex].pointcloud.size();
                 if(distance == -1){
                     continue;
                 }
@@ -3837,12 +3903,88 @@ void KNNSearch::KNN_UsingPoint_Efficient(PointCloud &ref, int k, map<int, vector
             }
         }
     }
+    calculationEnd = clock();
 
     stop = clock();
-    cout << "using only points method" << " time usage: " << stop-start << endl;
+    cout << "using only points method" << "total time usage: " << stop-start << endl;
+    cout << "upperbound time: " << upperboundEnd - upperboundStart << endl;
+    cout << "query nearby point time: " << queryEnd - queryStart << endl;
+    cout << "calculation time: " << calculationEnd - calculationStart << endl;
+    cout << "total consider point clouds " << totalPointClouds << endl;
+    cout << "average point cloud size: " << totalPoints/totalPointClouds << endl;
     for(int i = 0; i < k; i++){
         cout << prqueue.top().first << endl;
         prqueue.pop();
+    }
+}
+
+// ascending order
+bool cmp_pid(Point &p1, Point &p2){
+    return p1.pid < p2.pid;
+}
+
+inline void KNNSearch::doIntersection(vector<vector<Point>> &candidateSets, vector<Point> &candidateSet){
+    
+    // sort by pid
+    for(int i = 0; i < candidateSets.size(); i++){
+        sort(candidateSets[i].begin(), candidateSets[i].end(), cmp_pid);
+    }
+    
+    // find min pid
+//    int minpid = std::numeric_limits<double>::infinity(); // something wrong
+    int minpid = allPoints.size();
+    for(int i = 0; i < candidateSets.size(); i++){
+        if(candidateSets[i][0].pid < minpid){
+            minpid = candidateSets[i][0].pid;
+        }
+    }
+    
+    vector<int> currentPosition;
+    for(int i = 0; i < candidateSets.size(); i++){
+        currentPosition.push_back(0);
+    }
+    
+    // loop to find intersection
+    bool findFlag = true;
+    bool stopFlag = false;
+    while(true){
+        findFlag = true;
+        for(int i = 0; i < candidateSets.size(); i++){
+            while(candidateSets[i][currentPosition[i]].pid < minpid){
+                currentPosition[i]++;
+                if(currentPosition[i] >= candidateSets[i].size()){
+                    stopFlag = true;
+                }
+            }
+            if(candidateSets[i][currentPosition[i]].pid == minpid){ // found a pid not in intersection
+                currentPosition[i]++;
+                if(currentPosition[i] >= candidateSets[i].size()){
+                    stopFlag = true;
+                }
+            } else if(candidateSets[i][currentPosition[i]].pid > minpid){ // found a pid not in intersection
+                findFlag = false;
+                //break; // find next one that should be in the result; update the current position
+            }
+        }
+        
+        // add the point to result set
+        if(findFlag){
+            candidateSet.push_back(candidateSets[0][currentPosition[0]]);
+        }
+        
+        // find new min pid
+//        minpid = std::numeric_limits<double>::infinity();
+        minpid = allPoints.size();
+        for(int i = 0; i < candidateSets.size(); i++){
+            if(candidateSets[i][currentPosition[i]].pid < minpid){
+                minpid = candidateSets[i][currentPosition[i]].pid;
+            }
+        }
+        
+        // see if stop
+        if(stopFlag){
+            break;
+        }
     }
 }
 

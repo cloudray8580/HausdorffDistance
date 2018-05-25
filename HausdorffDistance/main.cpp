@@ -41,6 +41,7 @@ int main(int argc, const char * argv[]) {
     cout << "dataset size" << dataset.size() << endl;
     
     KNNSearch knn(dataset, points);
+    
 //    knn.associateMBRs("/Users/lizhe/Desktop/dataset/MBRs", "/Users/lizhe/Desktop/dataset/bounds");
 //    knn.associateMBRs("/Users/lizhe/Downloads/ICDE15data/Tweets-MBRs-10", "/Users/lizhe/Downloads/ICDE15data/Tweets-Bound");
     
@@ -49,7 +50,7 @@ int main(int argc, const char * argv[]) {
     PointCloud pc3("/Users/lizhe/Downloads/ICDE15data/TweetExtract3.pts");
     PointCloud pc4("/Users/lizhe/Downloads/ICDE15data/TweetExtract4.pts");
     PointCloud pc5("/Users/lizhe/Downloads/ICDE15data/TweetExtract5.pts");
-
+    
     knn.orderDatasetWithSize(); // 20s
     knn.buildRtreeForAllPoints(); // 60s
     knn.generateKeywordIdMap(); // 1s
@@ -62,7 +63,7 @@ int main(int argc, const char * argv[]) {
 //    knn.KNN_PAMI2015_Pruning_KCenter(pc1, 10);
 //    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc1, 10);
 //    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc1, 10);
-    knn.KNN_UsingPoint_Efficient(pc1, 1, pidMap);
+    knn.KNN_UsingPoint_Efficient(pc1, 10, pidMap, 2);
     
     cout << "test for Q2" << endl;
     
@@ -71,7 +72,7 @@ int main(int argc, const char * argv[]) {
 //    knn.KNN_PAMI2015_Pruning_KCenter(pc2, 10);
 //    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc2, 10);
 //    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc2, 10);
-    knn.KNN_UsingPoint_Efficient(pc2, 1, pidMap);
+    knn.KNN_UsingPoint_Efficient(pc2, 10, pidMap, 2);
 
     cout << "test for Q3" << endl;
     
@@ -80,7 +81,7 @@ int main(int argc, const char * argv[]) {
 //    knn.KNN_PAMI2015_Pruning_KCenter(pc3, 10);
 //    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc3, 10);
 //    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc3, 10);
-    knn.KNN_UsingPoint_Efficient(pc3, 1, pidMap);
+    knn.KNN_UsingPoint_Efficient(pc3, 10, pidMap, 2);
 
     cout << "test for Q4" << endl;
     
@@ -89,7 +90,7 @@ int main(int argc, const char * argv[]) {
 //    knn.KNN_PAMI2015_Pruning_KCenter(pc4, 10);
 //    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc4, 10);
 //    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc4, 10);
-    knn.KNN_UsingPoint_Efficient(pc4, 1, pidMap);
+    knn.KNN_UsingPoint_Efficient(pc4, 10, pidMap, 2);
 
     cout << "test for Q5" << endl;
     
@@ -98,7 +99,7 @@ int main(int argc, const char * argv[]) {
 //    knn.KNN_PAMI2015_Pruning_KCenter(pc5, 10);
 //    knn.KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(pc5, 10);
 //    knn.KNN_PAMI2015_Pruning_KCenter_MBR(pc5, 10);
-    knn.KNN_UsingPoint_Efficient(pc5, 1, pidMap);
+    knn.KNN_UsingPoint_Efficient(pc5, 10, pidMap, 2);
     
     
 //    vector<PointCloud> data = Dataset::RestorePointCloudFromFileWithKeywordId("/Users/lizhe/Downloads/ICDE15data/Tweets-Character-Lowercase-OnlyKeywordId-PointClouds");
