@@ -47,6 +47,9 @@ public:
     // about USA
     static map<string, PointCloud> GeneratePointCloudFromTwitterFileWithKeywordUSA(string filepath);
     static vector<PointCloud> GeneratePointCloudFromTwitterFileWithKeywordUSA2(string filepath);
+    static map<string, PointCloud> GeneratePointCloudFromTwitterFileWithKeywordNewYork(string filepath);
+    static map<string, PointCloud> GeneratePointCloudFromTwitterFileWithKeywordStatenIsland(string filepath);
+    static map<string, PointCloud> GeneratePointCloudFromTwitterFileWithKeywordWashington(string filepath);
     
     // store point cloud (using keyword)
     static bool StorePointCloudIntoFile(string filepath, vector<PointCloud> &dataset);
@@ -1067,6 +1070,9 @@ vector<PointCloud> Dataset::GeneratePointCloudFromTwitterFileWithKeywordUSA2(str
         if(!(latitude >= 24.7433195 && latitude <= 49.3457868 && longitude >= -124.7844079 && longitude <= -66.9513812)){
             continue; // not in USA continent
         }
+//        if(!(latitude >= 40.49663297753 && latitude <= 40.91250809 && longitude >= -74.254209408 && longitude <= -73.7373388529)){
+//            continue; // not in New York
+//        }
         
         split(features, feature, boost::is_any_of(","));
         
@@ -1118,6 +1124,197 @@ vector<PointCloud> Dataset::GeneratePointCloudFromTwitterFileWithKeywordUSA2(str
     cout << ">>>>>>>>> size : " << dataset.size() << " max: "<< max << "  min: " << min << "  Average points: " << totalpoints/totalpointclouds << " totalpoints:" << totalpoints << "  totalpointclouds: " << totalpointclouds << endl;
     
     return dataset;
+}
+
+// the South West Point of Staten Island, the North point of Bronx, the East point of Queens
+map<string, PointCloud> Dataset::GeneratePointCloudFromTwitterFileWithKeywordNewYork(string filepath){
+    vector<PointCloud> dataset;
+    
+    ifstream infile;
+    infile.open(filepath);
+    vector<string> fields;
+    string str;
+    
+    string coordinate;
+    string feature;
+    vector<string> features;
+    string latitude_str;
+    string longitude_str;
+    double latitude;
+    double longitude;
+    map<string, PointCloud> dataset_feature;
+    int lines = 0;
+    
+    bool contains_only_character = true;
+    
+    while(getline(infile,str)){
+        lines++;
+        fields.clear();
+        split(fields, str, boost::is_any_of("\t"));
+        feature = fields[1];
+        latitude_str = fields[2];
+        longitude_str = fields[3];
+        latitude = stod(latitude_str);
+        longitude = stod(longitude_str);
+        
+        if(!(latitude >= 40.49663297753 && latitude <= 40.91250809 && longitude >= -74.254209408 && longitude <= -73.7373388529)){
+            continue; // not in New York
+        }
+        
+        split(features, feature, boost::is_any_of(","));
+        
+        Point point = Point(latitude, longitude);
+        point.dimension = 2;
+        for (int i = 0; i < features.size(); i++){
+            feature = features[i];
+            contains_only_character = std::regex_match(feature, std::regex("^[A-Za-z]+$"));
+            if (!contains_only_character){
+                continue;
+            }
+            if(dataset_feature.find(feature) == dataset_feature.end()){
+                PointCloud pc = PointCloud();
+                pc.keyword = feature;
+                pc.dimension = 2;
+                pc.pointcloud.push_back(point);
+                dataset_feature.insert(pair<string, PointCloud>(feature, pc));
+            } else {
+                dataset_feature[feature].pointcloud.push_back(point);
+            }
+        }
+        
+        if(lines%10000 == 0){
+            cout << lines << endl;
+        }
+    }
+    
+    return dataset_feature;
+}
+
+map<string, PointCloud> Dataset::GeneratePointCloudFromTwitterFileWithKeywordWashington(string filepath){
+    vector<PointCloud> dataset;
+    
+    ifstream infile;
+    infile.open(filepath);
+    vector<string> fields;
+    string str;
+    
+    string coordinate;
+    string feature;
+    vector<string> features;
+    string latitude_str;
+    string longitude_str;
+    double latitude;
+    double longitude;
+    map<string, PointCloud> dataset_feature;
+    int lines = 0;
+    
+    bool contains_only_character = true;
+    
+    while(getline(infile,str)){
+        lines++;
+        fields.clear();
+        split(fields, str, boost::is_any_of("\t"));
+        feature = fields[1];
+        latitude_str = fields[2];
+        longitude_str = fields[3];
+        latitude = stod(latitude_str);
+        longitude = stod(longitude_str);
+        
+        if(!(latitude >= 38.7995439804529 && latitude <= 38.98634172844672 && longitude >= -77.19166513763514
+&& longitude <= -76.88233133636561)){
+            continue; // not in New York
+        }
+        
+        split(features, feature, boost::is_any_of(","));
+        
+        Point point = Point(latitude, longitude);
+        point.dimension = 2;
+        for (int i = 0; i < features.size(); i++){
+            feature = features[i];
+            contains_only_character = std::regex_match(feature, std::regex("^[A-Za-z]+$"));
+            if (!contains_only_character){
+                continue;
+            }
+            if(dataset_feature.find(feature) == dataset_feature.end()){
+                PointCloud pc = PointCloud();
+                pc.keyword = feature;
+                pc.dimension = 2;
+                pc.pointcloud.push_back(point);
+                dataset_feature.insert(pair<string, PointCloud>(feature, pc));
+            } else {
+                dataset_feature[feature].pointcloud.push_back(point);
+            }
+        }
+        
+        if(lines%10000 == 0){
+            cout << lines << endl;
+        }
+    }
+    
+    return dataset_feature;
+}
+
+map<string, PointCloud> Dataset::GeneratePointCloudFromTwitterFileWithKeywordStatenIsland(string filepath){
+    vector<PointCloud> dataset;
+    
+    ifstream infile;
+    infile.open(filepath);
+    vector<string> fields;
+    string str;
+    
+    string coordinate;
+    string feature;
+    vector<string> features;
+    string latitude_str;
+    string longitude_str;
+    double latitude;
+    double longitude;
+    map<string, PointCloud> dataset_feature;
+    int lines = 0;
+    
+    bool contains_only_character = true;
+    
+    while(getline(infile,str)){
+        lines++;
+        fields.clear();
+        split(fields, str, boost::is_any_of("\t"));
+        feature = fields[1];
+        latitude_str = fields[2];
+        longitude_str = fields[3];
+        latitude = stod(latitude_str);
+        longitude = stod(longitude_str);
+        
+        if(!(latitude >= 40.49710982749934 && latitude <= 40.64310576839339 && longitude >= -74.25426101760928 && longitude <= -74.05978375641905)){
+            continue; // not in New York
+        }
+        
+        split(features, feature, boost::is_any_of(","));
+        
+        Point point = Point(latitude, longitude);
+        point.dimension = 2;
+        for (int i = 0; i < features.size(); i++){
+            feature = features[i];
+            contains_only_character = std::regex_match(feature, std::regex("^[A-Za-z]+$"));
+            if (!contains_only_character){
+                continue;
+            }
+            if(dataset_feature.find(feature) == dataset_feature.end()){
+                PointCloud pc = PointCloud();
+                pc.keyword = feature;
+                pc.dimension = 2;
+                pc.pointcloud.push_back(point);
+                dataset_feature.insert(pair<string, PointCloud>(feature, pc));
+            } else {
+                dataset_feature[feature].pointcloud.push_back(point);
+            }
+        }
+        
+        if(lines%10000 == 0){
+            cout << lines << endl;
+        }
+    }
+    
+    return dataset_feature;
 }
 
 bool Dataset::StorePointCloudIntoFile(string filepath, vector<PointCloud> &dataset){
