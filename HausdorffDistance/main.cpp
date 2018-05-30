@@ -86,49 +86,68 @@ int main(int argc, const char * argv[]) {
 
 //    knn.orderDatasetWithSize(); // 20s
     knn.buildRtreeForAllPoints(); // 60s
-    knn.generateKeywordIdMap(); // 1s
-    knn.generateKeywordCheck(); // 1s
+//    knn.generateKeywordIdMap(); // 1s
+//    knn.generateKeywordCheck(); // 1s
+    
+//    knn.KNN_UsingPoint_Efficient_KeywordLB(pc1, 10, pidMap, 2);
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc1, 10);
+//
+//    knn.KNN_UsingPoint_Efficient_KeywordLB(pc2, 10, pidMap, 2);
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc2, 10);
+//
+//    knn.KNN_UsingPoint_Efficient_KeywordLB(pc3, 10, pidMap, 2);
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc3, 10);
+//
+//    knn.KNN_UsingPoint_Efficient_KeywordLB(pc4, 10, pidMap, 2);
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc4, 10);
+//
+//    knn.KNN_UsingPoint_Efficient_KeywordLB(pc5, 10, pidMap, 2);
+//    knn.KNN_PAMI2015_Pruning_KCenter(pc5, 10);
     
     ofstream outfile;
+    outfile.open("/Users/lizhe/Desktop/reports/final_01/using_PointBased.csv", ofstream::app);
+    outfile << endl;
+    outfile << endl;
+    outfile.close();
+    
+    for(int i = 0; i < 10; i++){
+        knn.KNN_UsingPoint_Efficient_KeywordLB(pc1, 10, pidMap, 10);
+    }
+
+    outfile.open("/Users/lizhe/Desktop/reports/final_01/using_PointBased.csv", ofstream::app);
+    outfile << endl;
+    outfile << endl;
+    outfile.close();
 
     for(int i = 0; i < 10; i++){
-        knn.KNN_UsingPoint_Efficient(pc1, 10, pidMap, 2);
+        knn.KNN_UsingPoint_Efficient_KeywordLB(pc2, 10, pidMap, 10);
     }
-    
+
     outfile.open("/Users/lizhe/Desktop/reports/final_01/using_PointBased.csv", ofstream::app);
     outfile << endl;
     outfile << endl;
     outfile.close();
-    
+
     for(int i = 0; i < 10; i++){
-        knn.KNN_UsingPoint_Efficient(pc2, 10, pidMap, 2);
+        knn.KNN_UsingPoint_Efficient_KeywordLB(pc3, 10, pidMap, 10);
     }
-    
+
     outfile.open("/Users/lizhe/Desktop/reports/final_01/using_PointBased.csv", ofstream::app);
     outfile << endl;
     outfile << endl;
     outfile.close();
-    
+
     for(int i = 0; i < 10; i++){
-        knn.KNN_UsingPoint_Efficient(pc3, 10, pidMap, 2);
+        knn.KNN_UsingPoint_Efficient_KeywordLB(pc4, 10, pidMap, 10);
     }
-    
+
     outfile.open("/Users/lizhe/Desktop/reports/final_01/using_PointBased.csv", ofstream::app);
     outfile << endl;
     outfile << endl;
     outfile.close();
-    
+
     for(int i = 0; i < 10; i++){
-        knn.KNN_UsingPoint_Efficient(pc4, 10, pidMap, 2);
-    }
-    
-    outfile.open("/Users/lizhe/Desktop/reports/final_01/using_PointBased.csv", ofstream::app);
-    outfile << endl;
-    outfile << endl;
-    outfile.close();
-    
-    for(int i = 0; i < 10; i++){
-        knn.KNN_UsingPoint_Efficient(pc5, 10, pidMap, 2);
+        knn.KNN_UsingPoint_Efficient_KeywordLB(pc5, 10, pidMap, 10);
     }
     
 //

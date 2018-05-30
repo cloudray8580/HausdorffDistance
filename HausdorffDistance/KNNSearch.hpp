@@ -3896,6 +3896,17 @@ void KNNSearch::KNN_UsingPoint_Efficient(PointCloud &ref, int k, map<int, vector
     delete[] keywordCount;
 }
 
+struct KeywordNode{
+    int keywordId;
+    int pointgroupIndex;
+    int count;
+    double distance;
+};
+
+bool cmp_keywordDistance(KeywordNode &k1, KeywordNode &k2){
+    return k1.distance < k2.distance;
+}
+
 void KNNSearch::KNN_UsingPoint_Efficient_KeywordLB(PointCloud &ref, int k, map<int, vector<int>> &pidKeywordIdsMap, int randomNum){
     
     priority_queue<pair<double, int>, vector<pair<double, int>>, cmp_pair> prqueue;
@@ -3904,6 +3915,16 @@ void KNNSearch::KNN_UsingPoint_Efficient_KeywordLB(PointCloud &ref, int k, map<i
         dataset[i].randomize();
     }
     srand((unsigned)time(NULL));
+    
+    vector<KeywordNode> keywords;
+    for(int i = 0; i < dataset.size(); i++){
+        KeywordNode key;
+        key.keywordId = dataset[i].keywordId;
+        key.pointgroupIndex = i;
+        key.count = 0;
+        key.distance = 0;
+        keywords.push_back(key);
+    }
     
     clock_t start, stop;
     start = clock();
@@ -3943,11 +3964,6 @@ void KNNSearch::KNN_UsingPoint_Efficient_KeywordLB(PointCloud &ref, int k, map<i
     clock_t queryStart, queryEnd;
     queryStart = clock();
     
-    int* keywordCount = new int[dataset.size()];
-    std::fill(keywordCount, keywordCount+sizeof(keywordCount)/sizeof(int), 0);
-    double* keywordDistance = new double[dataset.size()];
-    std::fill(keywordDistance, keywordDistance+sizeof(keywordDistance)/sizeof(double), 0);
-    
     vector<Point> minNearbyPoints;
     for(int i = 0; i < randomNum && i < ref.pointcloud.size(); i++){
         double px = ref.pointcloud[i].x;
@@ -3959,20 +3975,18 @@ void KNNSearch::KNN_UsingPoint_Efficient_KeywordLB(PointCloud &ref, int k, map<i
         sort(minNearbyPoints.begin(), minNearbyPoints.end(), cmp_nearbyPoints); // ascending order
         for(int j = 0; j < minNearbyPoints.size(); j++){
             for(auto it = pidKeywordIdsMap[minNearbyPoints[j].pid].begin(); it != pidKeywordIdsMap[minNearbyPoints[j].pid].end(); it++){
-                if(keywordCount[*it] == i){
-                    keywordCount[*it]++;
-                    if(keywordDistance[*it] < minNearbyPoints[j].distance){
-                        keywordDistance[*it] = minNearbyPoints[j].distance;
+                if(keywords[*it].count == i){
+                    keywords[*it].count++;
+                    if(keywords[*it].distance < minNearbyPoints[j].distance){
+                        keywords[*it].distance = minNearbyPoints[j].distance;
                     }
                 }
             }
         }
         minNearbyPoints.clear();
     }
+    sort(keywords.begin(), keywords.end(), cmp_keywordDistance);
     queryEnd = clock();
-    
-//    // sort points
-//    sort(minNearbyPoints.begin(), minNearbyPoints.end(), cmp_nearbyPoints); // ascending order
 
     // exact calculation part
     
@@ -3988,8 +4002,11 @@ void KNNSearch::KNN_UsingPoint_Efficient_KeywordLB(PointCloud &ref, int k, map<i
 
     int meet = ref.pointcloud.size() < randomNum ? ref.pointcloud.size() : randomNum;
     for(int i = 0; i < dataset.size(); i++){
-        if(keywordCount[i] == meet && keywordDistance[i] < kthValue){
-            pointcloudindex = keywordIdMapForDataset[i];
+        if(keywords[i].distance >= kthValue){
+            break;
+        }
+        if(keywords[i].count == meet){
+            pointcloudindex = keywords[i].pointgroupIndex;
             distance = ExactHausdorff::PAMI2015(ref, dataset[pointcloudindex], true, kthValue);
             totalPointClouds++;
             totalPoints += dataset[pointcloudindex].pointcloud.size();
@@ -4025,8 +4042,6 @@ void KNNSearch::KNN_UsingPoint_Efficient_KeywordLB(PointCloud &ref, int k, map<i
     outfile << ref.pointcloud.size() << "," << stop-start << "," << upperboundEnd - upperboundStart << "," << queryEnd - queryStart << "," << calculationEnd - calculationStart << "," << totalPointClouds << "," << totalPoints/totalPointClouds << "," << maxupperbound << endl;
     outfile.close();
     
-    delete[] keywordCount;
-    delete[] keywordDistance;
 }
 
 // ascending order
