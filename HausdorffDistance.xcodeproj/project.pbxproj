@@ -29,6 +29,7 @@
 
 /* Begin PBXFileReference section */
 		AD15AE192008911600A3B986 /* Dataset.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Dataset.hpp; sourceTree = "<group>"; };
+		AD354FF620BFC53A00CEF17B /* FinalExperiment.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = FinalExperiment.hpp; sourceTree = "<group>"; };
 		ADD65622204AE85E00329AC7 /* ProposedKNN.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ProposedKNN.hpp; sourceTree = "<group>"; };
 		ADD6562520511F8E00329AC7 /* AnalyseTask.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = AnalyseTask.hpp; sourceTree = "<group>"; };
 		ADD6562820511FB500329AC7 /* Util.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Util.hpp; sourceTree = "<group>"; };
@@ -99,6 +100,7 @@
 				ADD6562B205120E500329AC7 /* BoostRTreeSetting.hpp */,
 				ADF237BC209D7CB000A14CA4 /* HilbertCurve.hpp */,
 				ADF237BF20A4289500A14CA4 /* OtherDistanceMetric.hpp */,
+				AD354FF620BFC53A00CEF17B /* FinalExperiment.hpp */,
 			);
 			path = HausdorffDistance;
 			sourceTree = "<group>";

@@ -32,7 +32,7 @@ public:
     // change keyword into id
     static map<string, int> GenerateKeywordIdMapFromOriginal(string input, string output);
     static void mapKeywordIntoId(string input, string output, map<string,int> keywordIdMap); // based on original file
-//    static vector<Point> RestorePointFromFileWithKeywordId(string input); // based on original file with keyword Id
+    static vector<Point> RestorePointFromFileWithKeywordId(string input); // based on original file with keyword Id
     static vector<PointCloud> GeneratePointCloudFromTwitterFileWithKeywordId(string filepath);
     static bool StorePointCloudIntoFileWithKeywordId(string filepath, vector<PointCloud> pcs);
     static vector<PointCloud> RestorePointCloudFromFileWithKeywordId(string filepath); // point clouds file
@@ -40,8 +40,8 @@ public:
     // binary read write
     static void Binary_StoreKeywordIdDatasetToFile(string filepath, vector<PointCloud> dataset);
     static vector<PointCloud> Binary_RestoreKeywordIdDatasetFromFile(string filepath);
-//    static void Binary_StoreKeywordIdPointsToFile(string filepath, vector<Point> dataset);
-//    static vector<Point> Binary_RestoreKeywordIdPointsFromFile(string filepath);
+    static void Binary_StoreKeywordIdPointsToFile(string filepath, vector<Point> dataset);
+    static vector<Point> Binary_RestoreKeywordIdPointsFromFile(string filepath);
     static void Binary_RestoreKeywordIdPointsFromFile_Seperate(string filepath, vector<Point> &points, map<int, vector<int>> &pidMap);
     
     // about USA
@@ -70,6 +70,9 @@ public:
     // preprocessing
     static void removeNonCharacter(string input, string output);
     static void transferToLowercase(string input, string output);
+    
+    // sampling
+    static void randomSampling(string input, string output, int percentage);
 };
 
 // need to handle 2-dimension point
@@ -687,54 +690,54 @@ void Dataset::mapKeywordIntoId(string input, string output, map<string,int> keyw
     }
 }
 
-//vector<Point> Dataset::RestorePointFromFileWithKeywordId(string input){
-//    vector<Point> points;
-//
-//    ifstream infile;
-//    infile.open(input);
-//    vector<string> fields;
-//    string str;
-//
-//    string coordinate;
-//    string feature;
-//    vector<string> features;
-//    string latitude_str;
-//    string longitude_str;
-//    double latitude;
-//    double longitude;
-//    int lines = 0;
-//
-//    bool contains_only_character = true;
-//    vector<int> featureIds;
-//
-//    while(getline(infile,str)){
-//        lines++;
-//        fields.clear();
-//        split(fields, str, boost::is_any_of("\t"));
-//        feature = fields[1];
-//        latitude_str = fields[2];
-//        longitude_str = fields[3];
-//        latitude = stod(latitude_str);
-//        longitude = stod(longitude_str);
-//        split(features, feature, boost::is_any_of(","));
-//        featureIds.clear();
-//        for (int i = 0; i < features.size(); i++){
-//            feature = features[i];
-//            featureIds.push_back(stoi(feature));
-//        }
-//        Point point = Point(latitude, longitude);
-//        point.dimension = 2;
-//        point.keywordIds = featureIds;
-//        point.keywordsize = featureIds.size();
-////        point.keywordIds = set<int>(std::make_move_iterator(featureIds.begin()), std::make_move_iterator(featureIds.end()));
-//        points.push_back(point);
-//
-//        if(lines%10000 == 0){
-//            cout << lines << endl;
-//        }
-//    }
-//    return points;
-//}
+vector<Point> Dataset::RestorePointFromFileWithKeywordId(string input){
+    vector<Point> points;
+
+    ifstream infile;
+    infile.open(input);
+    vector<string> fields;
+    string str;
+
+    string coordinate;
+    string feature;
+    vector<string> features;
+    string latitude_str;
+    string longitude_str;
+    double latitude;
+    double longitude;
+    int lines = 0;
+
+    bool contains_only_character = true;
+    vector<int> featureIds;
+
+    while(getline(infile,str)){
+        lines++;
+        fields.clear();
+        split(fields, str, boost::is_any_of("\t"));
+        feature = fields[1];
+        latitude_str = fields[2];
+        longitude_str = fields[3];
+        latitude = stod(latitude_str);
+        longitude = stod(longitude_str);
+        split(features, feature, boost::is_any_of(","));
+        featureIds.clear();
+        for (int i = 0; i < features.size(); i++){
+            feature = features[i];
+            featureIds.push_back(stoi(feature));
+        }
+        Point point = Point(latitude, longitude);
+        point.dimension = 2;
+        point.keywordIds = featureIds;
+        point.keywordsize = featureIds.size();
+//        point.keywordIds = set<int>(std::make_move_iterator(featureIds.begin()), std::make_move_iterator(featureIds.end()));
+        points.push_back(point);
+
+        if(lines%10000 == 0){
+            cout << lines << endl;
+        }
+    }
+    return points;
+}
 
 vector<PointCloud> Dataset::GeneratePointCloudFromTwitterFileWithKeywordId(string filepath){
     vector<PointCloud> dataset;
@@ -904,46 +907,46 @@ vector<PointCloud> Dataset::Binary_RestoreKeywordIdDatasetFromFile(string filepa
     return dataset;
 }
 
-//void Dataset::Binary_StoreKeywordIdPointsToFile(string filepath, vector<Point> dataset){
-//    ofstream outfile;
-//    outfile.open(filepath, ios::binary);
-//    for(int i = 0; i < dataset.size(); i++){
-//        outfile.write((char*)&dataset[i].x, sizeof(double));
-//        outfile.write((char*)&dataset[i].y, sizeof(double));
-//        outfile.write((char*)&dataset[i].keywordsize, sizeof(int));
-//        for(int j = 0; j < dataset[i].keywordsize; j++){
-//            outfile.write((char*)&dataset[i].keywordIds[j], sizeof(int));
-//        }
-//    }
-//}
+void Dataset::Binary_StoreKeywordIdPointsToFile(string filepath, vector<Point> dataset){
+    ofstream outfile;
+    outfile.open(filepath, ios::binary);
+    for(int i = 0; i < dataset.size(); i++){
+        outfile.write((char*)&dataset[i].x, sizeof(double));
+        outfile.write((char*)&dataset[i].y, sizeof(double));
+        outfile.write((char*)&dataset[i].keywordsize, sizeof(int));
+        for(int j = 0; j < dataset[i].keywordsize; j++){
+            outfile.write((char*)&dataset[i].keywordIds[j], sizeof(int));
+        }
+    }
+}
 
-//vector<Point> Dataset::Binary_RestoreKeywordIdPointsFromFile(string filepath){
-//    vector<Point> dataset;
-//
-//    ifstream infile;
-//    infile.open(filepath, ios::binary);
-//    Point p(0, 0);
-//    int count = 0;
-//    while(true){
-//        if(!infile){
-//            break;
-//        }
-//        infile.read((char*)&p.x, sizeof(double));
-//        infile.read((char*)&p.y, sizeof(double));
-//        infile.read((char*)&p.keywordsize, sizeof(int));
-//        p.keywordIds.clear();
-//        for(int i = 0; i < p.keywordsize; i++){
-//            p.keywordIds.push_back(0);
-//            infile.read((char*)&p.keywordIds[i], sizeof(int));
-//        }
-//        dataset.push_back(p);
-//        count++;
-//        if(count % 10000 == 0){
-//            cout << count << endl;
-//        }
-//    }
-//    return dataset;
-//}
+vector<Point> Dataset::Binary_RestoreKeywordIdPointsFromFile(string filepath){
+    vector<Point> dataset;
+
+    ifstream infile;
+    infile.open(filepath, ios::binary);
+    Point p(0, 0);
+    int count = 0;
+    while(true){
+        if(!infile){
+            break;
+        }
+        infile.read((char*)&p.x, sizeof(double));
+        infile.read((char*)&p.y, sizeof(double));
+        infile.read((char*)&p.keywordsize, sizeof(int));
+        p.keywordIds.clear();
+        for(int i = 0; i < p.keywordsize; i++){
+            p.keywordIds.push_back(0);
+            infile.read((char*)&p.keywordIds[i], sizeof(int));
+        }
+        dataset.push_back(p);
+        count++;
+        if(count % 10000 == 0){
+            cout << count << endl;
+        }
+    }
+    return dataset;
+}
 
 void Dataset::Binary_RestoreKeywordIdPointsFromFile_Seperate(string filepath, vector<Point> &points, map<int, vector<int>> &pidMap){
     
@@ -961,6 +964,9 @@ void Dataset::Binary_RestoreKeywordIdPointsFromFile_Seperate(string filepath, ve
         infile.read((char*)&p.keywordsize, sizeof(int));
         p.pid = count;
         keywordIds.clear();
+//        if(count == 472603){
+//            cout << "here" << endl;
+//        }
         for(int i = 0; i < p.keywordsize; i++){
             keywordIds.push_back(0);
             infile.read((char*)&keywordIds[i], sizeof(int));
@@ -1220,8 +1226,13 @@ map<string, PointCloud> Dataset::GeneratePointCloudFromTwitterFileWithKeywordWas
         latitude = stod(latitude_str);
         longitude = stod(longitude_str);
         
-        if(!(latitude >= 38.7995439804529 && latitude <= 38.98634172844672 && longitude >= -77.19166513763514
-&& longitude <= -76.88233133636561)){
+//        if(!(latitude >= 38.7995439804529 && latitude <= 38.98634172844672 && longitude >= -77.19166513763514
+//&& longitude <= -76.88233133636561)){
+//            continue; // not in New York
+//        }
+        
+        if(!(latitude >= 38.80 && latitude <= 38.88 && longitude >= -77.155
+             && longitude <= -77.101)){
             continue; // not in New York
         }
         
@@ -1654,6 +1665,34 @@ void Dataset::transferToLowercase(string input, string output){
         }
         outfile << validKeyword[validKeyword.size()-1];
         outfile << "\t" << latitude_str << "\t" << longitude_str << endl;
+        
+        if(lines%10000 == 0){
+            cout << lines << endl;
+        }
+    }
+}
+
+void Dataset::randomSampling(string input, string output, int percentage){
+    ifstream infile;
+    infile.open(input);
+    
+    ofstream outfile;
+    outfile.open(output);
+    
+    string str;
+    int lines = 0;
+    
+    bool contains_only_character = true;
+    srand((unsigned)time(NULL));
+    int possibility = 0;
+    
+    while(getline(infile,str)){
+        lines++;
+        possibility = rand()%100;
+        
+        if(possibility <= percentage){
+            outfile << str << endl;
+        }
         
         if(lines%10000 == 0){
             cout << lines << endl;

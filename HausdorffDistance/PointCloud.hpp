@@ -99,13 +99,13 @@ public:
     void generateBoundAndMBRs(int expectedNumber);
     
     // without distanceMatrix, and use nearest_center_dist[i] for all point, O(nk)
-    void sortByKcenter(double percent=0.05, int lowerthreshold=10, int upperthreshold=100);
+    void sortByKcenter(double percent=0.05, int lowerthreshold=1, int upperthreshold=10000);
     void sortByKcenter2(); // O(nk^2)
     
     // return the distance of points to its nearest kcenter, and its kcenter index!
-    vector<pair<double,int>> sortByKcenterWithRecord(double percent=0.05, int lowerthreshold=10, int upperthreshold=100); // return the distance of points to its nearest kcenter
+    vector<pair<double,int>> sortByKcenterWithRecord(double percent=0.05, int lowerthreshold=1, int upperthreshold=10000); // return the distance of points to its nearest kcenter
     
-    int getKCenterNum();
+    int getKCenterNum(double percentage = 0.05, int lowerthreshold=1, int upperthreshold=10000);
     void generateRealWorldPosition(string outputfile); // from latitude-longitude to longitude-latitude
 };
 
@@ -522,6 +522,7 @@ void PointCloud::sortByKcenter(double percent, int lowerthreshold, int upperthre
     double targetIndex = 0;
     // for the remaining points, find the max(min distance to current kcenters)
     // for each remaining point, calculate its min distance to the current kcenters
+
     while(num){
         maxMinDistance = 0;
         targetIndex = 0;
@@ -538,6 +539,7 @@ void PointCloud::sortByKcenter(double percent, int lowerthreshold, int upperthre
         
         // add as new center
         pointcloud[targetIndex].isCenter = true;
+        
         kcenters.push_back(pointcloud[targetIndex]);
         
         // update NN distance for all
@@ -553,6 +555,7 @@ void PointCloud::sortByKcenter(double percent, int lowerthreshold, int upperthre
     // the reason why use this is avoid the back is also center
     int ksize = kcenters.size();
     int currentIndex = 0;
+    
     while(ksize){
         while(pointcloud[currentIndex].isCenter && ksize){
             pointcloud[currentIndex] = pointcloud.back();
@@ -795,14 +798,14 @@ vector<pair<double,int>> PointCloud::sortByKcenterWithRecord(double percent, int
     return nearest_center_dist;
 }
 
-int PointCloud::getKCenterNum(){
+int PointCloud::getKCenterNum(double percentage, int lowerthreshold, int upperthreshold){
     long num = this->pointcloud.size();
-    num *= 0.05;
-    if(num > 100){
-        num = 100;
+    num *= percentage;
+    if(num > upperthreshold){
+        num = upperthreshold;
     }
-    if(num < 10){
-        num = 10;
+    if(num < lowerthreshold){
+        num = lowerthreshold;
     }
     if(num > pointcloud.size()){
         num = pointcloud.size();

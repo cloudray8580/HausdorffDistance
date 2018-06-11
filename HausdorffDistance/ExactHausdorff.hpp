@@ -102,7 +102,11 @@ double ExactHausdorff::PAMI2015(PointCloud &pc1, PointCloud &pc2, bool pruning, 
                 return max;
             }
         }
-        
+//        if(i == pc1.getKCenterNum(0.002)){
+//            cout << max << endl;
+//        }
+        if(max < 1.1785194270778869)
+            cout << i+1 << " " << max << endl;
     }
     return max; // the Hausdorff distance
 }
@@ -307,16 +311,24 @@ double ExactHausdorff::PAMI2015_Pruning_KCenterUB(PointCloud &pc1, PointCloud &p
     int kcenterIndex = 0;
     
     int KNum = pc1.getKCenterNum();
-    double distToData[KNum];
+//    double distToData[KNum];
+    int index[KNum];
+    int indexj = 0;
 //    int breakcount = 0;
+    bool breaktag = false;
+    
     
     for (int i = 0; i < pc1.pointcloud.size(); i++){
         
         if(i >= KNum){
             kcenterIndex = disToKcenter[i-KNum].second;
-            distance = disToKcenter[i-KNum].first + distToData[kcenterIndex];
+//            distance = disToKcenter[i-KNum].first + distToData[kcenterIndex]; // 一会直接改成到点的距离试试
+            distance = pc1.pointcloud[i].distanceTo(pc2.pointcloud[index[disToKcenter[i-KNum].second]]);
             if(distance < max){
-//                breakcount++;
+                if(!breaktag){
+                    cout << "break by KCUB" << endl;
+                }
+                breaktag = true;
                 continue;
             }
         }
@@ -326,6 +338,7 @@ double ExactHausdorff::PAMI2015_Pruning_KCenterUB(PointCloud &pc1, PointCloud &p
             distance = pc1.pointcloud[i].distanceTo(pc2.pointcloud[j]);
             if(distance < min){
                 min = distance;
+                indexj = j;
             }
             if(distance < max){
                 break;
@@ -338,8 +351,10 @@ double ExactHausdorff::PAMI2015_Pruning_KCenterUB(PointCloud &pc1, PointCloud &p
             }
         }
         
-        if(i < KNum)
-            distToData[i] = distance;
+        if(i < KNum){
+//            distToData[i] = distance;
+            index[i] = indexj;
+        }
     }
 //    cout << "breakcount : " << breakcount << endl;
     return max;

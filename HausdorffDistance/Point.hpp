@@ -29,8 +29,8 @@ public:
     bool isAvailable = true;
     bool isCenter = false;
     uint64_t zorder;
-//    set<string> keywords;
-//    vector<int> keywordIds;
+    set<string> keywords;
+    vector<int> keywordIds;
     double distance = 0;
     int keywordsize = 0;
     

@@ -56,9 +56,11 @@ public:
     vector<pair<double,PointCloud>> KNN_PAMI2015(PointCloud &ref, int k);
     vector<pair<double,PointCloud>> KNN_PR2017(PointCloud &ref, int k);
     vector<tempResult> KNN_GIS2011(PointCloud &ref, int k, int number = 10);
+    vector<tempResult> KNN_GIS2011(PointCloud &ref, int k, int number, string filepath);
     
     void KNN_PAMI2015_Pruning(PointCloud &ref, int k); // use a priority queue to keep K
     void KNN_PAMI2015_Pruning_KCenter(PointCloud &ref, int k); // use a priority queue to keep K, the query is ordered by KCenter ordering
+    void KNN_PAMI2015_Pruning_KCenter(PointCloud &ref, int k, double kcenterPercent, string filepath);
     void KNN_PAMI2015_Pruning_KCenter_orderdata(PointCloud &ref, int k); // order dataset first according to its size
     
     void KNN_PAMI2015_Pruning_KCenter_UB(PointCloud &ref, int k, int dataSizeThreshold=10); // using kcenter UB
@@ -67,6 +69,9 @@ public:
     void KNN_PAMI2015_Pruning_KCenter_UB_BscLB2(PointCloud &ref, int k, int dataSizeThreshold=100000, int dataSizeThresholdForBscLB=100000); // using kcenter UB， and BscLB
     // sort data point cloud according to their size first
     void KNN_PAMI2015_Pruning_KCenter_UB_BscLB3(PointCloud &ref, int k, int dataSizeThreshold=100000, int dataSizeThresholdForBscLB=100000); // using kcenter UB， and BscLB
+    
+    void KNN_PAMI2015_Pruning_KCenter_UB_BscLB(PointCloud &ref, int k, string filepath, int dataSizeThreshold=100000, int dataSizeThresholdForBscLB=100000);
+    
     
     // using hilbert order value as UB in inner loop
     void KNN_PAMI2015_Pruning_KCenter_HilbertUB(PointCloud &ref, int k, int dataSizeThreshold = 10000);
@@ -113,9 +118,12 @@ public:
 //    void NN_UsingPoint_Efficient(PointCloud &ref); // 1.first sort dataset, then call build Rtree then generateBitmap
 //    void KNN_UsingPoint_Efficient(PointCloud &ref, int k); // 1.first sort dataset, then call build Rtree then generateBitmap
     void KNN_UsingPoint_Efficient(PointCloud &ref, int k, map<int, vector<int>> &pidKeywordIdsMap, int randomNum = 1);
-    void KNN_UsingPoint_Efficient_KeywordLB(PointCloud &ref, int k, map<int, vector<int>> &pidKeywordIdsMap, int randomNum = 1);
+    void KNN_UsingPoint_Efficient(PointCloud &ref, int k, map<int, vector<int>> &pidKeywordIdsMap, string filepath, double UBPercent = 0.01, int pointNum = 1);
     
-    void doIntersection(vector<vector<Point>> &candidateSets, vector<Point> &candidateSet);
+    void KNN_UsingPoint_Efficient_KeywordLB(PointCloud &ref, int k, map<int, vector<int>> &pidKeywordIdsMap, int randomNum = 1);
+    void KNN_UsingPoint_Efficient_KeywordLB(PointCloud &ref, int k, map<int, vector<int>> &pidKeywordIdsMap, string filepath, double UBPercent = 0.01, int pointNum = 1);
+    void KNN_UsingPoint_Efficient_KeywordLB_WithoutKcenter(PointCloud &ref, int k, map<int, vector<int>> &pidKeywordIdsMap, string filepath, double UBPercent = 0.01, int pointNum = 1);
+    void KNN_Kcenter_KCUB_PBKC(PointCloud &ref, int k, map<int, vector<int>> &pidKeywordIdsMap, string filepath, double UBPercent = 0.1, int pointNum = 2, int dataSizeThreshold=100000, int dataSizeThresholdForBscLB=100000);
 };
 
 bool cmp_pointcloudsize(PointCloud &pc1, PointCloud &pc2){
@@ -422,6 +430,58 @@ void KNNSearch::KNN_PAMI2015_Pruning_KCenter(PointCloud &ref, int k){
     }
 }
 
+void KNNSearch::KNN_PAMI2015_Pruning_KCenter(PointCloud &ref, int k, double kcenterPercent, string filepath){
+    
+//    ref.randomize();
+    ref.sortByKcenter(kcenterPercent, 1, 10000);
+    
+    // dataset.randomize();
+    for(int i = 0; i < dataset.size(); i++){
+        dataset[i].randomize();
+    }
+    
+    priority_queue<double> krecord; // descending
+    
+    clock_t start, stop;
+    start = clock();
+    
+    double distance = 0;
+    double kthValue = std::numeric_limits<double>::infinity();
+    
+    for(int i = 0; i < dataset.size(); i++){
+        
+        distance = ExactHausdorff::PAMI2015(ref, dataset[i], true, kthValue);
+    
+//        if(fabs(distance-0.0005001)<0.001){
+//            cout<< "here" << endl;
+//            cout << dataset[i].keywordId  <<endl;
+//        }
+        if(distance == -1){
+            continue;
+        } else if(krecord.size() < k){
+            krecord.push(distance);
+        } else if(distance < kthValue){
+            krecord.pop();
+            krecord.push(distance);
+            kthValue = krecord.top();
+        } else{
+            kthValue = krecord.top();
+        }
+    }
+    
+    stop = clock();
+    
+    cout << "PAMI kcenter method time usage: " << stop-start << endl;
+    for(int i = 0; i < k; i++){
+        cout << krecord.top() << endl;
+        krecord.pop();
+    }
+    ofstream outfile;
+    outfile.open(filepath, ofstream::app);
+    outfile << ref.pointcloud.size() << "," << stop-start << endl;
+    outfile.close();
+}
+
 void KNNSearch::KNN_PAMI2015_Pruning_KCenter_orderdata(PointCloud &ref, int k){
     priority_queue<double, vector<double>, cmp_double> prqueue;
     
@@ -509,7 +569,7 @@ void KNNSearch::KNN_PAMI2015_Pruning_KCenter_orderdata(PointCloud &ref, int k){
 
 // using kcenter UB
 void KNNSearch::KNN_PAMI2015_Pruning_KCenter_UB(PointCloud &ref, int k, int dataSizeThreshold){
-    
+
     vector<pair<double,int>> disToKcenter = ref.sortByKcenterWithRecord();
     
     // dataset.randomize();
@@ -724,6 +784,69 @@ void KNNSearch::KNN_PAMI2015_Pruning_KCenter_UB_BscLB3(PointCloud &ref, int k, i
 //bool cmp_pointcloudsize(PointCloud &pc1, PointCloud &pc2){
 //    return pc1.pointcloud.size() < pc2.pointcloud.size();
 //}
+
+void KNNSearch::KNN_PAMI2015_Pruning_KCenter_UB_BscLB(PointCloud &ref, int k, string filepath, int dataSizeThreshold, int dataSizeThresholdForBscLB){
+    ref.generateBoundAndMBRs(10);
+    vector<pair<double,int>> disToKcenter = ref.sortByKcenterWithRecord(0.05,1,10000);
+    
+    // dataset.randomize();
+    for(int i = 0; i < dataset.size(); i++){
+        dataset[i].randomize();
+    }
+    
+    priority_queue<double> krecord; // descending
+    
+    clock_t start, stop;
+    start = clock();
+    
+    double distance = 0;
+    double kthValue = std::numeric_limits<double>::infinity();
+//    bool KCenterUB = true;
+    
+    for(int i = 0; i < dataset.size(); i++){
+        
+//        KCenterUB = true;
+        
+        // handle bound
+//        if(krecord.size() == k && dataset[i].pointcloud.size() > dataSizeThresholdForBscLB){
+//            distance = HausdorffDistanceForBound(ref.bound, dataset[i].bound);
+//            if(distance > kthValue){
+//                continue;
+//            } else if(distance == 0){
+//                KCenterUB = false;
+//            }
+//        }
+        // handle exact
+        if(dataset[i].pointcloud.size() < dataSizeThreshold){
+            distance = ExactHausdorff::PAMI2015(ref, dataset[i], true, kthValue);
+        } else {
+            distance = ExactHausdorff::PAMI2015_Pruning_KCenterUB(ref, dataset[i], disToKcenter, kthValue);
+        }
+        if(distance == -1){
+            continue;
+        } else if(krecord.size() < k){
+            krecord.push(distance);
+        } else if(distance < krecord.top()){
+            krecord.pop();
+            krecord.push(distance);
+            kthValue = krecord.top();
+        } else{
+            kthValue = krecord.top();
+        }
+    }
+    
+    stop = clock();
+    
+    cout << "PAMI kcenter UB with BscLB 2 method time usage: " << stop-start << endl;
+    for(int i = 0; i < k; i++){
+        cout << krecord.top() << endl;
+        krecord.pop();
+    }
+    ofstream outfile;
+    outfile.open(filepath, ofstream::app);
+    outfile << ref.pointcloud.size() << "," << stop-start << endl;
+    outfile.close();
+}
 
 void KNNSearch::KNN_PAMI2015_Pruning_KCenter_HilbertUB(PointCloud &ref, int k, int dataSizeThreshold){
     
@@ -3419,6 +3542,92 @@ vector<tempResult> KNNSearch::KNN_GIS2011(PointCloud &ref, int k, int number){
     return result;
 }
 
+vector<tempResult> KNNSearch::KNN_GIS2011(PointCloud &ref, int k, int number, string filepath){
+    
+    vector<tempResult> result;
+    priority_queue<tempResult, vector<tempResult>, cmp_tempResult> prqueue;
+    
+    // calculate ref's bound and MBRs
+    ref.generateBoundAndMBRs(number);
+    
+    // do randomize for both query and data
+    ref.randomize();
+    for(int i = 0; i < dataset.size(); i++){
+        dataset[i].randomize();
+    }
+    
+    clock_t start,stop;
+    start = clock();
+    
+    clock_t PrqPartStart1, PrqPartEnd1, start1, stop1, totalBscLB = 0;; // can be removed later
+    PrqPartStart1 = clock();
+    
+    for(int i = 0; i < dataset.size(); i++){
+        tempResult tr(i);
+        start1 = clock(); // can be removed later
+        tr.distance = HausdorffDistanceForBound(ref.bound, dataset[i].bound);
+        stop1 = clock(); // can be removed later
+        totalBscLB += stop1 - start1;
+        prqueue.push(tr);
+    }
+    PrqPartEnd1 = clock();
+    
+    int _k = k;
+    
+    int count1 = 0, count2 = 0;
+    
+    clock_t start2, stop2, start3, stop3, totalENHLB = 0, totalHD = 0, PrqPartStart2, PrqPartEnd2; // you can remove this later
+    
+    long refMBRsize = ref.FirstLevelMBRs.size();
+    
+    PrqPartStart2 = clock();
+    while(k){
+        tempResult tr = prqueue.top();
+        prqueue.pop();
+        if(tr.level == 0){ // consider if there is not multi level
+            start2 = clock(); // you can remove this later
+            if(dataset[tr.pcindex].FirstLevelMBRs.size() == 1 && refMBRsize == 1){
+                // do nothing
+            } else {
+                tr.distance = HausdorffDistanceForMBRs(ref.FirstLevelMBRs, dataset[tr.pcindex].FirstLevelMBRs); // this refVec is not enhanced !!!!!!!!!!
+            }
+            tr.level = 1;
+            count1++;
+            stop2 = clock(); // you can remove this later
+            totalENHLB += stop2-start2; // you can remove this later
+            prqueue.push(tr);
+        } else if(tr.level == 1){
+            start3 = clock(); // you can remove this later
+            tr.distance = ExactHausdorff::PAMI2015(ref, dataset[tr.pcindex]);
+            tr.level = 2;
+            stop3 = clock(); // you can remove this later
+            totalHD += stop3-start3; // you can remove this later
+            count2++;
+            prqueue.push(tr);
+        } else if(tr.level == 2){
+            result.push_back(tr);
+            k--;
+        }
+    }
+    PrqPartEnd2 = clock();
+    
+    stop = clock();
+    for(int i = 0; i < _k; i++){
+        cout << result[i].distance << endl;
+    }
+    cout << "GIS2011 time usage: " <<  stop - start << endl;
+    cout << "filtering count: count1=" << count1 << "  count2=" << count2 << endl;
+    
+    ofstream outfile;
+    outfile.open(filepath, ofstream::app);
+    outfile << ref.pointcloud.size() << "," << (stop - start)/1000 << "," << totalBscLB/1000 << "," << totalENHLB/1000 << "," << totalHD/1000 << "," << (PrqPartEnd1-PrqPartStart1+PrqPartEnd2-PrqPartStart2-totalBscLB-totalENHLB-totalHD)/1000 << endl;
+    
+    outfile.close();
+
+    
+    return result;
+}
+
 void KNNSearch::KNN_Center(PointCloud &ref, int k){
     
     priority_queue<pair<double, int>, vector<pair<double, int>>, cmp_pair> prqueue;
@@ -3896,46 +4105,24 @@ void KNNSearch::KNN_UsingPoint_Efficient(PointCloud &ref, int k, map<int, vector
     delete[] keywordCount;
 }
 
-struct KeywordNode{
-    int keywordId;
-    int pointgroupIndex;
-    int count;
-    double distance;
-};
-
-bool cmp_keywordDistance(KeywordNode &k1, KeywordNode &k2){
-    return k1.distance < k2.distance;
-}
-
-void KNNSearch::KNN_UsingPoint_Efficient_KeywordLB(PointCloud &ref, int k, map<int, vector<int>> &pidKeywordIdsMap, int randomNum){
-    
-    priority_queue<pair<double, int>, vector<pair<double, int>>, cmp_pair> prqueue;
+void KNNSearch::KNN_UsingPoint_Efficient(PointCloud &ref, int k, map<int, vector<int>> &pidKeywordIdsMap, string filepath, double UBPercent, int pointNum){
+//    priority_queue<pair<double, int>, vector<pair<double, int>>, cmp_pair> prqueue;
     ref.sortByKcenter();
     for(int i = 0; i < dataset.size(); i++){
         dataset[i].randomize();
     }
     srand((unsigned)time(NULL));
     
-    vector<KeywordNode> keywords;
-    for(int i = 0; i < dataset.size(); i++){
-        KeywordNode key;
-        key.keywordId = dataset[i].keywordId;
-        key.pointgroupIndex = i;
-        key.count = 0;
-        key.distance = 0;
-        keywords.push_back(key);
-    }
-    
     clock_t start, stop;
     start = clock();
-
+    
     // upper bound calculation, using 1% of dataset
     clock_t upperboundStart, upperboundEnd;
     upperboundStart = clock();
-
+    
     double maxupperbound = 0;
     double upperbound = 0;
-    int top = dataset.size()*0.01;
+    int top = dataset.size()*UBPercent;
     priority_queue<double> krecord;
     int randomDatasetIndex = 0;
     double topValue = std::numeric_limits<double>::infinity();
@@ -3964,8 +4151,305 @@ void KNNSearch::KNN_UsingPoint_Efficient_KeywordLB(PointCloud &ref, int k, map<i
     clock_t queryStart, queryEnd;
     queryStart = clock();
     
+    int* keywordCount = new int[dataset.size()];
+//    std::fill(keywordCount, keywordCount+sizeof(keywordCount)/sizeof(int), 0);
+    for(int i = 0; i < dataset.size(); i++){
+        keywordCount[i] = 0;
+    }
+    
     vector<Point> minNearbyPoints;
-    for(int i = 0; i < randomNum && i < ref.pointcloud.size(); i++){
+    for(int i = 0; i < pointNum && i < ref.pointcloud.size(); i++){
+        double px = ref.pointcloud[i].x;
+        double py = ref.pointcloud[i].y;
+        box box_region(Point(px-maxupperbound,py-maxupperbound), Point(px+maxupperbound,py+maxupperbound));
+        bgi::query(refRTree, bgi::intersects(box_region), std::back_inserter(minNearbyPoints));
+        for(int j = 0; j < minNearbyPoints.size(); j++){
+            for(auto it = pidKeywordIdsMap[minNearbyPoints[j].pid].begin(); it != pidKeywordIdsMap[minNearbyPoints[j].pid].end(); it++){
+                if(keywordCount[*it] == i){
+                    keywordCount[*it]++;
+                }
+//                cout << keywordCount[*it] << endl;
+            }
+        }
+        minNearbyPoints.clear();
+    }
+    queryEnd = clock();
+    
+    
+    // exact calculation part
+    
+    clock_t calculationStart, calculationEnd;
+    calculationStart = clock();
+    
+    double distance = 0;
+    double kthValue = maxupperbound;
+    int pointcloudindex = 0;
+    
+    int totalPointClouds = 0;
+    int totalPoints = 0;
+    
+    int meet = ref.pointcloud.size() < pointNum ? ref.pointcloud.size() : pointNum;
+    for(int i = 0; i < dataset.size(); i++){
+        if(keywordCount[i] == meet){
+            pointcloudindex = keywordIdMapForDataset[i];
+            distance = ExactHausdorff::PAMI2015(ref, dataset[pointcloudindex], true, kthValue);
+            totalPointClouds++;
+            totalPoints += dataset[pointcloudindex].pointcloud.size();
+            if(distance == -1){
+                continue;
+            }
+//            if(prqueue.size() < k){
+//                prqueue.push(pair<double, int>(distance, pointcloudindex));
+//            } else if(distance < prqueue.top().first){
+//                prqueue.pop();
+//                prqueue.push(pair<double, int>(distance, pointcloudindex));
+//                kthValue = prqueue.top().first;
+//            }
+            if(krecord.size() < k){
+                krecord.push(distance);
+            } else if(distance < krecord.top()){
+                krecord.pop();
+                krecord.push(distance);
+                topValue = krecord.top();
+            }
+        }
+    }
+    
+    calculationEnd = clock();
+    
+    stop = clock();
+    cout << "using only points method" << "total time usage: " << stop-start << endl;
+    cout << "upperbound time: " << upperboundEnd - upperboundStart << endl;
+    cout << "query nearby point time: " << queryEnd - queryStart << endl;
+    cout << "calculation time: " << calculationEnd - calculationStart << endl;
+    cout << "total consider point clouds " << totalPointClouds << endl;
+    cout << "average point cloud size: " << totalPoints/totalPointClouds << endl;
+    for(int i = 0; i < k; i++){
+        cout << krecord.top() << endl;
+        krecord.pop();
+    }
+    
+    ofstream outfile;
+    outfile.open(filepath, ofstream::app);
+    outfile << ref.pointcloud.size() << "," << stop-start << "," << upperboundEnd - upperboundStart << "," << queryEnd - queryStart << "," << calculationEnd - calculationStart << "," << totalPointClouds << "," << totalPoints/totalPointClouds << "," << maxupperbound << endl;
+    outfile.close();
+    
+    delete[] keywordCount;
+}
+
+struct KeywordNode{
+    int keywordId;
+    int pointgroupIndex;
+    int count;
+    double distance;
+};
+
+bool cmp_keywordDistance(KeywordNode &k1, KeywordNode &k2){
+    return k1.distance < k2.distance;
+}
+
+void KNNSearch::KNN_UsingPoint_Efficient_KeywordLB(PointCloud &ref, int k, map<int, vector<int>> &pidKeywordIdsMap, int randomNum){
+    
+//    priority_queue<pair<double, int>, vector<pair<double, int>>, cmp_pair> prqueue;
+//    ref.sortByKcenter();
+//    for(int i = 0; i < dataset.size(); i++){
+//        dataset[i].randomize();
+//    }
+//    srand((unsigned)time(NULL));
+//
+//    vector<KeywordNode> keywords;
+//    for(int i = 0; i < dataset.size(); i++){
+//        KeywordNode key;
+//        key.keywordId = dataset[i].keywordId;
+//        key.pointgroupIndex = i;
+//        key.count = 0;
+//        key.distance = 0;
+//        keywords.push_back(key);
+//    }
+//
+//    clock_t start, stop;
+//    start = clock();
+//
+//    // upper bound calculation, using 1% of dataset
+//    clock_t upperboundStart, upperboundEnd;
+//    upperboundStart = clock();
+//
+//    double maxupperbound = 0;
+//    double upperbound = 0;
+//    int top = dataset.size()*0.01;
+//    priority_queue<double> krecord;
+//    int randomDatasetIndex = 0;
+//    double topValue = std::numeric_limits<double>::infinity();
+//    for(int i = 0; i < top; i++){
+//        randomDatasetIndex = rand()%dataset.size();
+//        upperbound = ExactHausdorff::PAMI2015(ref, dataset[randomDatasetIndex], true, topValue);
+//        if(upperbound == -1){
+//            continue;
+//        }
+//        if(krecord.size() < k){
+//            krecord.push(upperbound);
+//        } else if(upperbound < krecord.top()){
+//            krecord.pop();
+//            krecord.push(upperbound);
+//            topValue = krecord.top();
+//        }
+//    }
+//    maxupperbound = krecord.top();
+//
+//    upperboundEnd = clock();
+//    cout << "max upper bound : " << maxupperbound << endl;
+//
+//
+//    // choose some points from kcenters for query
+//
+//    clock_t queryStart, queryEnd;
+//    queryStart = clock();
+//
+//    vector<Point> minNearbyPoints;
+//    for(int i = 0; i < randomNum && i < ref.pointcloud.size(); i++){
+//        double px = ref.pointcloud[i].x;
+//        double py = ref.pointcloud[i].y;
+//        box box_region(Point(px-maxupperbound,py-maxupperbound), Point(px+maxupperbound,py+maxupperbound));
+//        bgi::query(refRTree, bgi::intersects(box_region), std::back_inserter(minNearbyPoints));
+//        //cout << "nearby points: " << minNearbyPoints.size() << endl;
+//
+//        sort(minNearbyPoints.begin(), minNearbyPoints.end(), cmp_nearbyPoints); // ascending order
+//        for(int j = 0; j < minNearbyPoints.size(); j++){
+//            for(auto it = pidKeywordIdsMap[minNearbyPoints[j].pid].begin(); it != pidKeywordIdsMap[minNearbyPoints[j].pid].end(); it++){
+//                if(keywords[*it].count == i){
+//                    keywords[*it].count++;
+//                    if(keywords[*it].distance < minNearbyPoints[j].distance){
+//                        keywords[*it].distance = minNearbyPoints[j].distance;
+//                    }
+//                }
+//            }
+//        }
+//        minNearbyPoints.clear();
+//    }
+//    sort(keywords.begin(), keywords.end(), cmp_keywordDistance);
+//    queryEnd = clock();
+//
+//    // exact calculation part
+//
+//    clock_t calculationStart, calculationEnd;
+//    calculationStart = clock();
+//
+//    double distance = 0;
+//    double kthValue = maxupperbound;
+//    int pointcloudindex = 0;
+//
+//    int totalPointClouds = 0;
+//    int totalPoints = 0;
+//
+//    int meet = ref.pointcloud.size() < randomNum ? ref.pointcloud.size() : randomNum;
+//    for(int i = 0; i < dataset.size(); i++){
+//        if(keywords[i].distance >= kthValue){
+//            break;
+//        }
+//        if(keywords[i].count == meet){
+//            pointcloudindex = keywords[i].pointgroupIndex;
+//            distance = ExactHausdorff::PAMI2015(ref, dataset[pointcloudindex], true, kthValue);
+//            totalPointClouds++;
+//            totalPoints += dataset[pointcloudindex].pointcloud.size();
+//            if(distance == -1){
+//                continue;
+//            }
+//            if(prqueue.size() < k){
+//                prqueue.push(pair<double, int>(distance, pointcloudindex));
+//            } else if(distance < prqueue.top().first){
+//                prqueue.pop();
+//                prqueue.push(pair<double, int>(distance, pointcloudindex));
+//                kthValue = prqueue.top().first;
+//            }
+//        }
+//    }
+//
+//    calculationEnd = clock();
+//
+//    stop = clock();
+//    cout << "using only points method" << "total time usage: " << stop-start << endl;
+//    cout << "upperbound time: " << upperboundEnd - upperboundStart << endl;
+//    cout << "query nearby point time: " << queryEnd - queryStart << endl;
+//    cout << "calculation time: " << calculationEnd - calculationStart << endl;
+//    cout << "total consider point clouds " << totalPointClouds << endl;
+//    cout << "average point cloud size: " << totalPoints/totalPointClouds << endl;
+//    for(int i = 0; i < k; i++){
+//        cout << prqueue.top().first << endl;
+//        prqueue.pop();
+//    }
+//
+//    ofstream outfile;
+//    outfile.open("/Users/lizhe/Desktop/reports/final_01/using_PointBased.csv", ofstream::app);
+//    outfile << ref.pointcloud.size() << "," << stop-start << "," << upperboundEnd - upperboundStart << "," << queryEnd - queryStart << "," << calculationEnd - calculationStart << "," << totalPointClouds << "," << totalPoints/totalPointClouds << "," << maxupperbound << endl;
+//    outfile.close();
+    
+}
+
+void KNNSearch::KNN_UsingPoint_Efficient_KeywordLB(PointCloud &ref, int k, map<int, vector<int>> &pidKeywordIdsMap, string filepath, double UBPercent, int pointNum){
+    
+//    priority_queue<pair<double, int>, vector<pair<double, int>>, cmp_pair> prqueue;
+    ref.sortByKcenter();
+    for(int i = 0; i < dataset.size(); i++){
+        dataset[i].randomize();
+    }
+    srand((unsigned)time(NULL));
+    
+    vector<KeywordNode> keywords;
+    for(int i = 0; i < dataset.size(); i++){
+        KeywordNode key;
+        key.keywordId = dataset[i].keywordId;
+        key.pointgroupIndex = i;
+        key.count = 0;
+        key.distance = 0;
+        keywords.push_back(key);
+    }
+    
+    bool* ubchecked = new bool[dataset.size()];
+    for(int i = 0; i < dataset.size(); i++){
+        ubchecked[i] = false;
+    }
+    
+    clock_t start, stop;
+    start = clock();
+    
+    // upper bound calculation, using 1% of dataset
+    clock_t upperboundStart, upperboundEnd;
+    upperboundStart = clock();
+    
+    double maxupperbound = 0;
+    double upperbound = 0;
+    int top = dataset.size()*UBPercent;
+    priority_queue<double> krecord;
+    int randomDatasetIndex = 0;
+    double topValue = std::numeric_limits<double>::infinity();
+    for(int i = 0; i < top; i++){
+        randomDatasetIndex = rand()%dataset.size();
+        ubchecked[randomDatasetIndex] = true;
+        upperbound = ExactHausdorff::PAMI2015(ref, dataset[randomDatasetIndex], true, topValue);
+        if(upperbound == -1){
+            continue;
+        }
+        if(krecord.size() < k){
+            krecord.push(upperbound);
+        } else if(upperbound < krecord.top()){
+            krecord.pop();
+            krecord.push(upperbound);
+            topValue = krecord.top();
+        }
+    }
+    maxupperbound = krecord.top();
+    
+    upperboundEnd = clock();
+    cout << "max upper bound : " << maxupperbound << endl;
+    
+    
+    // choose some points from kcenters for query
+    
+    clock_t queryStart, queryEnd;
+    queryStart = clock();
+    
+    vector<Point> minNearbyPoints;
+    for(int i = 0; i < pointNum && i < ref.pointcloud.size(); i++){
         double px = ref.pointcloud[i].x;
         double py = ref.pointcloud[i].y;
         box box_region(Point(px-maxupperbound,py-maxupperbound), Point(px+maxupperbound,py+maxupperbound));
@@ -3987,7 +4471,7 @@ void KNNSearch::KNN_UsingPoint_Efficient_KeywordLB(PointCloud &ref, int k, map<i
     }
     sort(keywords.begin(), keywords.end(), cmp_keywordDistance);
     queryEnd = clock();
-
+    
     // exact calculation part
     
     clock_t calculationStart, calculationEnd;
@@ -3999,119 +4483,371 @@ void KNNSearch::KNN_UsingPoint_Efficient_KeywordLB(PointCloud &ref, int k, map<i
     
     int totalPointClouds = 0;
     int totalPoints = 0;
-
-    int meet = ref.pointcloud.size() < randomNum ? ref.pointcloud.size() : randomNum;
+    
+    int meet = ref.pointcloud.size() < pointNum ? ref.pointcloud.size() : pointNum;
     for(int i = 0; i < dataset.size(); i++){
+//        if(keywords[i].keywordId == 331){
+//            cout << "here";
+//        }
         if(keywords[i].distance >= kthValue){
             break;
         }
-        if(keywords[i].count == meet){
+        if(keywords[i].count == meet && !ubchecked[keywords[i].pointgroupIndex]){
             pointcloudindex = keywords[i].pointgroupIndex;
             distance = ExactHausdorff::PAMI2015(ref, dataset[pointcloudindex], true, kthValue);
             totalPointClouds++;
             totalPoints += dataset[pointcloudindex].pointcloud.size();
+//            if(fabs(distance - 0.172848) < 0.0001){
+//                cout << "here" << endl;
+//            }
             if(distance == -1){
                 continue;
             }
-            if(prqueue.size() < k){
-                prqueue.push(pair<double, int>(distance, pointcloudindex));
-            } else if(distance < prqueue.top().first){
-                prqueue.pop();
-                prqueue.push(pair<double, int>(distance, pointcloudindex));
-                kthValue = prqueue.top().first;
+            if(krecord.size() < k){
+                krecord.push(distance);
+            } else if(distance < krecord.top()){
+                krecord.pop();
+                krecord.push(distance);
+                kthValue = krecord.top();
+            } else{
+                kthValue = krecord.top();
             }
         }
     }
     
     calculationEnd = clock();
-
+    
     stop = clock();
     cout << "using only points method" << "total time usage: " << stop-start << endl;
     cout << "upperbound time: " << upperboundEnd - upperboundStart << endl;
     cout << "query nearby point time: " << queryEnd - queryStart << endl;
     cout << "calculation time: " << calculationEnd - calculationStart << endl;
     cout << "total consider point clouds " << totalPointClouds << endl;
-    cout << "average point cloud size: " << totalPoints/totalPointClouds << endl;
+    if(totalPointClouds != 0){
+        cout << "average point cloud size: " << totalPoints/totalPointClouds << endl;
+    }
     for(int i = 0; i < k; i++){
-        cout << prqueue.top().first << endl;
-        prqueue.pop();
+        cout << krecord.top() << endl;
+        krecord.pop();
     }
     
     ofstream outfile;
-    outfile.open("/Users/lizhe/Desktop/reports/final_01/using_PointBased.csv", ofstream::app);
-    outfile << ref.pointcloud.size() << "," << stop-start << "," << upperboundEnd - upperboundStart << "," << queryEnd - queryStart << "," << calculationEnd - calculationStart << "," << totalPointClouds << "," << totalPoints/totalPointClouds << "," << maxupperbound << endl;
+    outfile.open(filepath, ofstream::app);
+    outfile << ref.pointcloud.size() << "," << stop-start << "," << upperboundEnd - upperboundStart << "," << queryEnd - queryStart << "," << calculationEnd - calculationStart << "," << totalPointClouds << "," << maxupperbound << endl;
     outfile.close();
     
+    delete [] ubchecked;
 }
 
-// ascending order
-bool cmp_pid(Point &p1, Point &p2){
-    return p1.pid < p2.pid;
-}
-
-inline void KNNSearch::doIntersection(vector<vector<Point>> &candidateSets, vector<Point> &candidateSet){
+void KNNSearch::KNN_UsingPoint_Efficient_KeywordLB_WithoutKcenter(PointCloud &ref, int k, map<int, vector<int>> &pidKeywordIdsMap, string filepath, double UBPercent , int pointNum){
+    //    priority_queue<pair<double, int>, vector<pair<double, int>>, cmp_pair> prqueue;
+//    ref.sortByKcenter();
+    for(int i = 0; i < dataset.size(); i++){
+        dataset[i].randomize();
+    }
+    srand((unsigned)time(NULL));
     
-    // sort by pid
-    for(int i = 0; i < candidateSets.size(); i++){
-        sort(candidateSets[i].begin(), candidateSets[i].end(), cmp_pid);
+    vector<KeywordNode> keywords;
+    for(int i = 0; i < dataset.size(); i++){
+        KeywordNode key;
+        key.keywordId = dataset[i].keywordId;
+        key.pointgroupIndex = i;
+        key.count = 0;
+        key.distance = 0;
+        keywords.push_back(key);
     }
     
-    // find min pid
-//    int minpid = std::numeric_limits<double>::infinity(); // something wrong
-    int minpid = allPoints.size();
-    for(int i = 0; i < candidateSets.size(); i++){
-        if(candidateSets[i][0].pid < minpid){
-            minpid = candidateSets[i][0].pid;
+    bool* ubchecked = new bool[dataset.size()];
+    for(int i = 0; i < dataset.size(); i++){
+        ubchecked[i] = false;
+    }
+    
+    clock_t start, stop;
+    start = clock();
+    
+    // upper bound calculation, using 1% of dataset
+    clock_t upperboundStart, upperboundEnd;
+    upperboundStart = clock();
+    
+    double maxupperbound = 0;
+    double upperbound = 0;
+    int top = dataset.size()*UBPercent;
+    priority_queue<double> krecord;
+    int randomDatasetIndex = 0;
+    double topValue = std::numeric_limits<double>::infinity();
+    for(int i = 0; i < top; i++){
+        randomDatasetIndex = rand()%dataset.size();
+        ubchecked[randomDatasetIndex] = true;
+        upperbound = ExactHausdorff::PAMI2015(ref, dataset[randomDatasetIndex], true, topValue);
+        if(upperbound == -1){
+            continue;
+        }
+        if(krecord.size() < k){
+            krecord.push(upperbound);
+        } else if(upperbound < krecord.top()){
+            krecord.pop();
+            krecord.push(upperbound);
+            topValue = krecord.top();
         }
     }
+    maxupperbound = krecord.top();
     
-    vector<int> currentPosition;
-    for(int i = 0; i < candidateSets.size(); i++){
-        currentPosition.push_back(0);
-    }
+    upperboundEnd = clock();
+    cout << "max upper bound : " << maxupperbound << endl;
     
-    // loop to find intersection
-    bool findFlag = true;
-    bool stopFlag = false;
-    while(true){
-        findFlag = true;
-        for(int i = 0; i < candidateSets.size(); i++){
-            while(candidateSets[i][currentPosition[i]].pid < minpid){
-                currentPosition[i]++;
-                if(currentPosition[i] >= candidateSets[i].size()){
-                    stopFlag = true;
+    
+    // choose some points from kcenters for query
+    
+    clock_t queryStart, queryEnd;
+    queryStart = clock();
+    
+    vector<Point> minNearbyPoints;
+    for(int i = 0; i < pointNum && i < ref.pointcloud.size(); i++){
+        double px = ref.pointcloud[i].x;
+        double py = ref.pointcloud[i].y;
+        box box_region(Point(px-maxupperbound,py-maxupperbound), Point(px+maxupperbound,py+maxupperbound));
+        bgi::query(refRTree, bgi::intersects(box_region), std::back_inserter(minNearbyPoints));
+        //cout << "nearby points: " << minNearbyPoints.size() << endl;
+        
+        sort(minNearbyPoints.begin(), minNearbyPoints.end(), cmp_nearbyPoints); // ascending order
+        for(int j = 0; j < minNearbyPoints.size(); j++){
+            for(auto it = pidKeywordIdsMap[minNearbyPoints[j].pid].begin(); it != pidKeywordIdsMap[minNearbyPoints[j].pid].end(); it++){
+                if(keywords[*it].count == i){
+                    keywords[*it].count++;
+                    if(keywords[*it].distance < minNearbyPoints[j].distance){
+                        keywords[*it].distance = minNearbyPoints[j].distance;
+                    }
                 }
             }
-            if(candidateSets[i][currentPosition[i]].pid == minpid){ // found a pid not in intersection
-                currentPosition[i]++;
-                if(currentPosition[i] >= candidateSets[i].size()){
-                    stopFlag = true;
-                }
-            } else if(candidateSets[i][currentPosition[i]].pid > minpid){ // found a pid not in intersection
-                findFlag = false;
-                //break; // find next one that should be in the result; update the current position
-            }
         }
-        
-        // add the point to result set
-        if(findFlag){
-            candidateSet.push_back(candidateSets[0][currentPosition[0]]);
-        }
-        
-        // find new min pid
-//        minpid = std::numeric_limits<double>::infinity();
-        minpid = allPoints.size();
-        for(int i = 0; i < candidateSets.size(); i++){
-            if(candidateSets[i][currentPosition[i]].pid < minpid){
-                minpid = candidateSets[i][currentPosition[i]].pid;
-            }
-        }
-        
-        // see if stop
-        if(stopFlag){
+        minNearbyPoints.clear();
+    }
+    sort(keywords.begin(), keywords.end(), cmp_keywordDistance);
+    queryEnd = clock();
+    
+    // exact calculation part
+    
+    clock_t calculationStart, calculationEnd;
+    calculationStart = clock();
+    
+    double distance = 0;
+    double kthValue = maxupperbound;
+    int pointcloudindex = 0;
+    
+    int totalPointClouds = 0;
+    int totalPoints = 0;
+    
+    int meet = ref.pointcloud.size() < pointNum ? ref.pointcloud.size() : pointNum;
+    for(int i = 0; i < dataset.size(); i++){
+        if(keywords[i].distance >= kthValue){
             break;
         }
+        if(keywords[i].count == meet && !ubchecked[keywords[i].pointgroupIndex]){
+            pointcloudindex = keywords[i].pointgroupIndex;
+            distance = ExactHausdorff::PAMI2015(ref, dataset[pointcloudindex], true, kthValue);
+            totalPointClouds++;
+            totalPoints += dataset[pointcloudindex].pointcloud.size();
+            //            if(fabs(distance - 0.172848) < 0.0001){
+            //                cout << "here" << endl;
+            //            }
+            if(distance == -1){
+                continue;
+            }
+            if(krecord.size() < k){
+                krecord.push(distance);
+            } else if(distance < krecord.top()){
+                krecord.pop();
+                krecord.push(distance);
+                kthValue = krecord.top();
+            } else{
+                kthValue = krecord.top();
+            }
+        }
     }
+    
+    calculationEnd = clock();
+    
+    stop = clock();
+    cout << "using only points method" << "total time usage: " << stop-start << endl;
+    cout << "upperbound time: " << upperboundEnd - upperboundStart << endl;
+    cout << "query nearby point time: " << queryEnd - queryStart << endl;
+    cout << "calculation time: " << calculationEnd - calculationStart << endl;
+    if(totalPointClouds != 0){
+        cout << "total consider point clouds " << totalPointClouds << endl;
+        cout << "average point cloud size: " << totalPoints/totalPointClouds << endl;
+    }
+    for(int i = 0; i < k; i++){
+        cout << krecord.top() << endl;
+        krecord.pop();
+    }
+    
+    ofstream outfile;
+    outfile.open(filepath, ofstream::app);
+    outfile << ref.pointcloud.size() << "," << stop-start << "," << upperboundEnd - upperboundStart << "," << queryEnd - queryStart << "," << calculationEnd - calculationStart << "," << totalPointClouds << "," << maxupperbound << endl;
+    outfile.close();
+    
+    delete [] ubchecked;
+}
+
+void KNNSearch::KNN_Kcenter_KCUB_PBKC(PointCloud &ref, int k, map<int, vector<int>> &pidKeywordIdsMap, string filepath, double UBPercent, int pointNum, int dataSizeThreshold, int dataSizeThresholdForBscLB){
+    
+    ref.generateBoundAndMBRs(10);
+    vector<pair<double,int>> disToKcenter = ref.sortByKcenterWithRecord();
+    
+    for(int i = 0; i < dataset.size(); i++){
+        dataset[i].randomize();
+    }
+    srand((unsigned)time(NULL));
+    
+    vector<KeywordNode> keywords;
+    for(int i = 0; i < dataset.size(); i++){
+        KeywordNode key;
+        key.keywordId = dataset[i].keywordId;
+        key.pointgroupIndex = i;
+        key.count = 0;
+        key.distance = 0;
+        keywords.push_back(key);
+    }
+    
+    bool* ubchecked = new bool[dataset.size()];
+    for(int i = 0; i < dataset.size(); i++){
+        ubchecked[i] = false;
+    }
+    
+    clock_t start, stop;
+    start = clock();
+    
+    // upper bound calculation, using 1% of dataset
+    clock_t upperboundStart, upperboundEnd;
+    upperboundStart = clock();
+    
+    double maxupperbound = 0;
+    double upperbound = 0;
+    int top = dataset.size()*UBPercent;
+    priority_queue<double> krecord;
+    int randomDatasetIndex = 0;
+    double topValue = std::numeric_limits<double>::infinity();
+    for(int i = 0; i < top; i++){
+        randomDatasetIndex = rand()%dataset.size();
+        ubchecked[randomDatasetIndex] = true;
+        upperbound = ExactHausdorff::PAMI2015(ref, dataset[randomDatasetIndex], true, topValue);
+        if(upperbound == -1){
+            continue;
+        }
+        if(krecord.size() < k){
+            krecord.push(upperbound);
+        } else if(upperbound < krecord.top()){
+            krecord.pop();
+            krecord.push(upperbound);
+            topValue = krecord.top();
+        }
+    }
+    maxupperbound = krecord.top();
+    
+    upperboundEnd = clock();
+    cout << "max upper bound : " << maxupperbound << endl;
+    
+    
+    // choose some points from kcenters for query
+    
+    clock_t queryStart, queryEnd;
+    queryStart = clock();
+    
+    vector<Point> minNearbyPoints;
+    for(int i = 0; i < pointNum && i < ref.pointcloud.size(); i++){
+        double px = ref.pointcloud[i].x;
+        double py = ref.pointcloud[i].y;
+        box box_region(Point(px-maxupperbound,py-maxupperbound), Point(px+maxupperbound,py+maxupperbound));
+        bgi::query(refRTree, bgi::intersects(box_region), std::back_inserter(minNearbyPoints));
+        //cout << "nearby points: " << minNearbyPoints.size() << endl;
+        
+        sort(minNearbyPoints.begin(), minNearbyPoints.end(), cmp_nearbyPoints); // ascending order
+        for(int j = 0; j < minNearbyPoints.size(); j++){
+            for(auto it = pidKeywordIdsMap[minNearbyPoints[j].pid].begin(); it != pidKeywordIdsMap[minNearbyPoints[j].pid].end(); it++){
+                if(keywords[*it].count == i){
+                    keywords[*it].count++;
+                    if(keywords[*it].distance < minNearbyPoints[j].distance){
+                        keywords[*it].distance = minNearbyPoints[j].distance;
+                    }
+                }
+            }
+        }
+        minNearbyPoints.clear();
+    }
+    sort(keywords.begin(), keywords.end(), cmp_keywordDistance);
+    queryEnd = clock();
+    
+    // exact calculation part
+    
+    clock_t calculationStart, calculationEnd;
+    calculationStart = clock();
+    
+    double distance = 0;
+    double kthValue = maxupperbound;
+    int pointcloudindex = 0;
+    
+    int totalPointClouds = 0;
+    int totalPoints = 0;
+    
+    int meet = ref.pointcloud.size() < pointNum ? ref.pointcloud.size() : pointNum;
+    for(int i = 0; i < dataset.size(); i++){
+        if(keywords[i].distance >= kthValue){
+            break;
+        }
+        if(keywords[i].count == meet && !ubchecked[keywords[i].pointgroupIndex]){
+            pointcloudindex = keywords[i].pointgroupIndex;
+            distance = ExactHausdorff::PAMI2015(ref, dataset[pointcloudindex], true, kthValue);
+            
+//            if(krecord.size() == k && dataset[i].pointcloud.size() > dataSizeThresholdForBscLB){
+//                distance = HausdorffDistanceForBound(ref.bound, dataset[pointcloudindex].bound);
+//                if(distance > kthValue){
+//                    continue;
+//                }
+//            }
+            // handle exact
+            if(dataset[pointcloudindex].pointcloud.size() < dataSizeThreshold){
+                distance = ExactHausdorff::PAMI2015(ref, dataset[pointcloudindex], true, kthValue);
+            } else{
+                distance = ExactHausdorff::PAMI2015_Pruning_KCenterUB(ref, dataset[pointcloudindex], disToKcenter, kthValue);
+            }
+            
+            if(distance == -1){
+                continue;
+            }
+            if(krecord.size() < k){
+                krecord.push(distance);
+            } else if(distance < krecord.top()){
+                krecord.pop();
+                krecord.push(distance);
+                kthValue = krecord.top();
+            } else{
+                kthValue = krecord.top();
+            }
+        }
+    }
+    
+    calculationEnd = clock();
+    
+    stop = clock();
+    cout << "using all techniques method" << "total time usage: " << stop-start << endl;
+    cout << "upperbound time: " << upperboundEnd - upperboundStart << endl;
+    cout << "query nearby point time: " << queryEnd - queryStart << endl;
+    cout << "calculation time: " << calculationEnd - calculationStart << endl;
+//    cout << "total consider point clouds " << totalPointClouds << endl;
+//    if(totalPointClouds != 0){
+//        cout << "average point cloud size: " << totalPoints/totalPointClouds << endl;
+//    }
+    for(int i = 0; i < k; i++){
+        cout << krecord.top() << endl;
+        krecord.pop();
+    }
+    
+    ofstream outfile;
+    outfile.open(filepath, ofstream::app);
+    outfile << ref.pointcloud.size() << "," << stop-start << "," << upperboundEnd - upperboundStart << "," << queryEnd - queryStart << "," << calculationEnd - calculationStart << "," << maxupperbound << endl;
+    outfile.close();
+    
+    delete [] ubchecked;
 }
 
 #endif /* KNNSearch_hpp */
